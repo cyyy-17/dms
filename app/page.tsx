@@ -3,7 +3,6 @@ import {
   FileText,
   ShieldCheck,
   GitBranch,
-  Clock,
   ArrowRight,
   Lock,
   Building2,
@@ -19,14 +18,14 @@ export default function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-amber-400 selection:text-slate-950 relative overflow-x-hidden">
       {/* Dynamic Background Mesh Orbs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-tr from-blue-900/30 via-indigo-900/20 to-amber-500/10 blur-[130px] pointer-events-none -z-10 rounded-full" />
-      <div className="absolute top-[600px] right-0 w-[600px] h-[600px] bg-blue-950/40 blur-[140px] pointer-events-none -z-10 rounded-full" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-250 h-125 bg-linear-to-tr from-blue-900/30 via-indigo-900/20 to-amber-500/10 blur-[130px] pointer-events-none -z-10 rounded-full" />
+      <div className="absolute top-150 right-0 w-150 h-150 bg-blue-950/40 blur-[140px] pointer-events-none -z-10 rounded-full" />
 
       {/* Top Floating Glass Header */}
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/75 border-b border-slate-800/80 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
           <div className="flex items-center space-x-3.5">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#0F2962] to-[#1E40AF] flex items-center justify-center text-amber-400 font-black text-xl shadow-lg shadow-blue-950/60 border border-blue-400/30">
+            <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] flex items-center justify-center text-amber-400 font-black text-xl shadow-lg shadow-blue-950/60 border border-blue-400/30">
               FA
             </div>
             <div>
@@ -53,7 +52,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/register"
-              className="text-xs sm:text-sm font-semibold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-4.5 py-2.5 rounded-xl shadow-lg shadow-amber-400/20 hover:shadow-amber-400/30 transition-all duration-200 flex items-center gap-1.5 font-bold transform active:scale-98"
+              className="text-xs sm:text-sm text-slate-950 bg-linear-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-4.5 py-2.5 rounded-xl shadow-lg shadow-amber-400/20 hover:shadow-amber-400/30 transition-all duration-200 flex items-center gap-1.5 font-bold transform active:scale-98"
             >
               <span>Staff Registration</span>
               <ArrowRight className="w-4 h-4" />
@@ -75,7 +74,7 @@ export default function HomePage() {
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.1] text-white">
                 Student & Alumni Services{" "}
-                <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent block mt-1">
+                <span className="bg-linear-to-r from-amber-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent block mt-1">
                   Document Management Portal
                 </span>
               </h1>
@@ -87,7 +86,7 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-4 pt-2">
                 <Link
                   href="/dashboard"
-                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-[#1E40AF] to-[#0F2962] hover:from-[#2563EB] hover:to-[#1E40AF] text-white font-bold text-sm shadow-xl shadow-blue-900/40 border border-blue-400/30 transition-all duration-200 flex items-center gap-2.5 hover:-translate-y-0.5 active:scale-98"
+                  className="px-6 py-3.5 rounded-xl bg-linear-to-r from-[#1E40AF] to-[#0F2962] hover:from-[#2563EB] hover:to-[#1E40AF] text-white font-bold text-sm shadow-xl shadow-blue-900/40 border border-blue-400/30 transition-all duration-200 flex items-center gap-2.5 hover:-translate-y-0.5 active:scale-98"
                 >
                   <Building2 className="w-4 h-4 text-amber-400" />
                   <span>Enter Staff Portal</span>
@@ -172,7 +171,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="w-0.5 h-4 bg-gradient-to-b from-blue-500 to-amber-500 ml-4 rounded-full" />
+                <div className="w-0.5 h-4 bg-linear-to-b from-blue-500 to-amber-500 ml-4 rounded-full" />
 
                 {/* Step 2: Coordinator */}
                 <div className="flex items-start gap-4 group">
@@ -192,7 +191,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="w-0.5 h-4 bg-gradient-to-b from-amber-500 to-purple-500 ml-4 rounded-full" />
+                <div className="w-0.5 h-4 bg-linear-to-b from-amber-500 to-purple-500 ml-4 rounded-full" />
 
                 {/* Step 3: Director */}
                 <div className="flex items-start gap-4 group">

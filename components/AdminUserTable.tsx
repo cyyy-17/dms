@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { approveUserAction, rejectUserAction, updateUserRoleUnitAction } from "@/actions/admin";
-import { AlertCircle, CheckCircle, Shield, Building2, User, UserCheck, XCircle, Settings, Check, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle, Shield, XCircle, Settings, Check } from "lucide-react";
 import { UserRole, UserStatus } from "@prisma/client";
 
 interface UserItem {
@@ -32,7 +31,6 @@ export default function AdminUserTable({
   users: UserItem[];
   units: UnitOption[];
 }) {
-  const router = useRouter();
   const [selectedUser, setSelectedUser] = useState<UserItem | null>(null);
   const [role, setRole] = useState<UserRole>("STAFF");
   const [unitId, setUnitId] = useState<string>(units[0]?.id || "");
@@ -168,7 +166,7 @@ export default function AdminUserTable({
                   <tr key={u.id} className="hover:bg-blue-50/40 transition-colors duration-150">
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center border border-blue-900 shadow-xs shrink-0">
+                        <div className="w-9 h-9 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center border border-blue-900 shadow-xs shrink-0">
                           {u.firstName.charAt(0)}
                         </div>
                         <div>
@@ -332,7 +330,7 @@ export default function AdminUserTable({
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white font-bold text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white font-bold text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
                 >
                   {isLoading ? "Updating..." : "Save Permissions"}
                 </button>

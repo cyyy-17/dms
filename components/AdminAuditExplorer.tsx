@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Search, ShieldCheck, Filter, Calendar, Activity } from "lucide-react";
+import { Download, Search } from "lucide-react";
 import { AuditAction } from "@prisma/client";
 
 interface AuditLogItem {

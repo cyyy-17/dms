@@ -381,7 +381,7 @@ export default function DocumentUploadForm({
                   className="flex items-center justify-between p-4 rounded-2xl border border-slate-200/90 bg-white/80 hover:bg-blue-50/40 hover:border-blue-300 transition-all duration-200 shadow-xs"
                 >
                   <div className="flex items-center gap-3.5">
-                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center shadow-sm shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center shadow-sm shrink-0">
                       {idx + 1}
                     </div>
                     <div>
@@ -544,7 +544,7 @@ export default function DocumentUploadForm({
         <button
           type="submit"
           disabled={isSubmitting || isHashing || !file}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white font-bold text-xs shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2.5 disabled:opacity-50 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
+          className="px-6 py-3 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white font-bold text-xs shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2.5 disabled:opacity-50 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
         >
           {isSubmitting ? (
             <>

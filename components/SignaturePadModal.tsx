@@ -329,7 +329,7 @@ export default function SignaturePadModal({
             type="button"
             onClick={handleSave}
             disabled={isLoading || (activeTab === "draw" && !hasDrawn) || (activeTab === "upload" && !uploadedImage)}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
           >
             {isLoading ? (
               <>

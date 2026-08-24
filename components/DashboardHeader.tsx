@@ -89,7 +89,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
         {/* User Identity Chip */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center border border-blue-900 shadow-md shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center border border-blue-900 shadow-md shrink-0">
             {user.fullName.charAt(0)}
           </div>
           <div className="hidden md:block text-left leading-tight">

@@ -125,7 +125,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
     <aside className="w-68 bg-slate-950 text-slate-300 flex flex-col shrink-0 border-r border-slate-800/80 selection:bg-amber-400 selection:text-slate-950 z-40">
       {/* Brand Header */}
       <div className="h-18 px-6 flex items-center gap-3.5 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0F2962] to-[#1E40AF] flex items-center justify-center text-amber-400 font-black text-lg shadow-lg shadow-blue-950/50 border border-blue-400/30 shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] flex items-center justify-center text-amber-400 font-black text-lg shadow-lg shadow-blue-950/50 border border-blue-400/30 shrink-0">
           FA
         </div>
         <div className="min-w-0">
@@ -146,7 +146,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
       {/* User Profile Card */}
       <div className="p-4 border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-800 to-slate-700 text-amber-400 font-black text-sm flex items-center justify-center border border-slate-600/80 shadow-md shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-slate-800 to-slate-700 text-amber-400 font-black text-sm flex items-center justify-center border border-slate-600/80 shadow-md shrink-0">
             {user.fullName.charAt(0)}
           </div>
           <div className="min-w-0 flex-1">
@@ -190,7 +190,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
                   href={link.href}
                   className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 group ${
                     isActive
-                      ? "bg-gradient-to-r from-[#1E40AF] to-[#0F2962] text-white shadow-md shadow-blue-950/40 border border-blue-400/30"
+                      ? "bg-linear-to-r from-[#1E40AF] to-[#0F2962] text-white shadow-md shadow-blue-950/40 border border-blue-400/30"
                       : "text-slate-400 hover:bg-slate-900/80 hover:text-white"
                   }`}
                 >
@@ -218,7 +218,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
                   href={link.href}
                   className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 group ${
                     isActive
-                      ? "bg-gradient-to-r from-[#1E40AF] to-[#0F2962] text-white shadow-md shadow-blue-950/40 border border-blue-400/30"
+                      ? "bg-linear-to-r from-[#1E40AF] to-[#0F2962] text-white shadow-md shadow-blue-950/40 border border-blue-400/30"
                       : "text-slate-400 hover:bg-slate-900/80 hover:text-white"
                   }`}
                 >

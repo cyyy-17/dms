@@ -140,7 +140,7 @@ export default function LiveDocumentViewer({
       {/* Viewer Top Action Bar */}
       <div className="p-4 sm:p-5 bg-white/80 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
         <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 flex items-center justify-center font-bold shadow-md shrink-0 border border-blue-400/30">
+          <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 flex items-center justify-center font-bold shadow-md shrink-0 border border-blue-400/30">
             <FileText className="w-5 h-5" />
           </div>
           <div className="min-w-0">
@@ -190,7 +190,7 @@ export default function LiveDocumentViewer({
           <button
             onClick={handleDownload}
             disabled={downloadLoading}
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5 text-amber-400" />
             <span>{downloadLoading ? "Signing..." : "Download"}</span>
@@ -273,7 +273,7 @@ export default function LiveDocumentViewer({
                       )}&embedded=true`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4.5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs font-bold shadow-md transition flex items-center gap-2"
+                      className="px-4.5 py-2.5 rounded-xl bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs font-bold shadow-md transition flex items-center gap-2"
                     >
                       <Sparkles className="w-4 h-4 text-amber-400" />
                       <span>Open in Web Viewer</span>

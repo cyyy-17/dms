@@ -7,6 +7,7 @@ import {
   Clock,
   CheckCircle2,
   AlertTriangle,
+  AlertCircle,
   Plus,
   ArrowRight,
   ShieldAlert,
@@ -134,7 +135,7 @@ export default async function DashboardPage() {
     <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto w-full">
       {/* Top Welcome Banner with Ambient Glassmorphism */}
       <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/90 relative overflow-hidden shadow-lg transition-all">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-600/10 via-amber-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-linear-to-bl from-blue-600/10 via-amber-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2.5">
@@ -155,7 +156,7 @@ export default async function DashboardPage() {
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link
               href="/dashboard/documents/new"
-              className="px-4.5 py-3 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
+              className="px-4.5 py-3 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
             >
               <Plus className="w-4 h-4 text-amber-400" />
               <span>New Document</span>
@@ -170,51 +171,17 @@ export default async function DashboardPage() {
                 <span>Review Queue ({stats.pendingCoordinator + stats.pendingDirector})</span>
               </Link>
             )}
-
-            <Link
-              href="/dashboard/documents"
-              className="p-3 rounded-xl bg-white/90 border border-slate-300/90 hover:border-slate-400 text-slate-700 text-xs font-semibold shadow-xs hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
-              title="Search Repository"
-            >
-              <Search className="w-4 h-4 text-slate-600" />
-            </Link>
           </div>
         </div>
       </div>
 
-      {/* Escalation Alert Banner */}
-      {stats.escalated > 0 && (
-        <div className="p-5 rounded-2xl bg-red-50/95 border border-red-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-red-950 shadow-md">
-          <div className="flex items-center gap-4">
-            <div className="w-11 h-11 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0 shadow-inner">
-              <ShieldAlert className="w-6 h-6 animate-pulse" />
-            </div>
-            <div>
-              <span className="font-black text-sm block">
-                {stats.escalated} Document(s) Auto-Escalated to Director Oversight
-              </span>
-              <span className="text-xs text-red-800/90 block mt-0.5">
-                Sequential workflow flagged revisions exceeding 2 rejections for executive review.
-              </span>
-            </div>
-          </div>
-          <Link
-            href="/dashboard/documents?escalated=true"
-            className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 self-start sm:self-center transition shadow-sm hover:shadow-md"
-          >
-            <span>Review Escalations</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-      )}
-
-      {/* My Action Items — Personal Signature Queue */}
+      {/* Priority Action Callout: My Assigned Reviews */}
       {myActionItems.length > 0 && (
-        <div className="glass-panel-gold rounded-3xl p-6 border border-amber-300/70 shadow-lg">
+        <div className="glass-panel-gold rounded-3xl p-6 sm:p-7 border border-amber-300/80 shadow-md animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
-                <BellRing className="w-5 h-5 animate-bounce" />
+              <div className="w-11 h-11 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md shrink-0 animate-pulse">
+                <AlertCircle className="w-6 h-6" />
               </div>
               <div>
                 <span className="font-black text-sm sm:text-base text-amber-950 block">
@@ -227,28 +194,11 @@ export default async function DashboardPage() {
             </div>
             <Link
               href="/dashboard/approvals"
-              className="px-4.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white text-xs font-bold flex items-center gap-2 self-start sm:self-center transition shadow-md hover:shadow-lg shrink-0"
+              className="px-4.5 py-2.5 rounded-xl bg-linear-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white text-xs font-bold flex items-center gap-2 self-start sm:self-center transition shadow-md hover:shadow-lg shrink-0"
             >
               <span>Open Queue</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
-          </div>
-
-          <div className="mt-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {myActionItems.map((item) => (
-              <Link
-                key={item.id}
-                href={`/dashboard/documents/${item.id}`}
-                className="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-white/90 border border-amber-200/80 hover:border-amber-400 hover:shadow-md transition-all duration-200 group"
-              >
-                <div className="min-w-0">
-                  <span className="text-[11px] font-mono font-black text-amber-900 block">{item.trackingNumber}</span>
-                  <span className="text-xs font-bold text-slate-900 block truncate">{item.title}</span>
-                  <span className="text-[10px] text-slate-500 font-medium">{item.unit?.code || ""} · {item.uploader ? `${item.uploader.firstName} ${item.uploader.lastName}` : ""}</span>
-                </div>
-                <ArrowUpRight className="w-4 h-4 text-amber-600 shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-              </Link>
-            ))}
           </div>
         </div>
       )}
@@ -360,7 +310,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
                     <div
-                      className="h-full bg-gradient-to-r from-[#0F2962] to-blue-600 rounded-full transition-all duration-500"
+                      className="h-full bg-linear-to-r from-[#0F2962] to-blue-600 rounded-full transition-all duration-500"
                       style={{ width: `${Math.max(pct, 4)}%` }}
                     />
                   </div>
@@ -395,7 +345,7 @@ export default async function DashboardPage() {
 
           <Link
             href="/dashboard/approvals"
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold text-center shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-98"
+            className="w-full py-3 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold text-center shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-98"
           >
             Manage Review Queue
           </Link>
