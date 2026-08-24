@@ -1,0 +1,361 @@
+// ============================================================================
+// Student & Alumni Services Document Management System (SASDMS)
+// Prisma Schema Definition
+// ============================================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearchPostgres"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ----------------------------------------------------------------------------
+// Enums
+// ----------------------------------------------------------------------------
+
+enum UserRole {
+  STAFF
+  COORDINATOR
+  DIRECTOR
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING_APPROVAL // Initial state upon valid @firstasia.edu.ph registration
+  ACTIVE           // Approved by Admin; full role-based access
+  REJECTED         // Denied by Admin during registration review
+  SUSPENDED        // Temporarily deactivated
+}
+
+enum ApprovalLevel {
+  COORDINATOR_ONLY  // Terminal approval at Coordinator level
+  DIRECTOR_REQUIRED // Must be approved by Coordinator, then Director
+}
+
+enum DocumentStatus {
+  DRAFT               // Initial upload or returned for editing
+  PENDING_COORDINATOR // Submitted by Staff, awaiting Coordinator review
+  PENDING_DIRECTOR    // Approved by Coordinator, awaiting Director review
+  APPROVED            // Fully approved (terminal active state)
+  REJECTED_RETURNED   // Returned to uploader with mandatory rework comments
+  REJECTED_CLOSED     // Terminated dead-end (duplicate, wrong unit, canceled)
+  ARCHIVED            // Retained for compliance; read-only terminal state
+}
+
+enum ApprovalActionType {
+  SUBMIT              // Initial submission or resubmission of new version
+  COORDINATOR_APPROVE // Level-1 approval by Unit Coordinator
+  DIRECTOR_APPROVE    // Final approval by Director
+  REJECT_RETURN       // Non-terminal return to uploader for revision
+  REJECT_CLOSE        // Terminal rejection / cancellation
+  AUTO_ESCALATE       // System-triggered visibility alert to Director
+}
+
+enum AuditAction {
+  USER_REGISTER
+  USER_APPROVE
+  USER_REJECT
+  USER_SUSPEND
+  USER_ROLE_CHANGE
+  DOCUMENT_CREATE
+  DOCUMENT_VERSION_UPLOAD
+  DOCUMENT_VIEW
+  DOCUMENT_DOWNLOAD
+  DOCUMENT_SUBMIT
+  DOCUMENT_APPROVE_COORDINATOR
+  DOCUMENT_APPROVE_DIRECTOR
+  DOCUMENT_REJECT_RETURN
+  DOCUMENT_REJECT_CLOSE
+  DOCUMENT_AUTO_ESCALATE
+  DOCUMENT_ARCHIVE
+  DOCUMENT_EXPIRY_ALERT
+  DOCUMENT_PURGE
+  DELEGATION_ASSIGNED
+  DELEGATION_REVOKED
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum NotificationType {
+  REGISTRATION_REQUEST_ADMIN
+  ACCOUNT_APPROVED
+  ACCOUNT_REJECTED
+  DOCUMENT_SUBMITTED_COORDINATOR
+  DOCUMENT_SUBMITTED_DIRECTOR
+  DOCUMENT_RETURNED_STAFF
+  DOCUMENT_CLOSED
+  DOCUMENT_APPROVED_ALL
+  DOCUMENT_ESCALATED_DIRECTOR
+  DOCUMENT_EXPIRY_WARNING
+}
+
+// ----------------------------------------------------------------------------
+// Core Models
+// ----------------------------------------------------------------------------
+
+/// Organizational Units within Student & Alumni Services
+/// [NOTE: Unit names and codes below are standard Student & Alumni Services units]
+model Unit {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code        String   @unique @db.VarChar(32) // e.g. "CAREER", "ALUMNI", "ACTIVITIES"
+  name        String   @db.VarChar(128)        // e.g. "Career Services & Placement"
+  description String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  users         User[]
+  documents     Document[]
+  documentTypes DocumentType[]
+  delegations   DelegateSignatory[]
+  auditLogs     AuditLog[]
+
+  @@map("units")
+}
+
+/// Employee User Profiles (Mirrors Supabase Auth UID)
+model User {
+  id            String     @id @db.Uuid // Matches Supabase Auth uid (UUIDv4)
+  email         String     @unique @db.VarChar(255) // Must end with @firstasia.edu.ph
+  firstName     String     @db.VarChar(64)
+  lastName      String     @db.VarChar(64)
+  employeeId    String?    @unique @db.VarChar(32) // Institutional ID number
+  role          UserRole   @default(STAFF)
+  status        UserStatus @default(PENDING_APPROVAL)
+  unitId        String?    @db.Uuid
+  unit          Unit?      @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  signaturePath String?    @db.VarChar(512) // Supabase storage path for e-sig image
+  approvedById  String?    @db.Uuid
+  approvedBy    User?      @relation("UserApprovals", fields: [approvedById], references: [id])
+  approvedAt    DateTime?  @db.Timestamptz(6)
+  createdAt     DateTime   @default(now()) @db.Timestamptz(6)
+  updatedAt     DateTime   @updatedAt @db.Timestamptz(6)
+
+  // Reverse Relations
+  managedUsers        User[]              @relation("UserApprovals")
+  uploadedDocuments   Document[]          @relation("DocumentUploader")
+  uploadedVersions    DocumentVersion[]   @relation("VersionUploader")
+  approvalActions     ApprovalAction[]    @relation("ApprovalActor")
+  delegationsGiven    DelegateSignatory[] @relation("Delegator")
+  delegationsReceived DelegateSignatory[] @relation("Delegate")
+  createdDelegations  DelegateSignatory[] @relation("DelegationCreator")
+  auditLogs                  AuditLog[]          @relation("AuditActor")
+  notifications              NotificationQueue[] @relation("NotificationRecipient")
+  documentsAwaitingSignature Document[]          @relation("CurrentSignatory")
+
+  @@index([email])
+  @@index([role, status])
+  @@index([unitId])
+  @@map("users")
+}
+
+/// Document Classification Taxonomy
+model DocumentType {
+  id                     String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  code                   String        @unique @db.VarChar(32) // e.g. "MOU_MOA", "EVENT_PROPOSAL"
+  name                   String        @db.VarChar(128)        // e.g. "Memorandum of Agreement"
+  description            String?       @db.Text
+  defaultApprovalLevel   ApprovalLevel @default(COORDINATOR_ONLY)
+  requiresExpiryTracking Boolean       @default(false)
+  defaultRetentionDays   Int           @default(1825) // RA 10173 retention (default 5 yrs)
+  unitId                 String?       @db.Uuid // Nullable: global or unit-specific
+  unit                   Unit?         @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  isActive               Boolean       @default(true)
+  createdAt              DateTime      @default(now()) @db.Timestamptz(6)
+  updatedAt              DateTime      @updatedAt @db.Timestamptz(6)
+
+  // Relations
+  documents Document[]
+
+  @@index([unitId])
+  @@map("document_types")
+}
+
+/// Root Document Entity (Holds workflow state, identity, and escalation counters)
+model Document {
+  id             String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  trackingNumber String         @unique @db.VarChar(64) // e.g. "SAS-2026-ALM-00042"
+  title          String         @db.VarChar(255)
+  description    String?        @db.Text
+  documentTypeId String         @db.Uuid
+  documentType   DocumentType   @relation(fields: [documentTypeId], references: [id], onDelete: Restrict)
+  unitId         String         @db.Uuid
+  unit           Unit           @relation(fields: [unitId], references: [id], onDelete: Restrict)
+  uploaderId     String         @db.Uuid
+  uploader       User           @relation("DocumentUploader", fields: [uploaderId], references: [id], onDelete: Restrict)
+
+  // Current Workflow State & Assigned Signatory Flow
+  status                DocumentStatus @default(DRAFT)
+  approvalLevel         ApprovalLevel  @default(COORDINATOR_ONLY)
+  rejectionCount        Int            @default(0) // Increments on REJECT_RETURN; triggers auto-escalate at 2
+  isEscalated           Boolean        @default(false) // Set to true when rejectionCount >= 2
+  signatoryFlow         Json?          @db.JsonB // Ordered list of assigned user signatories: [{ userId, fullName, role, title, stepOrder, status, signedAt }]
+  currentSignatoryId    String?        @db.Uuid // Active assigned user whose turn it is to sign
+  currentSignatory      User?          @relation("CurrentSignatory", fields: [currentSignatoryId], references: [id], onDelete: SetNull)
+  currentSignatoryIndex Int            @default(0) // 0-based index of active step in signatoryFlow
+
+  // Optional Lifecycle Dates
+  effectiveDate         DateTime? @db.Date
+  expiryDate            DateTime? @db.Date
+  lastExpiryAlertSentAt DateTime? @db.Timestamptz(6)
+  isArchived            Boolean   @default(false)
+  archivedAt            DateTime? @db.Timestamptz(6)
+
+  // Active Version Pointer
+  currentVersionId String?          @unique @db.Uuid
+  currentVersion   DocumentVersion? @relation("CurrentDocumentVersion", fields: [currentVersionId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+
+  // Reverse Relations
+  versions        DocumentVersion[] @relation("AllDocumentVersions")
+  approvalActions ApprovalAction[]
+  auditLogs       AuditLog[]
+
+  @@index([trackingNumber])
+  @@index([unitId, status])
+  @@index([uploaderId])
+  @@index([documentTypeId])
+  @@index([status])
+  @@index([expiryDate])
+  @@index([isEscalated])
+  @@index([currentSignatoryId])
+  @@index([currentSignatoryId, status])
+  @@map("documents")
+}
+
+/// Immutable Document Version Records (Separate storage object per version)
+model DocumentVersion {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  documentId     String   @db.Uuid
+  document       Document @relation("AllDocumentVersions", fields: [documentId], references: [id], onDelete: Cascade)
+  versionNumber  Int // Incremental per document (1, 2, 3...)
+  storagePath    String   @db.VarChar(512) // Supabase Storage key: e.g. "documents/CAREER/MOU/doc-uuid/v1_filename.pdf"
+  fileName       String   @db.VarChar(255)
+  fileSize       Int // Bytes
+  mimeType       String   @db.VarChar(128)
+  sha256Checksum String   @db.VarChar(64) // Integrity hash for RA 10173 non-repudiation
+  changeSummary  String?  @db.Text // Staff changelog required on resubmission
+  uploadedById   String   @db.Uuid
+  uploadedBy     User     @relation("VersionUploader", fields: [uploadedById], references: [id], onDelete: Restrict)
+  createdAt      DateTime @default(now()) @db.Timestamptz(6)
+
+  // Reverse Relations
+  currentOfDocument Document?        @relation("CurrentDocumentVersion")
+  approvalActions   ApprovalAction[]
+
+  @@unique([documentId, versionNumber])
+  @@index([documentId])
+  @@index([uploadedById])
+  @@map("document_versions")
+}
+
+/// Sequential Approval and Rejection Action Log
+model ApprovalAction {
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  documentId      String             @db.Uuid
+  document        Document           @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  versionId       String             @db.Uuid
+  version         DocumentVersion    @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  actorId         String             @db.Uuid
+  actor           User               @relation("ApprovalActor", fields: [actorId], references: [id], onDelete: Restrict)
+  actorRole       UserRole // Snapshot of role at time of action
+  action          ApprovalActionType
+  comments        String?            @db.Text // MANDATORY for REJECT_RETURN and REJECT_CLOSE
+  isEscalatedFlag Boolean            @default(false)
+
+  // Security & Signature Stamping Metadata
+  signatureApplied Boolean  @default(false)
+  signaturePath    String?  @db.VarChar(512)
+  ipAddress        String?  @db.VarChar(45)
+  userAgent        String?  @db.VarChar(512)
+  createdAt        DateTime @default(now()) @db.Timestamptz(6)
+
+  @@index([documentId])
+  @@index([versionId])
+  @@index([actorId])
+  @@index([action])
+  @@map("approval_actions")
+}
+
+/// Delegated Authority & Signatory Assignment
+model DelegateSignatory {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  delegatorId String   @db.Uuid
+  delegator   User     @relation("Delegator", fields: [delegatorId], references: [id], onDelete: Cascade)
+  delegateId  String   @db.Uuid
+  delegate    User     @relation("Delegate", fields: [delegateId], references: [id], onDelete: Cascade)
+  unitId      String   @db.Uuid
+  unit        Unit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  startDate   DateTime @db.Timestamptz(6)
+  endDate     DateTime @db.Timestamptz(6)
+  reason      String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdById String   @db.Uuid
+  createdBy   User     @relation("DelegationCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt   DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @db.Timestamptz(6)
+
+  @@index([delegatorId])
+  @@index([delegateId])
+  @@index([unitId, isActive])
+  @@map("delegate_signatories")
+}
+
+/// Comprehensive, Immutable Audit Log (RA 10173 Compliance)
+model AuditLog {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actorId    String?     @db.Uuid // Nullable for anonymous pre-auth or system cron actions
+  actor      User?       @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
+  unitId     String?     @db.Uuid
+  unit       Unit?       @relation(fields: [unitId], references: [id], onDelete: SetNull)
+  action     AuditAction
+  targetType String      @db.VarChar(64) // "DOCUMENT", "USER", "VERSION", "AUTH"
+  targetId   String?     @db.VarChar(64) // Entity UUID
+  documentId String?     @db.Uuid
+  document   Document?   @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  details    Json?       @db.JsonB // Before/After delta, filter criteria, or error details
+  ipAddress  String?     @db.VarChar(45)
+  userAgent  String?     @db.VarChar(512)
+  createdAt  DateTime    @default(now()) @db.Timestamptz(6)
+
+  @@index([actorId])
+  @@index([action])
+  @@index([targetType, targetId])
+  @@index([documentId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+/// Asynchronous Notification Queue (Resend Email Dispatcher)
+model NotificationQueue {
+  id             String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  recipientId    String             @db.Uuid
+  recipient      User               @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  recipientEmail String             @db.VarChar(255)
+  type           NotificationType
+  subject        String             @db.VarChar(255)
+  templateName   String             @db.VarChar(64)
+  payload        Json               @db.JsonB // Dynamic variables for React Email template
+  status         NotificationStatus @default(PENDING)
+  attempts       Int                @default(0)
+  maxAttempts    Int                @default(3)
+  lastError      String?            @db.Text
+  scheduledFor   DateTime           @default(now()) @db.Timestamptz(6)
+  sentAt         DateTime?          @db.Timestamptz(6)
+  createdAt      DateTime           @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime           @updatedAt @db.Timestamptz(6)
+
+  @@index([status, scheduledFor])
+  @@index([recipientId])
+  @@map("notification_queue")
+}
