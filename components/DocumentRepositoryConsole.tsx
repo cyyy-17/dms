@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { getStatusLabel, getStatusBadgeClass } from "@/lib/status-labels";
+import CopyTrackingButton from "@/components/CopyTrackingButton";
 import {
   FileText,
   Search,
@@ -13,9 +14,8 @@ import {
   List,
   Download,
   Filter,
-  ArrowUpRight,
-  Shield,
-  Layers,
+  X,
+  Sparkles,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
 
@@ -66,6 +66,21 @@ export default function DocumentRepositoryConsole({
   const [selectedDocType, setSelectedDocType] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [onlyEscalated, setOnlyEscalated] = useState(false);
+
+  const hasActiveFilters =
+    searchQuery.trim() !== "" ||
+    selectedUnit !== "ALL" ||
+    selectedDocType !== "ALL" ||
+    selectedStatus !== "ALL" ||
+    onlyEscalated;
+
+  const handleResetFilters = () => {
+    setSearchQuery("");
+    setSelectedUnit("ALL");
+    setSelectedDocType("ALL");
+    setSelectedStatus("ALL");
+    setOnlyEscalated(false);
+  };
 
   // Filtered documents
   const filteredDocuments = useMemo(() => {
@@ -269,18 +284,44 @@ export default function DocumentRepositoryConsole({
             </div>
           </div>
         </div>
+
+        {/* Filter Reset pill when filters are active */}
+        {hasActiveFilters && (
+          <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+            <span className="text-slate-500 font-medium">
+              Showing filtered results ({filteredDocuments.length} of {initialDocuments.length})
+            </span>
+            <button
+              onClick={handleResetFilters}
+              className="text-blue-700 hover:text-blue-900 font-bold inline-flex items-center gap-1 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span>Clear Active Filters</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Main Content Area */}
       {filteredDocuments.length === 0 ? (
-        <div className="glass-panel rounded-3xl p-14 border border-white/90 text-center space-y-3 shadow-sm">
+        <div className="glass-panel rounded-3xl p-14 border border-white/90 text-center space-y-4 shadow-sm">
           <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto shadow-inner">
             <FileText className="w-7 h-7" />
           </div>
-          <h3 className="text-base font-black text-slate-800">No matching documents found</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto font-medium">
-            Try adjusting your search criteria, classification type, or status filters.
-          </p>
+          <div>
+            <h3 className="text-base font-black text-slate-800">No matching documents found</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto font-medium mt-1">
+              Try adjusting your search criteria or clear your active filters to view repository records.
+            </p>
+          </div>
+          {hasActiveFilters && (
+            <button
+              onClick={handleResetFilters}
+              className="px-4 py-2 rounded-xl bg-[#0F2962] text-white font-bold text-xs shadow-sm hover:bg-[#091a42] transition cursor-pointer"
+            >
+              Reset Filters
+            </button>
+          )}
         </div>
       ) : viewMode === "table" ? (
         /* TABLE VIEW */
@@ -301,13 +342,15 @@ export default function DocumentRepositoryConsole({
               <tbody className="divide-y divide-slate-100/90 bg-white/60">
                 {filteredDocuments.map((doc) => (
                   <tr key={doc.id} className="hover:bg-blue-50/40 transition-colors duration-150">
-                    <td className="py-4 px-6 font-mono font-black text-blue-900">
-                      {doc.trackingNumber}
-                      {doc.currentVersion && (
-                        <span className="ml-2 px-1.5 py-0.5 rounded-md bg-blue-100/80 text-blue-800 text-[10px] font-bold">
-                          v{doc.currentVersion.versionNumber}
-                        </span>
-                      )}
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-1.5">
+                        <CopyTrackingButton trackingNumber={doc.trackingNumber} />
+                        {doc.currentVersion && (
+                          <span className="px-1.5 py-0.5 rounded-md bg-blue-100/80 text-blue-800 text-[10px] font-bold">
+                            v{doc.currentVersion.versionNumber}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="py-4 px-6">
                       <span className="font-bold text-slate-900 block truncate max-w-xs">
@@ -363,9 +406,7 @@ export default function DocumentRepositoryConsole({
             >
               <div className="space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-black text-[#0F2962] bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200/60">
-                    {doc.trackingNumber}
-                  </span>
+                  <CopyTrackingButton trackingNumber={doc.trackingNumber} />
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
                     {getStatusLabel(doc.status)}
                   </span>

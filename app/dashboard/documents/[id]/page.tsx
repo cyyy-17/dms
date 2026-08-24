@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import DocumentDetailActions from "@/components/DocumentDetailActions";
 import LiveDocumentViewer from "@/components/LiveDocumentViewer";
+import CopyTrackingButton from "@/components/CopyTrackingButton";
 import {
   GitBranch,
   ShieldCheck,
@@ -208,11 +209,9 @@ export default async function DocumentDetailPage({ params }: PageProps) {
 
       {/* Header Banner */}
       <div className="glass-card rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-sm font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded">
-              {doc.trackingNumber}
-            </span>
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <CopyTrackingButton trackingNumber={doc.trackingNumber} />
             <span
               className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
                 doc.status === DocumentStatus.APPROVED
