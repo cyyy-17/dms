@@ -204,9 +204,12 @@ export async function loginEmployee(formData: {
     };
   }
 
-  // If in local preview mode without live credentials, allow logging in directly
+  // Check if live database credentials are present
   if (!isDatabaseConfigured) {
-    return { success: true, status: "ACTIVE" };
+    return {
+      success: false,
+      error: "Database configuration is missing. Please configure DATABASE_URL, NEXT_PUBLIC_SUPABASE_URL, and SUPABASE_SERVICE_ROLE_KEY in your Vercel Project Settings.",
+    };
   }
 
   try {

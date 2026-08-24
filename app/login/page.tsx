@@ -39,9 +39,8 @@ export default function LoginPage() {
         return;
       }
 
-      // Navigate to Dashboard upon successful authentication
-      router.push("/dashboard");
-      router.refresh();
+      // Perform hard navigation to Dashboard to guarantee cookie transmission
+      window.location.href = "/dashboard";
     } catch (err: unknown) {
       console.error("[LOGIN_PAGE_ERROR]", err);
       const msg = err instanceof Error ? err.message : "An unexpected error occurred during login.";
