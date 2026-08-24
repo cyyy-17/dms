@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient as createBrowserSupabase } from "@/lib/supabase/client";
 import { loginEmployee } from "@/actions/auth";
 import { Lock, Mail, ArrowRight, AlertCircle } from "lucide-react";
 
@@ -28,32 +27,19 @@ export default function LoginPage() {
     }
 
     try {
-      // 1. Direct Browser Session Initialization
-      const supabase = createBrowserSupabase();
-      const { error: authError } = await supabase.auth.signInWithPassword({
-        email: normalizedEmail,
-        password,
-      });
-
-      if (authError) {
-        setError(authError.message || "Invalid email or password.");
-        setIsLoading(false);
-        return;
-      }
-
-      // 2. Server Profile & RBAC Verification
+      // Authenticate and verify status via Server Action (handles cookies & RBAC)
       const res = await loginEmployee({ email: normalizedEmail, password });
       if (!res.success) {
         if (res.status === "PENDING_APPROVAL") {
           router.push("/pending-approval");
           return;
         }
-        setError(res.error || "Failed to log in.");
+        setError(res.error || "Invalid institutional email or password.");
         setIsLoading(false);
         return;
       }
 
-      // 3. Navigate to Dashboard
+      // Navigate to Dashboard upon successful authentication
       router.push("/dashboard");
       router.refresh();
     } catch (err: unknown) {
