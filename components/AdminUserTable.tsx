@@ -4,6 +4,7 @@ import { useState } from "react";
 import { approveUserAction, rejectUserAction, updateUserRoleUnitAction } from "@/actions/admin";
 import { AlertCircle, CheckCircle, Shield, XCircle, Settings, Check } from "lucide-react";
 import { UserRole, UserStatus } from "@prisma/client";
+import { getRoleLabel, formatHumanDate } from "@/lib/status-labels";
 
 interface UserItem {
   id: string;
@@ -180,9 +181,9 @@ export default function AdminUserTable({
                       </div>
                     </td>
                     <td className="py-4 px-6">
-                      <span className="inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-blue-100/80 text-blue-900 border border-blue-300/80 uppercase">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black px-2.5 py-0.5 rounded-full bg-blue-100/80 text-blue-900 border border-blue-300/80">
                         <Shield className="w-3 h-3 text-amber-500" />
-                        <span>{u.role}</span>
+                        <span>{getRoleLabel(u.role)}</span>
                       </span>
                     </td>
                     <td className="py-4 px-6">
@@ -200,11 +201,15 @@ export default function AdminUserTable({
                             : "bg-rose-100/90 text-rose-800 border border-rose-300"
                         }`}
                       >
-                        {u.status}
+                        {u.status === "ACTIVE"
+                          ? "Verified Active"
+                          : u.status === "PENDING_APPROVAL"
+                          ? "Pending Approval"
+                          : "Account Suspended"}
                       </span>
                     </td>
                     <td className="py-4 px-6 text-slate-500 font-mono text-[11px]">
-                      {new Date(u.createdAt).toLocaleDateString()}
+                      {formatHumanDate(u.createdAt)}
                     </td>
                     <td className="py-4 px-6 text-right">
                       <div className="flex items-center justify-end gap-2">

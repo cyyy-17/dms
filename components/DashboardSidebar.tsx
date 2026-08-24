@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { signOutAction } from "@/actions/auth";
+import { getRoleLabel } from "@/lib/status-labels";
 import {
   LayoutDashboard,
   FileText,
@@ -160,12 +161,12 @@ export default function DashboardSidebar({ user }: SidebarProps) {
         </div>
 
         <div className="mt-3 flex flex-wrap gap-1.5">
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-blue-950/90 text-blue-300 border border-blue-700/60 uppercase shadow-inner">
+          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-blue-950/90 text-blue-300 border border-blue-700/60 shadow-inner">
             <Shield className="w-3 h-3 text-amber-400" />
-            <span>{user.role}</span>
+            <span>{getRoleLabel(user.role)}</span>
           </span>
           {user.unitCode && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-amber-950/90 text-amber-300 border border-amber-700/60 uppercase shadow-inner">
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-md bg-amber-950/90 text-amber-300 border border-amber-700/60 shadow-inner">
               <Building2 className="w-3 h-3 text-amber-400" />
               <span>{user.unitCode}</span>
             </span>

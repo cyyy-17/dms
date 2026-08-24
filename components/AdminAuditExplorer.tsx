@@ -3,6 +3,12 @@
 import { useState } from "react";
 import { Download, Search } from "lucide-react";
 import { AuditAction } from "@prisma/client";
+import {
+  getActionLabel,
+  getTargetTypeLabel,
+  formatHumanDateTime,
+  formatAuditDetailsSummary,
+} from "@/lib/status-labels";
 
 interface AuditLogItem {
   id: string;
@@ -128,11 +134,11 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
                 filteredLogs.map((log) => (
                   <tr key={log.id} className="hover:bg-blue-50/40 transition-colors duration-150">
                     <td className="py-4 px-6 font-mono text-[11px] text-slate-500 whitespace-nowrap">
-                      {new Date(log.createdAt).toLocaleString()}
+                      {formatHumanDateTime(log.createdAt)}
                     </td>
                     <td className="py-4 px-6">
-                      <span className="font-mono text-[10px] font-black px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 border border-slate-300/80 uppercase">
-                        {log.action}
+                      <span className="font-mono text-[10px] font-black px-2.5 py-1 rounded-full bg-blue-50 text-blue-900 border border-blue-200 shadow-xs">
+                        {getActionLabel(log.action)}
                       </span>
                     </td>
                     <td className="py-4 px-6">
@@ -144,18 +150,18 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
                       </span>
                     </td>
                     <td className="py-4 px-6 font-medium">
-                      <span className="text-slate-500 text-[11px] block">{log.targetType}</span>
+                      <span className="text-slate-500 text-[11px] block">{getTargetTypeLabel(log.targetType)}</span>
                       <span className="font-mono font-bold text-blue-900 block mt-0.5">
-                        {log.document ? log.document.trackingNumber : (log.targetId || "N/A")}
+                        {log.document ? log.document.trackingNumber : (log.targetId ? `Record #${log.targetId.substring(0, 8)}` : "System-wide")}
                       </span>
                     </td>
                     <td className="py-4 px-6 font-mono text-[11px] text-slate-500">
-                      {log.ipAddress || "127.0.0.1"}
+                      {log.ipAddress || "Internal Server"}
                     </td>
                     <td className="py-4 px-6">
-                      <pre className="text-[10px] font-mono text-slate-700 bg-slate-50/80 p-2 rounded-xl border border-slate-200 max-w-xs truncate overflow-hidden">
-                        {JSON.stringify(log.details)}
-                      </pre>
+                      <div className="text-[11px] text-slate-700 bg-slate-50/90 p-2.5 rounded-xl border border-slate-200/80 max-w-sm leading-relaxed font-medium">
+                        {formatAuditDetailsSummary(log.details)}
+                      </div>
                     </td>
                   </tr>
                 ))

@@ -17,6 +17,7 @@ import {
   Loader2,
   ShieldCheck,
 } from "lucide-react";
+import { formatFileSize } from "@/lib/status-labels";
 
 interface LiveDocumentViewerProps {
   documentTitle: string;
@@ -153,7 +154,7 @@ export default function LiveDocumentViewer({
               </span>
             </div>
             <span className="text-[11px] text-slate-500 block font-mono font-medium mt-0.5">
-              {trackingNumber} • {(fileSize / 1024).toFixed(1)} KB
+              {trackingNumber} • {formatFileSize(fileSize)}
             </span>
           </div>
         </div>

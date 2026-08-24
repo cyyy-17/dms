@@ -15,6 +15,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { DocumentStatus, ApprovalLevel } from "@prisma/client";
+import { getStatusLabel } from "@/lib/status-labels";
 
 interface DocumentWithDetails {
   id: string;
@@ -251,11 +252,11 @@ export default function AdminDocumentOverrideManagement({
                             : "bg-amber-100 text-amber-800 border border-amber-200"
                         }`}
                       >
-                        {doc.status.replace("_", " ")}
+                        {getStatusLabel(doc.status)}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-slate-600 font-mono text-[11px]">
-                      {doc.approvalLevel}
+                    <td className="py-4 px-6 text-slate-700 font-medium text-[11px]">
+                      {doc.approvalLevel === "DIRECTOR_REQUIRED" ? "Coordinator + Director" : "Coordinator Endorsement Only"}
                     </td>
                     <td className="py-4 px-6">
                       {doc.isEscalated ? (
@@ -264,8 +265,8 @@ export default function AdminDocumentOverrideManagement({
                           <span>Escalated ({doc.rejectionCount}x)</span>
                         </span>
                       ) : (
-                        <span className="text-slate-400 text-[11px]">
-                          Rejections: {doc.rejectionCount}
+                        <span className="text-slate-500 text-[11px]">
+                          {doc.rejectionCount === 0 ? "0 rejections" : `${doc.rejectionCount} return(s)`}
                         </span>
                       )}
                     </td>
@@ -321,7 +322,7 @@ export default function AdminDocumentOverrideManagement({
 
             <p className="text-xs text-slate-600">
               Intervening on tracking number <strong>{overrideDoc.trackingNumber}</strong> (Current status:{" "}
-              <strong>{overrideDoc.status}</strong>).
+              <strong>{getStatusLabel(overrideDoc.status)}</strong>).
             </p>
 
             <form onSubmit={handleOverride} className="space-y-3.5 text-xs">
@@ -334,13 +335,13 @@ export default function AdminDocumentOverrideManagement({
                   }
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
                 >
-                  <option value="DRAFT">DRAFT</option>
-                  <option value="PENDING_COORDINATOR">PENDING_COORDINATOR</option>
-                  <option value="PENDING_DIRECTOR">PENDING_DIRECTOR</option>
-                  <option value="APPROVED">APPROVED (Force Grant)</option>
-                  <option value="REJECTED_RETURNED">REJECTED_RETURNED (Force Return)</option>
-                  <option value="REJECTED_CLOSED">REJECTED_CLOSED (Terminate Dead-End)</option>
-                  <option value="ARCHIVED">ARCHIVED</option>
+                  <option value="DRAFT">Draft (In Preparation)</option>
+                  <option value="PENDING_COORDINATOR">Pending Coordinator Review</option>
+                  <option value="PENDING_DIRECTOR">Pending Director Sign-off</option>
+                  <option value="APPROVED">Approved & Sealed (Force Grant)</option>
+                  <option value="REJECTED_RETURNED">Returned for Revision (Force Return)</option>
+                  <option value="REJECTED_CLOSED">Closed & Rejected (Terminate Dead-End)</option>
+                  <option value="ARCHIVED">Archived (Preserved)</option>
                 </select>
               </div>
 
@@ -353,8 +354,8 @@ export default function AdminDocumentOverrideManagement({
                   }
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
                 >
-                  <option value="COORDINATOR_ONLY">COORDINATOR_ONLY</option>
-                  <option value="DIRECTOR_REQUIRED">DIRECTOR_REQUIRED</option>
+                  <option value="COORDINATOR_ONLY">Coordinator Endorsement Only</option>
+                  <option value="DIRECTOR_REQUIRED">Coordinator + Director Sign-off Required</option>
                 </select>
               </div>
 

@@ -20,6 +20,7 @@ import {
   FileCheck,
   Fingerprint,
 } from "lucide-react";
+import { getRoleLabel, formatFileSize } from "@/lib/status-labels";
 
 interface DocTypeOption {
   id: string;
@@ -387,8 +388,8 @@ export default function DocumentUploadForm({
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-xs sm:text-sm text-slate-900">{step.fullName}</span>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-extrabold">
-                          {step.role}
+                        <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-blue-100/90 text-blue-900 font-bold border border-blue-200">
+                          {getRoleLabel(step.role)}
                         </span>
                       </div>
                       <span className="text-xs text-slate-500 font-medium block mt-0.5">
@@ -507,7 +508,7 @@ export default function DocumentUploadForm({
             </div>
             <div className="text-sm font-bold text-slate-800">
               {file ? (
-                <span className="text-[#0F2962] font-black">{file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)</span>
+                <span className="text-[#0F2962] font-black">{file.name} ({formatFileSize(file.size)})</span>
               ) : (
                 <span>Click to select document or drag and drop file here</span>
               )}

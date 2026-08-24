@@ -25,6 +25,7 @@ import {
   User,
 } from "lucide-react";
 import { signOutAction } from "@/actions/auth";
+import { getRoleLabel } from "@/lib/status-labels";
 import SignaturePadModal from "@/components/SignaturePadModal";
 import QuickSearchModal from "@/components/QuickSearchModal";
 
@@ -175,7 +176,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                 {user.fullName}
               </span>
               <span className="text-[10px] text-slate-500 font-medium block">
-                {user.role} {user.unitCode ? `• ${user.unitCode}` : ""}
+                {getRoleLabel(user.role)} {user.unitCode ? `• ${user.unitCode}` : ""}
               </span>
             </div>
           </Link>

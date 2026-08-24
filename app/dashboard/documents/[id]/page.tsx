@@ -5,6 +5,15 @@ import DocumentDetailActions from "@/components/DocumentDetailActions";
 import LiveDocumentViewer from "@/components/LiveDocumentViewer";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
 import {
+  getStatusLabel,
+  getStatusBadgeClass,
+  getRoleLabel,
+  getActionLabel,
+  formatFileSize,
+  formatHumanDate,
+  formatHumanDateTime,
+} from "@/lib/status-labels";
+import {
   GitBranch,
   ShieldCheck,
   ArrowLeft,
@@ -213,18 +222,11 @@ export default async function DocumentDetailPage({ params }: PageProps) {
           <div className="flex flex-wrap items-center gap-3">
             <CopyTrackingButton trackingNumber={doc.trackingNumber} />
             <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${
-                doc.status === DocumentStatus.APPROVED
-                  ? "badge-approved"
-                  : doc.status === DocumentStatus.REJECTED_RETURNED
-                  ? "badge-returned"
-                  : doc.status === DocumentStatus.PENDING_COORDINATOR ||
-                    doc.status === DocumentStatus.PENDING_DIRECTOR
-                  ? "badge-pending"
-                  : "badge-draft"
-              }`}
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(
+                doc.status
+              )}`}
             >
-              {doc.status.replace("_", " ")}
+              {getStatusLabel(doc.status)}
             </span>
             {doc.isEscalated && (
               <span className="badge-escalated px-2.5 py-0.5 rounded-full text-[10px] font-bold">
@@ -296,7 +298,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                 <div>
                   <span className="text-slate-400 block mb-0.5">Effective Date</span>
                   <span className="font-semibold text-slate-900">
-                    {new Date(doc.effectiveDate).toLocaleDateString()}
+                    {formatHumanDate(doc.effectiveDate)}
                   </span>
                 </div>
               )}
@@ -305,7 +307,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                 <div>
                   <span className="text-slate-400 block mb-0.5">Expiry / Renewal Date</span>
                   <span className="font-semibold text-amber-800">
-                    {new Date(doc.expiryDate).toLocaleDateString()}
+                    {formatHumanDate(doc.expiryDate)}
                   </span>
                 </div>
               )}
@@ -357,8 +359,8 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                         </span>
                       )}
                     </div>
-                    <span className="text-[11px] text-slate-400">
-                      {(ver.fileSize / 1024).toFixed(1)} KB
+                    <span className="text-[11px] text-slate-400 font-mono font-medium">
+                      {formatFileSize(ver.fileSize)}
                     </span>
                   </div>
 
@@ -369,7 +371,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                   <div className="mt-2 text-[10px] text-slate-400 flex items-center justify-between">
                     <span>
                       Uploaded by {ver.uploadedBy?.firstName} {ver.uploadedBy?.lastName} on{" "}
-                      {new Date(ver.createdAt).toLocaleString()}
+                      {formatHumanDateTime(ver.createdAt)}
                     </span>
                     <span className="font-mono text-slate-500">
                       SHA: {ver.sha256Checksum.substring(0, 12)}...
@@ -412,11 +414,11 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                     <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-slate-900">
-                          {action.action.replace("_", " ")} by {action.actor.firstName}{" "}
-                          {action.actor.lastName} ({action.actorRole})
+                          {getActionLabel(action.action)} by {action.actor.firstName}{" "}
+                          {action.actor.lastName} ({getRoleLabel(action.actorRole)})
                         </span>
-                        <span className="text-[10px] text-slate-400">
-                          {new Date(action.createdAt).toLocaleString()}
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          {formatHumanDateTime(action.createdAt)}
                         </span>
                       </div>
 

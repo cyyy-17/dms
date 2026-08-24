@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/auth/session";
-import { getStatusLabel, getStatusBadgeClass } from "@/lib/status-labels";
+import { getStatusLabel, getStatusBadgeClass, getRoleLabel } from "@/lib/status-labels";
+import CopyTrackingButton from "@/components/CopyTrackingButton";
 import {
   FileText,
   Clock,
@@ -339,7 +340,7 @@ export default async function DashboardPage() {
             </div>
             <div className="flex items-center justify-between">
               <span className="text-slate-500 font-medium">Designation:</span>
-              <span className="font-mono font-bold text-[#0F2962]">{user.role}</span>
+              <span className="font-bold text-[#0F2962]">{getRoleLabel(user.role)}</span>
             </div>
           </div>
 
@@ -383,8 +384,8 @@ export default async function DashboardPage() {
             <tbody className="divide-y divide-slate-100/90 bg-white/60">
               {recentDocs.map((doc) => (
                 <tr key={doc.id} className="hover:bg-blue-50/50 transition-colors duration-150">
-                  <td className="py-4 px-6 font-mono font-bold text-blue-900">
-                    {doc.trackingNumber}
+                  <td className="py-4 px-6">
+                    <CopyTrackingButton trackingNumber={doc.trackingNumber} />
                   </td>
                   <td className="py-4 px-6">
                     <span className="font-bold text-slate-900 block truncate max-w-xs">

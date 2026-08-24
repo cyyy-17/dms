@@ -13,6 +13,7 @@ import {
   UserCheck,
   Calendar,
 } from "lucide-react";
+import { getRoleLabel, formatHumanDate } from "@/lib/status-labels";
 
 interface DelegationItem {
   id: string;
@@ -250,13 +251,12 @@ export default function AdminDelegationManagement({
                         <div className="flex items-center gap-1 font-medium text-slate-800">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" />
                           <span>
-                            {new Date(d.startDate).toLocaleDateString()} –{" "}
-                            {new Date(d.endDate).toLocaleDateString()}
+                            {formatHumanDate(d.startDate)} – {formatHumanDate(d.endDate)}
                           </span>
                         </div>
                       </td>
                       <td className="py-4 px-6 text-slate-600 max-w-xs truncate">
-                        {d.reason || <span className="text-slate-300 italic">Official leave / assignment</span>}
+                        {d.reason || <span className="text-slate-400 italic">Official administrative leave</span>}
                       </td>
                       <td className="py-4 px-6">
                         <span
@@ -270,7 +270,7 @@ export default function AdminDelegationManagement({
                               : "bg-blue-100 text-blue-800 border border-blue-200"
                           }`}
                         >
-                          {!d.isActive ? "REVOKED" : isCurrent ? "ACTIVE DELEGATION" : "EXPIRED"}
+                          {!d.isActive ? "Revoked" : isCurrent ? "Active Delegation" : "Expired"}
                         </span>
                       </td>
                       <td className="py-4 px-6 text-right">
@@ -319,7 +319,7 @@ export default function AdminDelegationManagement({
                 >
                   {coordinatorsAndDirectors.map((u) => (
                     <option key={u.id} value={u.id}>
-                      {u.firstName} {u.lastName} ({u.role}) – {u.email}
+                      {u.firstName} {u.lastName} ({getRoleLabel(u.role)}) – {u.email}
                     </option>
                   ))}
                 </select>
@@ -336,7 +336,7 @@ export default function AdminDelegationManagement({
                 >
                   {allEligibleStaff.map((u) => (
                     <option key={u.id} value={u.id}>
-                      {u.firstName} {u.lastName} ({u.role}) – {u.email}
+                      {u.firstName} {u.lastName} ({getRoleLabel(u.role)}) – {u.email}
                     </option>
                   ))}
                 </select>
