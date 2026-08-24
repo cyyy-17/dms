@@ -11,15 +11,10 @@ import {
   AlertCircle,
   Plus,
   ArrowRight,
-  ShieldAlert,
   Building2,
   PenLine,
   TrendingUp,
   Sparkles,
-  Search,
-  BellRing,
-  Layers,
-  ArrowUpRight,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
 

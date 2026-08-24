@@ -15,7 +15,6 @@ import {
   FileCode,
   Sparkles,
   Loader2,
-  ShieldCheck,
 } from "lucide-react";
 import { formatFileSize } from "@/lib/status-labels";
 

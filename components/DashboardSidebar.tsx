@@ -45,9 +45,10 @@ export default function DashboardSidebar({ user }: SidebarProps) {
     try {
       await signOutAction();
     } catch {
-      window.location.href = "/login";
+      // Ignored
     } finally {
-      window.location.href = "/login";
+      router.push("/login");
+      router.refresh();
     }
   };
 

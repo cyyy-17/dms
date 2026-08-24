@@ -17,8 +17,6 @@ import {
   Building2,
   Users,
   Loader2,
-  FileCheck,
-  Fingerprint,
 } from "lucide-react";
 import { getRoleLabel, formatFileSize } from "@/lib/status-labels";
 
@@ -212,7 +210,8 @@ export default function DocumentUploadForm({
       });
 
       if (res.success && res.documentId) {
-        window.location.href = `/dashboard/documents/${res.documentId}`;
+        router.push(`/dashboard/documents/${res.documentId}`);
+        router.refresh();
       } else {
         setError(res.error || "Failed to create document.");
       }
@@ -388,7 +387,7 @@ export default function DocumentUploadForm({
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-xs sm:text-sm text-slate-900">{step.fullName}</span>
-                        <span className="text-[10px] font-medium px-2.5 py-0.5 rounded-full bg-blue-100/90 text-blue-900 font-bold border border-blue-200">
+                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100/90 text-blue-900 border border-blue-200">
                           {getRoleLabel(step.role)}
                         </span>
                       </div>
