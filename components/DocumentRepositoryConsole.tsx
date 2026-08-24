@@ -13,9 +13,7 @@ import {
   LayoutGrid,
   List,
   Download,
-  Filter,
   X,
-  Sparkles,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
 

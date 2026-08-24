@@ -3,7 +3,6 @@ import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import ProfileClient from "@/components/ProfileClient";
 import {
   Shield,
-  User,
   Mail,
   Building2,
   CheckCircle2,
@@ -11,8 +10,6 @@ import {
   FileText,
   Clock,
   Star,
-  Activity,
-  Layers,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
 

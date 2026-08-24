@@ -25,13 +25,17 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  const handleClose = () => {
+    setQuery("");
+    onClose();
+  };
+
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         inputRef.current?.focus();
       }, 50);
-    } else {
-      setQuery("");
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
@@ -41,10 +45,10 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
         if (isOpen) {
-          onClose();
+          handleClose();
         }
       } else if (e.key === "Escape" && isOpen) {
-        onClose();
+        handleClose();
       }
     };
 
@@ -112,7 +116,7 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
   );
 
   const handleNavigate = (href: string) => {
-    onClose();
+    handleClose();
     router.push(href);
   };
 
@@ -120,7 +124,7 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
     e.preventDefault();
     if (!query.trim()) return;
 
-    onClose();
+    handleClose();
     router.push(`/dashboard/documents?search=${encodeURIComponent(query.trim())}`);
   };
 

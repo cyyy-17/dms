@@ -16,7 +16,6 @@ import {
   GitBranch,
   FilePlus2,
   FileText,
-  Clock,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
 

@@ -7,7 +7,6 @@ import {
   PenLine,
   Menu,
   X,
-  Shield,
   Home,
   ChevronRight,
   Search,
@@ -66,9 +65,10 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
     try {
       await signOutAction();
     } catch {
-      window.location.href = "/login";
+      // Ignored
     } finally {
-      window.location.href = "/login";
+      router.push("/login");
+      router.refresh();
     }
   };
 
