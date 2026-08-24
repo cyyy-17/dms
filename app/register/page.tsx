@@ -35,22 +35,26 @@ export default async function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-flex items-center space-x-2">
-          <div className="w-12 h-12 rounded-xl bg-[#0F2962] flex items-center justify-center text-amber-400 font-bold text-xl shadow-md">
+    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden selection:bg-amber-400 selection:text-slate-950">
+      {/* Background Ambient Glows */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] bg-gradient-to-tr from-blue-900/40 via-indigo-900/30 to-amber-500/15 blur-[130px] pointer-events-none rounded-full" />
+      <div className="absolute bottom-0 right-10 w-96 h-96 bg-blue-950/40 blur-[130px] pointer-events-none rounded-full" />
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-xl text-center relative z-10">
+        <Link href="/" className="inline-flex items-center space-x-2 group">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#0F2962] to-[#1E40AF] flex items-center justify-center text-amber-400 font-black text-2xl shadow-xl shadow-blue-950/70 border border-blue-400/30 group-hover:scale-105 transition-all duration-300">
             FA
           </div>
         </Link>
-        <h1 className="mt-4 text-2xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="mt-5 text-3xl font-black text-white tracking-tight">
           Employee Self-Registration
         </h1>
-        <p className="mt-1 text-xs text-slate-500 font-medium">
+        <p className="mt-1.5 text-xs text-slate-400 font-medium">
           Student & Alumni Services • First Asia Institute of Technology and Humanities
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-lg px-4 sm:px-0">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-xl px-4 sm:px-0 relative z-10">
         <RegisterForm units={units} />
       </div>
     </div>

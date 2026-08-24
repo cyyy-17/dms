@@ -16,6 +16,9 @@ import {
   ChevronDown,
   Building2,
   Users,
+  Loader2,
+  FileCheck,
+  Fingerprint,
 } from "lucide-react";
 
 interface DocTypeOption {
@@ -71,7 +74,7 @@ export default function DocumentUploadForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Signatory Flow State (Lazily initialized with default Coordinator + Director)
+  // Signatory Flow State (Default Coordinator + Director)
   const [signatoryChain, setSignatoryChain] = useState<AssignedSignatoryStep[]>(() => {
     const defaultChain: AssignedSignatoryStep[] = [];
     if (availableUsers.length > 0) {
@@ -128,7 +131,7 @@ export default function DocumentUploadForm({
       const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
       setFileChecksum(hashHex);
     } catch {
-      setError("Failed to compute file integrity checksum.");
+      setError("Failed to compute cryptographic file checksum.");
     } finally {
       setIsHashing(false);
     }
@@ -141,7 +144,7 @@ export default function DocumentUploadForm({
     if (!userObj) return;
 
     if (signatoryChain.some((s) => s.userId === userObj.id)) {
-      setError(`${userObj.fullName} is already in the signatory chain.`);
+      setError(`${userObj.fullName} is already assigned in the sequential chain.`);
       return;
     }
 
@@ -159,7 +162,6 @@ export default function DocumentUploadForm({
     setError(null);
   };
 
-  // Move step up / down
   const handleMoveStep = (index: number, direction: "up" | "down") => {
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= signatoryChain.length) return;
@@ -169,12 +171,10 @@ export default function DocumentUploadForm({
     newChain[index] = newChain[targetIndex];
     newChain[targetIndex] = temp;
 
-    // Recalculate stepOrder
     const reordered = newChain.map((step, idx) => ({ ...step, stepOrder: idx }));
     setSignatoryChain(reordered);
   };
 
-  // Remove step
   const handleRemoveStep = (index: number) => {
     const filtered = signatoryChain.filter((_, idx) => idx !== index);
     const reordered = filtered.map((step, idx) => ({ ...step, stepOrder: idx }));
@@ -184,7 +184,7 @@ export default function DocumentUploadForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !fileChecksum) {
-      setError("Please select a document file to upload.");
+      setError("Please choose a valid document file to ingest.");
       return;
     }
 
@@ -192,7 +192,6 @@ export default function DocumentUploadForm({
     setError(null);
 
     try {
-      // Convert file to Base64
       const arrayBuffer = await file.arrayBuffer();
       const base64String = Buffer.from(arrayBuffer).toString("base64");
 
@@ -212,7 +211,7 @@ export default function DocumentUploadForm({
       });
 
       if (res.success && res.documentId) {
-        router.push(`/dashboard/documents/${res.documentId}`);
+        window.location.href = `/dashboard/documents/${res.documentId}`;
       } else {
         setError(res.error || "Failed to create document.");
       }
@@ -224,35 +223,35 @@ export default function DocumentUploadForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto">
       {/* Error Alert */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center gap-3 text-rose-800 text-xs font-semibold animate-shake">
+        <div className="p-4.5 rounded-2xl bg-rose-50/95 border border-rose-200/90 flex items-center gap-3 text-rose-900 text-xs font-bold shadow-sm animate-in fade-in slide-in-from-top-2">
           <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* 1. Metadata Box */}
-      <div className="glass-card rounded-2xl p-6 sm:p-7 border border-slate-200/90 space-y-5 bg-white shadow-xs">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <Building2 className="w-4 h-4 text-[#0F2962]" />
-            <span>1. Document Classification & Context</span>
+      <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/90 space-y-6 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
+          <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2.5">
+            <Building2 className="w-5 h-5 text-[#0F2962]" />
+            <span>1. Document Classification & Metadata</span>
           </h2>
-          <span className="text-[11px] font-mono font-semibold text-slate-400">Step 1 of 3</span>
+          <span className="text-xs font-mono font-bold text-slate-400">Step 1 of 3</span>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-5">
           {/* Classification Taxonomy */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
               Document Type *
             </label>
             <select
               value={documentTypeId}
               onChange={(e) => setDocumentTypeId(e.target.value)}
-              className="block w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition bg-white"
+              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
             >
               {docTypes.map((dt) => (
                 <option key={dt.id} value={dt.id}>
@@ -264,14 +263,14 @@ export default function DocumentUploadForm({
 
           {/* Unit Scope */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
               Originating Unit *
             </label>
             <select
               value={unitId}
               disabled={!isCrossUnit}
               onChange={(e) => setUnitId(e.target.value)}
-              className="block w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition bg-white disabled:bg-slate-100 disabled:text-slate-500"
+              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner disabled:bg-slate-100 disabled:text-slate-500"
             >
               {units.map((u) => (
                 <option key={u.id} value={u.id}>
@@ -284,65 +283,65 @@ export default function DocumentUploadForm({
 
         {/* Title */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
             Official Document Title *
           </label>
           <input
             type="text"
             required
-            placeholder="e.g. MOA Partnership Agreement - Ayala Land Inc."
+            placeholder="e.g. MOA Partnership Agreement - Industry Partner Inc."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="block w-full px-3.5 py-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition bg-white"
+            className="block w-full px-4 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Description & Objectives (Optional)
+          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+            Description & Context (Optional)
           </label>
           <textarea
             rows={2}
             placeholder="Provide context, parties involved, or key objectives for reviewer reference..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="block w-full px-3.5 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition bg-white"
+            className="block w-full px-4 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
           />
         </div>
 
         {/* Validity Dates */}
-        <div className="grid sm:grid-cols-2 gap-4 pt-1">
+        <div className="grid sm:grid-cols-2 gap-5 pt-1">
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
               Effective Date (Optional)
             </label>
-            <div className="relative rounded-lg shadow-sm">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <div className="relative rounded-xl shadow-xs">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                 <Calendar className="w-4 h-4" />
               </div>
               <input
                 type="date"
                 value={effectiveDate}
                 onChange={(e) => setEffectiveDate(e.target.value)}
-                className="block w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition bg-white"
+                className="block w-full pl-10 pr-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Expiry Date {selectedDocType?.requiresExpiryTracking && "(Recommended for Alerts)"}
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+              Expiry Date {selectedDocType?.requiresExpiryTracking && "(Required for Automated Alerts)"}
             </label>
-            <div className="relative rounded-lg shadow-sm">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+            <div className="relative rounded-xl shadow-xs">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
                 <Calendar className="w-4 h-4" />
               </div>
               <input
                 type="date"
                 value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
-                className="block w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition bg-white"
+                className="block w-full pl-10 pr-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
               />
             </div>
           </div>
@@ -350,50 +349,50 @@ export default function DocumentUploadForm({
       </div>
 
       {/* 2. Assigned Signatory Workflow Builder */}
-      <div className="glass-card rounded-2xl p-6 sm:p-7 border border-slate-200/90 space-y-5 bg-white shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-2">
+      <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/90 space-y-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200/80 pb-4 gap-2">
           <div>
-            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Users className="w-4 h-4 text-blue-600" />
-              <span>2. Assigned Signatory Workflow (Sequential E-Sign Flow)</span>
+            <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2.5">
+              <Users className="w-5 h-5 text-blue-600" />
+              <span>2. Sequential Signatory Pipeline</span>
             </h2>
-            <p className="text-[11px] text-slate-500 mt-0.5">
-              Select specific users to review and sign this document in exact turn-based order.
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Define the sequential order of reviewers required to apply electronic signatures.
             </p>
           </div>
-          <span className="text-[11px] font-mono font-semibold text-slate-400">Step 2 of 3</span>
+          <span className="text-xs font-mono font-bold text-slate-400">Step 2 of 3</span>
         </div>
 
-        {/* Visual Signatory Steps List */}
+        {/* Steps List */}
         <div className="space-y-3">
           {signatoryChain.length === 0 ? (
-            <div className="p-6 rounded-xl border border-dashed border-slate-300 text-center bg-slate-50/60">
-              <UserCheck className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-              <span className="text-xs font-bold text-slate-700 block">No Assigned Signatories Configured</span>
+            <div className="p-8 rounded-2xl border-2 border-dashed border-slate-300/90 text-center bg-slate-50/70">
+              <UserCheck className="w-9 h-9 text-slate-400 mx-auto mb-2" />
+              <span className="text-xs font-bold text-slate-700 block">No Signatories Configured</span>
               <span className="text-[11px] text-slate-500">
                 Add signatories below to define the sequential review chain.
               </span>
             </div>
           ) : (
-            <div className="space-y-2.5">
+            <div className="space-y-3">
               {signatoryChain.map((step, idx) => (
                 <div
                   key={step.userId}
-                  className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50/80 hover:bg-slate-50 transition"
+                  className="flex items-center justify-between p-4 rounded-2xl border border-slate-200/90 bg-white/80 hover:bg-blue-50/40 hover:border-blue-300 transition-all duration-200 shadow-xs"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-full bg-[#0F2962] text-amber-400 font-bold text-xs flex items-center justify-center shadow-xs shrink-0">
+                  <div className="flex items-center gap-3.5">
+                    <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center shadow-sm shrink-0">
                       {idx + 1}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs text-slate-900">{step.fullName}</span>
-                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-bold">
+                        <span className="font-bold text-xs sm:text-sm text-slate-900">{step.fullName}</span>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-extrabold">
                           {step.role}
                         </span>
                       </div>
-                      <span className="text-[11px] text-slate-500 block">
-                        Signatory Line: <strong className="text-slate-700">{step.title}</strong>
+                      <span className="text-xs text-slate-500 font-medium block mt-0.5">
+                        Signatory Line: <strong className="text-slate-800">{step.title}</strong>
                       </span>
                     </div>
                   </div>
@@ -403,7 +402,7 @@ export default function DocumentUploadForm({
                       type="button"
                       disabled={idx === 0}
                       onClick={() => handleMoveStep(idx, "up")}
-                      className="p-1.5 rounded-md hover:bg-slate-200 text-slate-600 disabled:opacity-30 transition"
+                      className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 disabled:opacity-30 transition cursor-pointer"
                       title="Move Step Up"
                     >
                       <ChevronUp className="w-4 h-4" />
@@ -412,7 +411,7 @@ export default function DocumentUploadForm({
                       type="button"
                       disabled={idx === signatoryChain.length - 1}
                       onClick={() => handleMoveStep(idx, "down")}
-                      className="p-1.5 rounded-md hover:bg-slate-200 text-slate-600 disabled:opacity-30 transition"
+                      className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 disabled:opacity-30 transition cursor-pointer"
                       title="Move Step Down"
                     >
                       <ChevronDown className="w-4 h-4" />
@@ -420,7 +419,7 @@ export default function DocumentUploadForm({
                     <button
                       type="button"
                       onClick={() => handleRemoveStep(idx)}
-                      className="p-1.5 rounded-md hover:bg-rose-100 text-rose-600 transition ml-1"
+                      className="p-2 rounded-lg hover:bg-rose-100 text-rose-600 transition ml-1 cursor-pointer"
                       title="Remove Signatory"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -432,24 +431,24 @@ export default function DocumentUploadForm({
           )}
         </div>
 
-        {/* Add User to Chain Controls */}
-        <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-100 space-y-3">
-          <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-            <Plus className="w-3.5 h-3.5 text-blue-600" />
-            <span>Add Next Assigned Signatory to Chain</span>
+        {/* Add User Controls */}
+        <div className="p-5 rounded-2xl bg-blue-50/60 border border-blue-200/80 space-y-3.5">
+          <span className="text-xs font-bold text-slate-800 flex items-center gap-2">
+            <Plus className="w-4 h-4 text-blue-700" />
+            <span>Add Signatory to Sequential Pipeline</span>
           </span>
 
-          <div className="grid sm:grid-cols-5 gap-3">
+          <div className="grid sm:grid-cols-5 gap-3.5">
             <div className="sm:col-span-3">
               <label className="block text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">
-                Select User Profile
+                Select Institutional User
               </label>
               <select
                 value={selectedUserToAdd}
                 onChange={(e) => setSelectedUserToAdd(e.target.value)}
-                className="block w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-[#0F2962]"
+                className="block w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
               >
-                <option value="">-- Choose Institutional User --</option>
+                <option value="">-- Choose Signer --</option>
                 {availableUsers.map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.fullName} ({u.role} {u.unitCode ? `• ${u.unitCode}` : ""})
@@ -460,7 +459,7 @@ export default function DocumentUploadForm({
 
             <div className="sm:col-span-2">
               <label className="block text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">
-                Signatory Line Title
+                Signatory Title
               </label>
               <div className="flex gap-2">
                 <input
@@ -468,13 +467,13 @@ export default function DocumentUploadForm({
                   placeholder="e.g. Approved by, Reviewed"
                   value={selectedTitleToAdd}
                   onChange={(e) => setSelectedTitleToAdd(e.target.value)}
-                  className="block w-full px-3 py-2 text-xs border border-slate-300 rounded-lg bg-white focus:ring-2 focus:ring-[#0F2962]"
+                  className="block w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
                 />
                 <button
                   type="button"
                   disabled={!selectedUserToAdd}
                   onClick={handleAddSignatory}
-                  className="px-3.5 py-2 rounded-lg bg-[#0F2962] text-white font-bold text-xs hover:bg-[#091a42] disabled:opacity-50 transition shrink-0"
+                  className="px-4 py-2.5 rounded-xl bg-[#0F2962] text-white font-bold text-xs hover:bg-[#091a42] disabled:opacity-50 transition-all shadow-sm shrink-0 cursor-pointer"
                 >
                   Add
                 </button>
@@ -485,16 +484,16 @@ export default function DocumentUploadForm({
       </div>
 
       {/* 3. File Upload Box */}
-      <div className="glass-card rounded-2xl p-6 sm:p-7 border border-slate-200/90 space-y-4 bg-white shadow-xs">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-            <UploadCloud className="w-4 h-4 text-emerald-600" />
-            <span>3. Document Binary & Integrity Verification (v1)</span>
+      <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/90 space-y-5 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
+          <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2.5">
+            <UploadCloud className="w-5 h-5 text-emerald-600" />
+            <span>3. Document File & Integrity Checksum (v1)</span>
           </h2>
-          <span className="text-[11px] font-mono font-semibold text-slate-400">Step 3 of 3</span>
+          <span className="text-xs font-mono font-bold text-slate-400">Step 3 of 3</span>
         </div>
 
-        <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-blue-400 transition bg-slate-50/50">
+        <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center hover:border-blue-400 transition-all bg-slate-50/70 hover:bg-blue-50/20">
           <input
             type="file"
             id="docFile"
@@ -502,28 +501,30 @@ export default function DocumentUploadForm({
             onChange={handleFileChange}
             className="hidden"
           />
-          <label htmlFor="docFile" className="cursor-pointer block space-y-2">
-            <UploadCloud className="w-10 h-10 text-slate-400 mx-auto" />
-            <div className="text-xs font-semibold text-slate-700">
+          <label htmlFor="docFile" className="cursor-pointer block space-y-3">
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 text-[#0F2962] flex items-center justify-center mx-auto shadow-sm">
+              <UploadCloud className="w-7 h-7" />
+            </div>
+            <div className="text-sm font-bold text-slate-800">
               {file ? (
-                <span className="text-[#0F2962] font-bold">{file.name}</span>
+                <span className="text-[#0F2962] font-black">{file.name} ({(file.size / (1024 * 1024)).toFixed(2)} MB)</span>
               ) : (
-                <span>Click to select document or drag file here</span>
+                <span>Click to select document or drag and drop file here</span>
               )}
             </div>
-            <p className="text-[11px] text-slate-500">
-              Supported formats: PDF, Microsoft Word (.docx), Excel (.xlsx) • Max 50 MB
+            <p className="text-xs text-slate-500 font-medium">
+              Supported formats: PDF, Word (.docx), Excel (.xlsx) • Max 50 MB
             </p>
           </label>
         </div>
 
-        {/* SHA-256 Checksum Preview */}
+        {/* Checksum Display */}
         {fileChecksum && (
-          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-2.5 text-emerald-900 text-xs">
-            <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
-            <div>
-              <span className="font-bold">RA 10173 Cryptographic Integrity Hash:</span>
-              <code className="block font-mono text-[10px] text-emerald-800 break-all mt-0.5 bg-emerald-100/60 p-1.5 rounded">
+          <div className="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200 flex items-start gap-3 text-emerald-950 text-xs shadow-xs">
+            <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <span className="font-extrabold">RA 10173 Cryptographic Integrity Checksum:</span>
+              <code className="block font-mono text-[11px] text-emerald-900 break-all mt-1 bg-emerald-100/70 p-2 rounded-xl border border-emerald-200">
                 SHA-256: {fileChecksum}
               </code>
             </div>
@@ -531,26 +532,29 @@ export default function DocumentUploadForm({
         )}
       </div>
 
-      {/* Submit Button */}
-      <div className="flex justify-end gap-3 pt-2">
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3.5 pt-2">
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-5 py-2.5 rounded-lg border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition"
+          className="px-5 py-3 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition-all shadow-xs cursor-pointer"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting || isHashing || !file}
-          className="px-6 py-2.5 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white font-semibold text-xs shadow-md hover:shadow-lg transition flex items-center gap-2 disabled:opacity-50"
+          className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white font-bold text-xs shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2.5 disabled:opacity-50 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
         >
           {isSubmitting ? (
-            <span>Ingesting Document...</span>
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+              <span>Ingesting Document...</span>
+            </>
           ) : (
             <>
-              <span>Save as Draft (v1)</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>Save & Register Document (v1)</span>
+              <ArrowRight className="w-4 h-4 text-amber-400" />
             </>
           )}
         </button>

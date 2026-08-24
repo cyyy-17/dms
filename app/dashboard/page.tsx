@@ -16,17 +16,17 @@ import {
   Sparkles,
   Search,
   BellRing,
+  Layers,
+  ArrowUpRight,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  // Auth is enforced by the dashboard layout — user is always defined here
   const user = await getAuthenticatedUser();
-  if (!user) return null; // Layout redirect handles this
+  if (!user) return null;
 
-  // Baseline stats
   let stats = {
     total: 0,
     pendingCoordinator: 0,
@@ -84,7 +84,6 @@ export default async function DashboardPage() {
         prisma.document.count({ where: { ...unitFilter, status: DocumentStatus.APPROVED } }),
         prisma.document.count({ where: { ...unitFilter, status: DocumentStatus.REJECTED_RETURNED } }),
         prisma.document.count({ where: { ...unitFilter, isEscalated: true } }),
-        // 6C: Documents directly assigned to current user's signature turn
         prisma.document.count({ where: { currentSignatoryId: user.id } }),
         prisma.document.findMany({
           where: unitFilter,
@@ -92,14 +91,12 @@ export default async function DashboardPage() {
           take: 6,
           include: { unit: true, uploader: true },
         }),
-        // 2A: Only active units with documents
         prisma.unit.findMany({
           where: { isActive: true },
           include: { _count: { select: { documents: true } } },
           orderBy: { documents: { _count: "desc" } },
           take: 7,
         }),
-        // 3B: My personal action items
         prisma.document.findMany({
           where: { currentSignatoryId: user.id },
           orderBy: { updatedAt: "desc" },
@@ -109,7 +106,6 @@ export default async function DashboardPage() {
       ]);
 
       stats = { total, pendingCoordinator, pendingDirector, approved, returned, escalated, awaitingMySignature };
-
       if (docs.length > 0) recentDocs = docs;
 
       if (allUnits.length > 0) {
@@ -136,37 +132,39 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto w-full">
-      {/* Top Welcome & Fast Actions Header */}
-      <div className="glass-card rounded-2xl p-6 sm:p-8 border border-slate-200/80 bg-linear-to-r from-white via-slate-50 to-blue-50/30 relative overflow-hidden shadow-sm">
+      {/* Top Welcome Banner with Ambient Glassmorphism */}
+      <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/90 relative overflow-hidden shadow-lg transition-all">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-blue-600/10 via-amber-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0F2962]/10 border border-[#0F2962]/20 text-[#0F2962] text-xs font-bold">
+          <div className="space-y-2.5">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0F2962]/10 border border-[#0F2962]/20 text-[#0F2962] text-xs font-black">
               <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              <span>Student & Alumni Services DMS • FAITH Colleges</span>
+              <span>Student & Alumni Services • FAITH Colleges</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Welcome back, {user.firstName}!
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-xl">
+            <p className="text-xs sm:text-sm text-slate-600 max-w-xl leading-relaxed">
               {user.role === "DIRECTOR" || user.role === "ADMIN"
-                ? "Overseeing all department streams, sequential sign-offs, and RA 10173 compliance."
-                : `Active workspace for ${user.unitName || "Unit"}. Streamlining reviews & electronic approvals.`}
+                ? "Executive oversight of all department workflows, electronic sign-offs, and compliance auditing."
+                : `Active workspace for ${user.unitName || "Unit"}. Streamlining sequential reviews and approvals.`}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Link
               href="/dashboard/documents/new"
-              className="px-4 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-bold shadow-sm hover:shadow-md transition flex items-center gap-2"
+              className="px-4.5 py-3 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
             >
               <Plus className="w-4 h-4 text-amber-400" />
-              <span>Ingest Document</span>
+              <span>New Document</span>
             </Link>
 
             {(user.role === "COORDINATOR" || user.role === "DIRECTOR" || user.role === "ADMIN") && (
               <Link
                 href="/dashboard/approvals"
-                className="px-4 py-2.5 rounded-xl bg-white border border-slate-300 hover:border-slate-400 text-slate-700 text-xs font-bold shadow-sm transition flex items-center gap-2"
+                className="px-4.5 py-3 rounded-xl bg-white/90 border border-slate-300/90 hover:border-slate-400 text-slate-800 text-xs font-bold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
               >
                 <Clock className="w-4 h-4 text-amber-600" />
                 <span>Review Queue ({stats.pendingCoordinator + stats.pendingDirector})</span>
@@ -175,80 +173,80 @@ export default async function DashboardPage() {
 
             <Link
               href="/dashboard/documents"
-              className="p-2.5 rounded-xl bg-white border border-slate-300 hover:border-slate-400 text-slate-700 text-xs font-semibold shadow-sm transition"
+              className="p-3 rounded-xl bg-white/90 border border-slate-300/90 hover:border-slate-400 text-slate-700 text-xs font-semibold shadow-xs hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
               title="Search Repository"
             >
-              <Search className="w-4 h-4 text-slate-500" />
+              <Search className="w-4 h-4 text-slate-600" />
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Escalation Alert Banner (If Any) */}
+      {/* Escalation Alert Banner */}
       {stats.escalated > 0 && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-red-50/90 border border-red-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-red-900 shadow-sm">
-          <div className="flex items-center gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0 shadow-inner">
-              <ShieldAlert className="w-5 h-5 animate-pulse" />
+        <div className="p-5 rounded-2xl bg-red-50/95 border border-red-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-red-950 shadow-md">
+          <div className="flex items-center gap-4">
+            <div className="w-11 h-11 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0 shadow-inner">
+              <ShieldAlert className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <span className="font-extrabold text-xs sm:text-sm block">
+              <span className="font-black text-sm block">
                 {stats.escalated} Document(s) Auto-Escalated to Director Oversight
               </span>
-              <span className="text-[11px] text-red-700/90 block">
-                Sequential workflow automatically flagged revisions exceeding 2 rejections for executive review.
+              <span className="text-xs text-red-800/90 block mt-0.5">
+                Sequential workflow flagged revisions exceeding 2 rejections for executive review.
               </span>
             </div>
           </div>
           <Link
             href="/dashboard/documents?escalated=true"
-            className="px-3.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 self-start sm:self-center transition shadow-sm"
+            className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center gap-1.5 self-start sm:self-center transition shadow-sm hover:shadow-md"
           >
             <span>Review Escalations</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
       )}
 
-      {/* 3B: My Action Items — Personal Signature Queue */}
+      {/* My Action Items — Personal Signature Queue */}
       {myActionItems.length > 0 && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-blue-50 border border-blue-200 shadow-sm">
+        <div className="glass-panel-gold rounded-3xl p-6 border border-amber-300/70 shadow-lg">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 shadow-inner">
-                <BellRing className="w-5 h-5" />
+              <div className="w-11 h-11 rounded-2xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                <BellRing className="w-5 h-5 animate-bounce" />
               </div>
               <div>
-                <span className="font-extrabold text-xs sm:text-sm text-blue-950 block">
+                <span className="font-black text-sm sm:text-base text-amber-950 block">
                   {myActionItems.length} Document{myActionItems.length > 1 ? "s" : ""} Awaiting Your Signature
                 </span>
-                <span className="text-[11px] text-blue-700/90 block">
-                  It is your turn to review and electronically sign the following:
+                <span className="text-xs text-amber-900/90 block mt-0.5">
+                  It is currently your turn in the sequential pipeline to review and apply your electronic signature.
                 </span>
               </div>
             </div>
             <Link
               href="/dashboard/approvals"
-              className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 self-start sm:self-center transition shadow-sm shrink-0"
+              className="px-4.5 py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white text-xs font-bold flex items-center gap-2 self-start sm:self-center transition shadow-md hover:shadow-lg shrink-0"
             >
-              <span>Open Review Queue</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Open Queue</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="mt-5 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {myActionItems.map((item) => (
               <Link
                 key={item.id}
                 href={`/dashboard/documents/${item.id}`}
-                className="flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl bg-white border border-blue-200 hover:border-blue-400 hover:shadow-xs transition group"
+                className="flex items-center justify-between gap-3 p-3.5 rounded-2xl bg-white/90 border border-amber-200/80 hover:border-amber-400 hover:shadow-md transition-all duration-200 group"
               >
                 <div className="min-w-0">
-                  <span className="text-[11px] font-mono font-bold text-blue-800 block">{item.trackingNumber}</span>
-                  <span className="text-xs font-semibold text-slate-900 block truncate">{item.title}</span>
-                  <span className="text-[10px] text-slate-500">{item.unit?.code || ""} · {item.uploader ? `${item.uploader.firstName} ${item.uploader.lastName}` : ""}</span>
+                  <span className="text-[11px] font-mono font-black text-amber-900 block">{item.trackingNumber}</span>
+                  <span className="text-xs font-bold text-slate-900 block truncate">{item.title}</span>
+                  <span className="text-[10px] text-slate-500 font-medium">{item.unit?.code || ""} · {item.uploader ? `${item.uploader.firstName} ${item.uploader.lastName}` : ""}</span>
                 </div>
-                <ArrowRight className="w-3.5 h-3.5 text-blue-500 shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                <ArrowUpRight className="w-4 h-4 text-amber-600 shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </Link>
             ))}
           </div>
@@ -256,123 +254,114 @@ export default async function DashboardPage() {
       )}
 
       {/* Modern KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <div className="glass-card rounded-2xl p-5 border border-slate-200/90 hover:shadow-md transition">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* KPI 1 */}
+        <div className="glass-panel glass-panel-interactive rounded-3xl p-5 sm:p-6 border border-white/90">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
               Total Ingested
             </span>
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#0F2962] flex items-center justify-center">
-              <FileText className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#0F2962] border border-blue-200/60 flex items-center justify-center shadow-xs">
+              <FileText className="w-4.5 h-4.5" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-extrabold text-slate-900">{stats.total}</span>
-            <span className="text-[11px] font-semibold text-emerald-600 flex items-center gap-0.5">
+            <span className="text-2xl sm:text-3xl font-black text-slate-900">{stats.total}</span>
+            <span className="text-xs font-bold text-emerald-600 flex items-center gap-0.5 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
               <TrendingUp className="w-3 h-3" />
               {approvalRate}% Done
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-slate-400 font-medium">Immutable audited records</p>
+          <p className="mt-1.5 text-[11px] text-slate-400 font-medium">Immutable records</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 border border-amber-200 bg-amber-50/30 hover:shadow-md transition">
+        {/* KPI 2 */}
+        <div className="glass-panel glass-panel-interactive rounded-3xl p-5 sm:p-6 border border-amber-200/80 bg-amber-50/40">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-amber-800">
+            <span className="text-[11px] font-black uppercase tracking-wider text-amber-900">
               Pending Coordinator
             </span>
-            <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
-              <Clock className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 border border-amber-300/60 flex items-center justify-center shadow-xs">
+              <Clock className="w-4.5 h-4.5" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-extrabold text-amber-950">{stats.pendingCoordinator}</span>
-            <span className="text-[10px] font-bold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded-full">
+            <span className="text-2xl sm:text-3xl font-black text-amber-950">{stats.pendingCoordinator}</span>
+            <span className="text-[10px] font-extrabold text-amber-800 bg-amber-200/70 px-2 py-0.5 rounded-full">
               Level-1 Review
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-amber-700/80 font-medium">Awaiting unit sign-off</p>
+          <p className="mt-1.5 text-[11px] text-amber-800/80 font-medium">Unit-level validation</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 border border-purple-200 bg-purple-50/30 hover:shadow-md transition">
+        {/* KPI 3 */}
+        <div className="glass-panel glass-panel-interactive rounded-3xl p-5 sm:p-6 border border-purple-200/80 bg-purple-50/40">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-purple-800">
+            <span className="text-[11px] font-black uppercase tracking-wider text-purple-900">
               Pending Director
             </span>
-            <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
-              <Building2 className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 border border-purple-300/60 flex items-center justify-center shadow-xs">
+              <Building2 className="w-4.5 h-4.5" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-extrabold text-purple-950">{stats.pendingDirector}</span>
-            <span className="text-[10px] font-bold text-purple-700 bg-purple-100/80 px-2 py-0.5 rounded-full">
+            <span className="text-2xl sm:text-3xl font-black text-purple-950">{stats.pendingDirector}</span>
+            <span className="text-[10px] font-extrabold text-purple-800 bg-purple-200/70 px-2 py-0.5 rounded-full">
               Level-2 Final
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-purple-700/80 font-medium">Executive approval stage</p>
+          <p className="mt-1.5 text-[11px] text-purple-800/80 font-medium">Executive approval stage</p>
         </div>
 
-        <div className="glass-card rounded-2xl p-5 border border-emerald-200 bg-emerald-50/30 hover:shadow-md transition">
+        {/* KPI 4 */}
+        <div className="glass-panel glass-panel-interactive rounded-3xl p-5 sm:p-6 border border-emerald-200/80 bg-emerald-50/40">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
+            <span className="text-[11px] font-black uppercase tracking-wider text-emerald-900">
               Approved & Stamped
             </span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-300/60 flex items-center justify-center shadow-xs">
+              <CheckCircle2 className="w-4.5 h-4.5" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl sm:text-3xl font-extrabold text-emerald-950">{stats.approved}</span>
-            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-full">
+            <span className="text-2xl sm:text-3xl font-black text-emerald-950">{stats.approved}</span>
+            <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-200/70 px-2 py-0.5 rounded-full">
               Verified
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-emerald-700/80 font-medium">With E-Signature stamp</p>
+          <p className="mt-1.5 text-[11px] text-emerald-800/80 font-medium">With E-Signature stamp</p>
         </div>
-
-        {/* 6C: Awaiting My Signature KPI */}
-        {stats.awaitingMySignature > 0 && (
-          <div className="lg:col-span-4 glass-card rounded-xl px-4 py-3 border border-blue-200 bg-blue-50/50 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <PenLine className="w-4 h-4 text-blue-600" />
-              <span className="text-xs font-bold text-blue-900">
-                {stats.awaitingMySignature} document{stats.awaitingMySignature > 1 ? "s" : ""} currently awaiting your e-signature
-              </span>
-            </div>
-            <Link href="/dashboard/approvals" className="text-[11px] font-bold text-blue-700 hover:underline flex items-center gap-1">
-              Sign Now <ArrowRight className="w-3 h-3" />
-            </Link>
-          </div>
-        )}
       </div>
 
-      {/* Secondary Row: Unit Distribution & Quick E-Sign Card */}
+      {/* Secondary Row: Department Distribution & Quick Signer Card */}
       <div className="grid lg:grid-cols-12 gap-6">
-        {/* Unit Breakdown Widget */}
-        <div className="lg:col-span-8 glass-card rounded-2xl p-6 border border-slate-200 space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+        {/* Unit Breakdown */}
+        <div className="lg:col-span-8 glass-panel rounded-3xl p-6 sm:p-7 border border-white/90 space-y-5 shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900">
+              <h2 className="text-sm font-black uppercase tracking-wider text-slate-900">
                 Department Document Distribution
-              </h3>
-              <p className="text-[11px] text-slate-500">Live volume metrics across SAS active units</p>
+              </h2>
+              <p className="text-xs text-slate-500 font-medium">Live volume metrics across SAS active units</p>
             </div>
-            <span className="text-xs font-mono font-bold text-[#0F2962]">{stats.total} Total</span>
+            <span className="text-xs font-mono font-black text-[#0F2962] bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
+              {stats.total} Total Documents
+            </span>
           </div>
 
-          <div className="space-y-3.5">
+          <div className="space-y-4">
             {unitCounts.map((unit) => {
               const pct = stats.total > 0 ? Math.round((unit.count / stats.total) * 100) : 0;
               return (
                 <div key={unit.code} className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-slate-800">{unit.name} ({unit.code})</span>
-                    <span className="font-mono text-slate-500 font-semibold">{unit.count} docs ({pct}%)</span>
+                    <span className="font-mono text-slate-500 font-bold">{unit.count} docs ({pct}%)</span>
                   </div>
-                  <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
                     <div
-                      className="h-full bg-linear-to-r from-[#0F2962] to-blue-600 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.max(pct, 5)}%` }}
+                      className="h-full bg-gradient-to-r from-[#0F2962] to-blue-600 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.max(pct, 4)}%` }}
                     />
                   </div>
                 </div>
@@ -381,32 +370,32 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Quick Electronic Signature Profile Card */}
-        <div className="lg:col-span-4 glass-card rounded-2xl p-6 border border-slate-200 flex flex-col justify-between space-y-4 bg-slate-50/50">
+        {/* Quick Electronic Signature Profile */}
+        <div className="lg:col-span-4 glass-panel rounded-3xl p-6 sm:p-7 border border-white/90 flex flex-col justify-between space-y-5 bg-slate-50/60 shadow-sm">
           <div className="space-y-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#0F2962] flex items-center justify-center">
+            <div className="w-11 h-11 rounded-2xl bg-blue-100 text-[#0F2962] flex items-center justify-center shadow-xs">
               <PenLine className="w-5 h-5" />
             </div>
-            <h3 className="text-sm font-extrabold text-slate-900">Smart E-Signature</h3>
+            <h2 className="text-base font-black text-slate-900">Smart E-Signature</h2>
             <p className="text-xs text-slate-600 leading-relaxed">
               Institutional electronic signatures are embedded via Smart Anchor detection on review approvals.
             </p>
           </div>
 
-          <div className="p-3 rounded-xl bg-white border border-slate-200 text-xs space-y-2">
+          <div className="p-4 rounded-2xl bg-white/90 border border-slate-200 text-xs space-y-2.5 shadow-inner">
             <div className="flex items-center justify-between">
-              <span className="text-slate-500">Registered Signer:</span>
+              <span className="text-slate-500 font-medium">Registered Signer:</span>
               <span className="font-bold text-slate-900">{user.fullName}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-500">Designation:</span>
+              <span className="text-slate-500 font-medium">Designation:</span>
               <span className="font-mono font-bold text-[#0F2962]">{user.role}</span>
             </div>
           </div>
 
           <Link
             href="/dashboard/approvals"
-            className="w-full py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-bold text-center shadow-sm transition"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold text-center shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-98"
           >
             Manage Review Queue
           </Link>
@@ -414,17 +403,17 @@ export default async function DashboardPage() {
       </div>
 
       {/* Recent Submissions Table */}
-      <div className="glass-card rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between bg-white">
+      <div className="glass-panel rounded-3xl border border-white/90 overflow-hidden shadow-sm">
+        <div className="px-6 py-5 border-b border-slate-200/80 flex items-center justify-between bg-white/80">
           <div>
-            <h2 className="text-sm font-bold text-slate-900">Recent Document Ingestions</h2>
-            <p className="text-xs text-slate-500">Tracking sequential state and active version pointers</p>
+            <h2 className="text-sm sm:text-base font-black text-slate-900">Recent Document Ingestions</h2>
+            <p className="text-xs text-slate-500 font-medium">Tracking sequential pipeline state and active version pointers</p>
           </div>
           <Link
             href="/dashboard/documents"
-            className="text-xs font-bold text-[#0F2962] hover:underline flex items-center gap-1"
+            className="text-xs font-bold text-[#0F2962] hover:text-blue-700 hover:underline flex items-center gap-1.5 transition"
           >
-            <span>View All Repository</span>
+            <span>View Full Repository</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -432,23 +421,23 @@ export default async function DashboardPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
-                <th className="py-3 px-6">Tracking Number</th>
-                <th className="py-3 px-6">Title & Scope</th>
-                <th className="py-3 px-6">Unit</th>
-                <th className="py-3 px-6">Uploader</th>
-                <th className="py-3 px-6">Status</th>
-                <th className="py-3 px-6 text-right">Action</th>
+              <tr className="bg-slate-50/90 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200/80">
+                <th className="py-3.5 px-6">Tracking Number</th>
+                <th className="py-3.5 px-6">Title & Scope</th>
+                <th className="py-3.5 px-6">Unit</th>
+                <th className="py-3.5 px-6">Uploader</th>
+                <th className="py-3.5 px-6">Status</th>
+                <th className="py-3.5 px-6 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 bg-white">
+            <tbody className="divide-y divide-slate-100/90 bg-white/60">
               {recentDocs.map((doc) => (
-                <tr key={doc.id} className="hover:bg-slate-50/80 transition">
-                  <td className="py-4 px-6 font-mono font-bold text-slate-800">
+                <tr key={doc.id} className="hover:bg-blue-50/50 transition-colors duration-150">
+                  <td className="py-4 px-6 font-mono font-bold text-blue-900">
                     {doc.trackingNumber}
                   </td>
                   <td className="py-4 px-6">
-                    <span className="font-semibold text-slate-900 block truncate max-w-xs">
+                    <span className="font-bold text-slate-900 block truncate max-w-xs">
                       {doc.title}
                     </span>
                     {doc.isEscalated && (
@@ -472,7 +461,7 @@ export default async function DashboardPage() {
                   <td className="py-4 px-6 text-right">
                     <Link
                       href={`/dashboard/documents/${doc.id}`}
-                      className="px-3 py-1 rounded-lg border border-slate-300 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition inline-block"
+                      className="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block"
                     >
                       Details
                     </Link>

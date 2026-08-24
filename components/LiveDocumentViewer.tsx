@@ -14,6 +14,8 @@ import {
   AlertCircle,
   FileCode,
   Sparkles,
+  Loader2,
+  ShieldCheck,
 } from "lucide-react";
 
 interface LiveDocumentViewerProps {
@@ -120,37 +122,37 @@ export default function LiveDocumentViewer({
 
   if (!storagePath) {
     return (
-      <div className="glass-card rounded-2xl p-6 border border-slate-200 text-center space-y-2">
-        <FileCode className="w-8 h-8 mx-auto text-slate-400" />
-        <p className="text-xs font-bold text-slate-700">No binary file attached to this version.</p>
+      <div className="glass-panel rounded-3xl p-8 border border-white/90 text-center space-y-3 shadow-xs">
+        <FileCode className="w-9 h-9 mx-auto text-slate-400" />
+        <p className="text-xs font-bold text-slate-700">No binary file attached to this version record.</p>
       </div>
     );
   }
 
   return (
     <div
-      className={`glass-card rounded-2xl border border-slate-200 overflow-hidden shadow-sm transition-all duration-200 ${
+      className={`glass-panel rounded-3xl border border-white/90 overflow-hidden shadow-lg transition-all duration-300 ${
         isFullscreen
-          ? "fixed inset-0 z-50 rounded-none bg-slate-900/95 flex flex-col p-4 backdrop-blur-md"
+          ? "fixed inset-0 z-50 rounded-none bg-slate-950/95 flex flex-col p-6 backdrop-blur-2xl"
           : "space-y-0"
       }`}
     >
-      {/* Viewer Action Bar */}
-      <div className="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#0F2962] text-amber-400 flex items-center justify-center font-bold shrink-0">
-            <FileText className="w-4 h-4" />
+      {/* Viewer Top Action Bar */}
+      <div className="p-4 sm:p-5 bg-white/80 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 flex items-center justify-center font-bold shadow-md shrink-0 border border-blue-400/30">
+            <FileText className="w-5 h-5" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-xs text-slate-900 truncate block">
+              <span className="font-extrabold text-xs sm:text-sm text-slate-900 truncate block">
                 {fileName}
               </span>
-              <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-bold">
+              <span className="px-2 py-0.5 rounded-md bg-blue-100/90 text-blue-800 text-[10px] font-black border border-blue-200">
                 v{versionNumber}
               </span>
             </div>
-            <span className="text-[11px] text-slate-400 block font-mono">
+            <span className="text-[11px] text-slate-500 block font-mono font-medium mt-0.5">
               {trackingNumber} • {(fileSize / 1024).toFixed(1)} KB
             </span>
           </div>
@@ -160,7 +162,7 @@ export default function LiveDocumentViewer({
         <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
             onClick={() => setIsPreviewOpen(!isPreviewOpen)}
-            className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5"
+            className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer hover:-translate-y-0.5"
             title={isPreviewOpen ? "Collapse Live Preview" : "Expand Live Preview"}
           >
             {isPreviewOpen ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-blue-600" />}
@@ -170,28 +172,28 @@ export default function LiveDocumentViewer({
           {signedUrl && (
             <button
               onClick={() => window.open(signedUrl, "_blank")}
-              className="p-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-600 transition"
+              className="p-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 transition-all shadow-xs cursor-pointer hover:-translate-y-0.5"
               title="Open in new browser tab"
             >
-              <ExternalLink className="w-3.5 h-3.5" />
+              <ExternalLink className="w-4 h-4" />
             </button>
           )}
 
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-600 transition"
+            className="p-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 transition-all shadow-xs cursor-pointer hover:-translate-y-0.5"
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Live View"}
           >
-            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
 
           <button
             onClick={handleDownload}
             disabled={downloadLoading}
-            className="px-3.5 py-1.5 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5 text-amber-400" />
-            <span>{downloadLoading ? "Signing..." : "Download (Optional)"}</span>
+            <span>{downloadLoading ? "Signing..." : "Download"}</span>
           </button>
         </div>
       </div>
@@ -199,32 +201,32 @@ export default function LiveDocumentViewer({
       {/* Live Preview Display Body */}
       {isPreviewOpen && (
         <div
-          className={`relative bg-slate-900/90 overflow-hidden flex items-center justify-center transition-all ${
-            isFullscreen ? "flex-1 w-full rounded-xl mt-3" : "h-120 lg:h-145"
+          className={`relative bg-slate-950 overflow-hidden flex items-center justify-center transition-all ${
+            isFullscreen ? "flex-1 w-full rounded-2xl mt-4 border border-slate-800" : "h-130 lg:h-160"
           }`}
         >
           {isLoading && (
-            <div className="flex flex-col items-center justify-center space-y-3 text-slate-300">
-              <RefreshCw className="w-7 h-7 animate-spin text-amber-400" />
+            <div className="flex flex-col items-center justify-center space-y-3.5 text-slate-300">
+              <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
               <div className="text-center">
-                <span className="text-xs font-bold block">Generating Secure Stream...</span>
-                <span className="text-[10px] text-slate-400 block font-mono">
-                  Decrypting from Supabase private storage
+                <span className="text-xs font-bold block text-white">Generating Secure Stream...</span>
+                <span className="text-[10px] text-slate-400 block font-mono mt-0.5">
+                  Decrypting from Supabase private vault
                 </span>
               </div>
             </div>
           )}
 
           {error && !isLoading && (
-            <div className="p-6 text-center space-y-3 max-w-md">
-              <AlertCircle className="w-8 h-8 text-red-400 mx-auto" />
+            <div className="p-8 text-center space-y-3.5 max-w-md bg-slate-900/80 rounded-2xl border border-slate-800">
+              <AlertCircle className="w-9 h-9 text-rose-400 mx-auto" />
               <div>
-                <p className="text-xs font-bold text-white">Live Stream Unavailable</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">{error}</p>
+                <p className="text-sm font-bold text-white">Live Stream Unavailable</p>
+                <p className="text-xs text-slate-400 mt-1">{error}</p>
               </div>
               <button
                 onClick={handleReload}
-                className="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold inline-flex items-center gap-1.5"
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold inline-flex items-center gap-2 shadow-md transition cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span>Retry Stream</span>
@@ -243,25 +245,25 @@ export default function LiveDocumentViewer({
               )}
 
               {isImage && (
-                <div className="w-full h-full p-4 flex items-center justify-center overflow-auto">
+                <div className="w-full h-full p-6 flex items-center justify-center overflow-auto">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={signedUrl}
                     alt={documentTitle}
-                    className="max-h-full max-w-full object-contain rounded-lg shadow-2xl border border-slate-700 bg-white"
+                    className="max-h-full max-w-full object-contain rounded-2xl shadow-2xl border border-slate-800 bg-white"
                   />
                 </div>
               )}
 
               {isOfficeDoc && (
-                <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-white space-y-4">
-                  <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400">
-                    <FileText className="w-7 h-7" />
+                <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center text-white space-y-5">
+                  <div className="w-16 h-16 rounded-3xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shadow-lg">
+                    <FileText className="w-8 h-8" />
                   </div>
-                  <div className="max-w-sm space-y-1">
-                    <h4 className="text-sm font-bold text-white">{fileName}</h4>
-                    <p className="text-xs text-slate-400">
-                      Office Document stream verified under RA 10173 integrity token.
+                  <div className="max-w-sm space-y-1.5">
+                    <h4 className="text-base font-bold text-white">{fileName}</h4>
+                    <p className="text-xs text-slate-400 leading-relaxed">
+                      Office Document stream verified with cryptographic checksum.
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
@@ -271,16 +273,16 @@ export default function LiveDocumentViewer({
                       )}&embedded=true`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow transition flex items-center gap-1.5"
+                      className="px-4.5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs font-bold shadow-md transition flex items-center gap-2"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Open in Web Document Viewer</span>
+                      <Sparkles className="w-4 h-4 text-amber-400" />
+                      <span>Open in Web Viewer</span>
                     </a>
                     <button
                       onClick={handleDownload}
-                      className="px-4 py-2 rounded-lg border border-slate-600 hover:bg-slate-800 text-slate-200 text-xs font-bold transition flex items-center gap-1.5"
+                      className="px-4 py-2.5 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-200 text-xs font-bold transition flex items-center gap-2 cursor-pointer"
                     >
-                      <Download className="w-3.5 h-3.5" />
+                      <Download className="w-4 h-4" />
                       <span>Download File</span>
                     </button>
                   </div>

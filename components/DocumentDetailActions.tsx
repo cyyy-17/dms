@@ -28,6 +28,9 @@ import {
   CheckCircle2,
   Clock,
   ShieldCheck,
+  Loader2,
+  FileText,
+  Sparkles,
 } from "lucide-react";
 import { DocumentStatus, UserRole } from "@prisma/client";
 
@@ -137,7 +140,7 @@ export default function DocumentDetailActions({
         setError(res.error || "Failed to submit document.");
       } else {
         setSuccessMessage("Document submitted for sequential review.");
-        router.refresh();
+        window.location.reload();
       }
     } catch {
       setError("Network error submitting document.");
@@ -161,7 +164,7 @@ export default function DocumentDetailActions({
         setError(res.error || "Approval failed.");
       } else {
         setSuccessMessage("Electronic signature stamped & approval recorded!");
-        router.refresh();
+        window.location.reload();
       }
     } catch {
       setError("Network error approving document.");
@@ -189,7 +192,7 @@ export default function DocumentDetailActions({
         setError(res.error || "Failed to return document.");
       } else {
         setSuccessMessage("Document returned to uploader for revision.");
-        router.refresh();
+        window.location.reload();
       }
     } catch {
       setError("Network error returning document.");
@@ -221,7 +224,7 @@ export default function DocumentDetailActions({
         setError(res.error || "Failed to close document.");
       } else {
         setSuccessMessage("Document closed and rejected.");
-        router.refresh();
+        window.location.reload();
       }
     } catch {
       setError("Network error closing document.");
@@ -275,7 +278,7 @@ export default function DocumentDetailActions({
       } else {
         setSuccessMessage("New immutable version uploaded successfully!");
         setShowVersionModal(false);
-        router.refresh();
+        window.location.reload();
       }
     } catch {
       setError("Network error uploading new version.");
@@ -287,37 +290,37 @@ export default function DocumentDetailActions({
   return (
     <div className="space-y-6">
       {error && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3 text-red-800 text-xs font-medium animate-shake">
-          <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+        <div className="p-4.5 rounded-2xl bg-red-50/95 border border-red-200/90 flex items-start gap-3 text-red-900 text-xs font-bold shadow-xs animate-shake">
+          <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
           <span>{error}</span>
         </div>
       )}
 
       {successMessage && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-start gap-3 text-emerald-800 text-xs font-medium">
-          <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+        <div className="p-4.5 rounded-2xl bg-emerald-50/95 border border-emerald-200/90 flex items-start gap-3 text-emerald-900 text-xs font-bold shadow-xs">
+          <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
           <span>{successMessage}</span>
         </div>
       )}
 
-      {/* Sequential Signatory Workflow Progress Track */}
+      {/* Sequential Signatory Workflow Stepper */}
       {flow.length > 0 && (
-        <div className="glass-card rounded-2xl p-6 border border-slate-200 bg-white space-y-4 shadow-xs">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-            <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-              <Users className="w-4 h-4 text-blue-600" />
-              <span>Assigned Signatory Routing Flow</span>
+        <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-white/90 space-y-5 shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
+            <h2 className="text-sm font-black text-slate-900 flex items-center gap-2.5">
+              <Users className="w-4.5 h-4.5 text-blue-600" />
+              <span>Assigned Signatory Routing Pipeline</span>
             </h2>
-            <span className="text-[11px] font-mono font-semibold text-slate-500">
+            <span className="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
               {document.status === DocumentStatus.APPROVED
-                ? "Fully Signed & Sealed"
+                ? "Fully Signed & Stamped"
                 : `Step ${(document.currentSignatoryIndex || 0) + 1} of ${flow.length}`}
             </span>
           </div>
 
-          {/* 3E: Horizontal Stepper with Connector Lines */}
-          <div className="overflow-x-auto pb-2">
-            <div className="flex items-start min-w-max gap-0">
+          {/* Stepper with Connector Lines */}
+          <div className="overflow-x-auto pb-3">
+            <div className="flex items-start min-w-max gap-1">
               {flow.map((step, idx) => {
                 const isCurrent =
                   isPendingApproval &&
@@ -331,57 +334,57 @@ export default function DocumentDetailActions({
                   <div key={step.userId} className="flex items-start">
                     {/* Step Card */}
                     <div
-                      className={`flex flex-col items-center w-36 px-2 pt-2 pb-3 rounded-xl border transition-all ${
+                      className={`flex flex-col items-center w-40 px-3 pt-3 pb-4 rounded-2xl border transition-all duration-300 ${
                         isDone
-                          ? "bg-emerald-50/70 border-emerald-200"
+                          ? "bg-emerald-50/80 border-emerald-300 shadow-xs"
                           : isCurrent
-                          ? "bg-blue-50 border-blue-300 ring-2 ring-blue-500/20 shadow-xs"
-                          : "bg-slate-50 border-slate-200 opacity-60"
+                          ? "bg-blue-50/90 border-blue-400 ring-4 ring-blue-500/20 shadow-md scale-102"
+                          : "bg-slate-50/70 border-slate-200 opacity-60"
                       }`}
                     >
-                      {/* Status Icon */}
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 ${
-                        isDone ? "bg-emerald-100" : isCurrent ? "bg-blue-100 animate-pulse" : "bg-slate-200"
+                      {/* Icon */}
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-2.5 shadow-xs ${
+                        isDone ? "bg-emerald-100 text-emerald-700" : isCurrent ? "bg-blue-600 text-white animate-pulse" : "bg-slate-200 text-slate-500"
                       }`}>
                         {isDone ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                          <CheckCircle2 className="w-5 h-5" />
                         ) : isCurrent ? (
-                          <PenLine className="w-4 h-4 text-blue-600" />
+                          <PenLine className="w-4.5 h-4.5" />
                         ) : (
-                          <Clock className="w-4 h-4 text-slate-400" />
+                          <Clock className="w-4.5 h-4.5" />
                         )}
                       </div>
 
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-0.5">
                         Step {idx + 1}
                       </span>
-                      <span className="font-bold text-[11px] text-slate-900 text-center leading-tight">
+                      <span className="font-extrabold text-xs text-slate-900 text-center leading-tight">
                         {step.fullName}
                       </span>
-                      <span className="text-[10px] text-slate-500 font-medium text-center leading-tight mt-0.5">
+                      <span className="text-[11px] text-slate-500 font-medium text-center leading-tight mt-1">
                         {step.title || step.role}
                       </span>
 
                       {isDone ? (
-                        <span className="mt-1.5 text-[9px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                          Signed
+                        <span className="mt-2 text-[10px] font-bold text-emerald-800 bg-emerald-100/80 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                          Signed & Stamped
                         </span>
                       ) : isCurrent ? (
-                        <span className="mt-1.5 text-[9px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
-                          Active Turn
+                        <span className="mt-2 text-[10px] font-bold text-blue-800 bg-blue-100/90 px-2.5 py-0.5 rounded-full border border-blue-300 animate-pulse">
+                          Active Review Turn
                         </span>
                       ) : (
-                        <span className="mt-1.5 text-[9px] font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                        <span className="mt-2 text-[10px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
                           Waiting
                         </span>
                       )}
                     </div>
 
-                    {/* Connector Line */}
+                    {/* Connector */}
                     {idx < flow.length - 1 && (
-                      <div className="flex items-center mt-4 mx-1">
-                        <div className={`h-0.5 w-6 rounded-full ${isDone ? "bg-emerald-300" : "bg-slate-200"}`} />
-                        <div className={`w-2 h-2 rotate-45 border-t-2 border-r-2 -ml-1 ${isDone ? "border-emerald-400" : "border-slate-300"}`} />
+                      <div className="flex items-center mt-6 mx-1">
+                        <div className={`h-1 w-6 rounded-full ${isDone ? "bg-emerald-400" : "bg-slate-200"}`} />
+                        <div className={`w-2.5 h-2.5 rotate-45 border-t-2 border-r-2 -ml-1.5 ${isDone ? "border-emerald-500" : "border-slate-300"}`} />
                       </div>
                     )}
                   </div>
@@ -392,13 +395,13 @@ export default function DocumentDetailActions({
         </div>
       )}
 
-      {/* Download Action */}
-      <div className="glass-card rounded-2xl p-6 border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white shadow-xs">
+      {/* Download Action Bar */}
+      <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-white/90 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
         <div>
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
+          <span className="text-xs font-black uppercase tracking-wider text-slate-500 block">
             Active Binary File (v{document.currentVersion?.versionNumber || 1})
           </span>
-          <span className="font-semibold text-slate-900 text-sm block mt-0.5">
+          <span className="font-extrabold text-slate-900 text-sm block mt-1">
             {document.currentVersion?.fileName || "document.pdf"}
           </span>
         </div>
@@ -406,44 +409,44 @@ export default function DocumentDetailActions({
         <button
           onClick={handleDownload}
           disabled={downloadLoading}
-          className="w-full sm:w-auto px-5 py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition flex items-center justify-center gap-2"
+          className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
         >
           <Download className="w-4 h-4 text-amber-400" />
-          <span>{downloadLoading ? "Generating Signed URL..." : "Download File (15m)"}</span>
+          <span>{downloadLoading ? "Generating Signed URL..." : "Download File"}</span>
         </button>
       </div>
 
-      {/* State-Dependent Action Panel */}
-      <div className="glass-card rounded-2xl p-6 border border-slate-200 space-y-4 bg-white shadow-xs">
-        <h2 className="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3 flex items-center gap-2">
-          <Lock className="w-4 h-4 text-blue-700" />
+      {/* Workflow Action Panel */}
+      <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/90 space-y-5 shadow-sm">
+        <h2 className="text-sm sm:text-base font-black text-slate-900 border-b border-slate-200/80 pb-4 flex items-center gap-2.5">
+          <Lock className="w-5 h-5 text-blue-700" />
           <span>Workflow & Electronic Signature Actions</span>
         </h2>
 
-        {/* 1. Uploader Submission & Versioning Controls */}
+        {/* 1. Uploader Submission & Versioning */}
         {(document.status === DocumentStatus.DRAFT ||
           document.status === DocumentStatus.REJECTED_RETURNED) &&
           isUploader && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 {document.status === DocumentStatus.REJECTED_RETURNED
-                  ? "This document was returned for revision. Upload a new version (v2+) addressing the reviewer comments before resubmitting."
-                  : "This document is currently in Draft state. Submit for review when ready."}
+                  ? "This document was returned for rework. Upload a revised version (v2+) addressing reviewer feedback before resubmitting."
+                  : "This document is in Draft status. Submit when ready to begin the sequential approval pipeline."}
               </p>
 
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-3.5">
                 <button
                   onClick={handleSubmitForReview}
                   disabled={isLoading}
-                  className="px-5 py-2.5 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-semibold shadow-md transition flex items-center gap-2"
+                  className="px-5 py-3 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
                 >
                   <Send className="w-4 h-4 text-amber-400" />
-                  <span>Submit for Assigned Sequential Review</span>
+                  <span>Submit for Sequential Review</span>
                 </button>
 
                 <button
                   onClick={() => setShowVersionModal(true)}
-                  className="px-5 py-2.5 rounded-lg bg-white border border-slate-300 hover:border-slate-400 text-slate-700 text-xs font-semibold shadow-sm transition flex items-center gap-2"
+                  className="px-5 py-3 rounded-xl bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-bold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
                 >
                   <Upload className="w-4 h-4 text-blue-600" />
                   <span>
@@ -456,43 +459,43 @@ export default function DocumentDetailActions({
 
         {/* 2. Active Assigned Signatory Approval Box */}
         {canApprove && (
-          <div className="space-y-4">
-            <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200">
-              <span className="text-xs font-bold text-blue-950 block">
+          <div className="space-y-5">
+            <div className="p-4 rounded-2xl bg-blue-50/90 border border-blue-200/80">
+              <span className="text-xs font-black text-blue-950 block">
                 It is your turn to review and sign this document
               </span>
-              <span className="text-[11px] text-blue-800 block mt-0.5">
-                Your electronic signature will be automatically scanned and stamped above your printed name.
+              <span className="text-xs text-blue-800 block mt-1">
+                Your registered institutional electronic signature will be stamped on approval.
               </span>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Reviewer Endorsement & Comments (Optional for Approval, Mandatory for Return)
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+                Reviewer Endorsement & Comments (Mandatory for returns)
               </label>
               <textarea
                 rows={3}
-                placeholder="Enter endorsement remarks, required revisions, or feedback..."
+                placeholder="Enter remarks, endorsements, or line-item revision feedback..."
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
-                className="block w-full px-3.5 py-2.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962] bg-white"
+                className="block w-full px-4 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
               />
             </div>
 
             {/* E-Signature Status Banner */}
-            <div className="p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50 border-slate-200">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-full bg-blue-100 text-[#0F2962] flex items-center justify-center shrink-0">
-                  <PenLine className="w-3.5 h-3.5" />
+            <div className="p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/80 border-slate-200">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-100 text-[#0F2962] flex items-center justify-center shrink-0 shadow-xs">
+                  <PenLine className="w-4.5 h-4.5" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-slate-900 block">
                     {hasSignature ? "Electronic Signature Registered" : "No Signature on File"}
                   </span>
-                  <span className="text-[11px] text-slate-500 block">
+                  <span className="text-[11px] text-slate-500 block font-medium">
                     {hasSignature
-                      ? "Your signature is ready to stamp above your name in the document."
-                      : "Draw or upload your signature before finalizing approval."}
+                      ? "Ready to apply cryptographic stamp on approval."
+                      : "Draw or upload your signature before finalizing review."}
                   </span>
                 </div>
               </div>
@@ -500,32 +503,30 @@ export default function DocumentDetailActions({
               <button
                 type="button"
                 onClick={() => setIsSignaturePadOpen(true)}
-                className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-[#0F2962] font-bold text-xs shadow-sm transition flex items-center gap-1.5 shrink-0 self-start sm:self-auto"
+                className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-[#0F2962] font-bold text-xs shadow-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer"
               >
                 <PenLine className="w-3.5 h-3.5" />
-                <span>{hasSignature ? "Edit / Re-draw Signature" : "Draw / Upload Signature"}</span>
+                <span>{hasSignature ? "Edit Signature" : "Draw Signature"}</span>
               </button>
             </div>
 
             <div className="space-y-2">
-              <label className="flex items-center gap-2 text-xs text-slate-700 font-medium cursor-pointer">
+              <label className="flex items-center gap-2.5 text-xs text-slate-700 font-bold cursor-pointer">
                 <input
                   type="checkbox"
                   checked={signatureApplied}
                   onChange={(e) => setSignatureApplied(e.target.checked)}
-                  className="rounded border-slate-300 text-[#0F2962] focus:ring-[#0F2962]"
+                  className="w-4 h-4 rounded border-slate-300 text-[#0F2962] focus:ring-[#0F2962]"
                 />
-                <span className="font-semibold">
-                  Stamp Electronic Signature on Document & Sign Audit Trail
-                </span>
+                <span>Stamp Electronic Signature on Document & Sign Audit Trail</span>
               </label>
             </div>
 
-            <div className="flex flex-wrap gap-3 pt-2">
+            <div className="flex flex-wrap gap-3.5 pt-2">
               <button
                 onClick={handleApprove}
                 disabled={isLoading}
-                className="px-5 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md transition flex items-center gap-1.5"
+                className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
               >
                 <CheckCircle className="w-4 h-4" />
                 <span>Approve & Stamp E-Signature</span>
@@ -534,50 +535,50 @@ export default function DocumentDetailActions({
               <button
                 onClick={handleRejectReturn}
                 disabled={isLoading}
-                className="px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-md transition flex items-center gap-1.5"
+                className="px-5 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>Return for Revision (Comments Required)</span>
+                <span>Return for Revision</span>
               </button>
 
               <button
                 onClick={handleRejectClose}
                 disabled={isLoading}
-                className="px-5 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-red-700 border border-red-200 text-xs font-semibold transition flex items-center gap-1.5"
+                className="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-red-700 border border-red-200 text-xs font-bold transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 <XCircle className="w-4 h-4" />
-                <span>Cancel / Reject Document</span>
+                <span>Cancel / Reject</span>
               </button>
             </div>
           </div>
         )}
 
-        {/* 3. Awaiting Other Signatory Notice */}
+        {/* 3. Awaiting Other Signatory */}
         {isPendingApproval && !canApprove && (
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-center gap-3 text-slate-700 text-xs">
-            <Clock className="w-4 h-4 text-blue-600 shrink-0" />
+          <div className="p-4.5 rounded-2xl bg-slate-50/90 border border-slate-200 flex items-center gap-3.5 text-slate-700 text-xs">
+            <Clock className="w-5 h-5 text-blue-600 shrink-0" />
             <div>
-              <span className="font-bold block">
-                Awaiting signature from:{" "}
+              <span className="font-bold text-slate-900 block">
+                Awaiting review from:{" "}
                 {document.currentSignatory
                   ? `${document.currentSignatory.firstName} ${document.currentSignatory.lastName} (${document.currentSignatory.role})`
                   : "Next Assigned Signatory"}
               </span>
-              <span className="text-[11px] text-slate-500 block">
-                The document will automatically advance to the next step once approved.
+              <span className="text-slate-500 block mt-0.5">
+                The document will automatically advance to the subsequent signatory once approved.
               </span>
             </div>
           </div>
         )}
 
-        {/* 4. Fully Approved Banner */}
+        {/* 4. Fully Approved */}
         {document.status === DocumentStatus.APPROVED && (
-          <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-3 text-emerald-900 text-xs">
-            <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+          <div className="p-4.5 rounded-2xl bg-emerald-50/90 border border-emerald-200 flex items-center gap-3.5 text-emerald-950 text-xs shadow-xs">
+            <ShieldCheck className="w-6 h-6 text-emerald-600 shrink-0" />
             <div>
-              <span className="font-bold block">This document is fully approved and sealed.</span>
-              <span className="text-[11px] text-emerald-700 block">
-                All electronic signatures have been embedded and the cryptographic hash is locked.
+              <span className="font-black text-sm block">This document is fully approved and cryptographically sealed.</span>
+              <span className="text-emerald-800 block mt-0.5">
+                All sequential electronic signatures have been embedded and the SHA-256 digest is locked.
               </span>
             </div>
           </div>
@@ -596,24 +597,24 @@ export default function DocumentDetailActions({
 
       {/* New Version Upload Modal */}
       {showVersionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="glass-card rounded-2xl p-6 max-w-lg w-full bg-white shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <Upload className="w-4 h-4 text-blue-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md">
+          <div className="glass-panel rounded-3xl p-7 max-w-lg w-full bg-white shadow-2xl space-y-5 border border-white/90 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
+              <h3 className="font-black text-slate-900 text-base flex items-center gap-2.5">
+                <Upload className="w-5 h-5 text-blue-600" />
                 <span>Upload Revised Version (v{(document.currentVersion?.versionNumber || 1) + 1})</span>
               </h3>
               <button
                 onClick={() => setShowVersionModal(false)}
-                className="text-slate-400 hover:text-slate-600 text-sm font-bold"
+                className="text-slate-400 hover:text-slate-700 text-sm font-bold p-1 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleUploadNewVersion} className="space-y-4">
+            <form onSubmit={handleUploadNewVersion} className="space-y-4.5">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
                   Change Summary / Revisions Made *
                 </label>
                 <textarea
@@ -622,12 +623,12 @@ export default function DocumentDetailActions({
                   placeholder="Summarize the adjustments made in this revision..."
                   value={changeSummary}
                   onChange={(e) => setChangeSummary(e.target.value)}
-                  className="block w-full px-3 py-2 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962]"
+                  className="block w-full px-4 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
                   New Document File (PDF / Word / Excel) *
                 </label>
                 <input
@@ -635,29 +636,29 @@ export default function DocumentDetailActions({
                   required
                   accept=".pdf,.docx,.xlsx"
                   onChange={handleNewVersionFileChange}
-                  className="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-[#0F2962] hover:file:bg-blue-100"
+                  className="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-[#0F2962] hover:file:bg-blue-100 cursor-pointer"
                 />
               </div>
 
               {newVersionChecksum && (
-                <div className="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px]">
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs">
                   <span className="font-bold block">New Version SHA-256:</span>
                   <code className="font-mono text-[10px] break-all">{newVersionChecksum}</code>
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex justify-end gap-3 pt-3">
                 <button
                   type="button"
                   onClick={() => setShowVersionModal(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50"
+                  className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading || !newVersionFile}
-                  className="px-4 py-2 rounded-lg bg-[#0F2962] text-white font-semibold text-xs hover:bg-[#091a42] disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
                 >
                   {isLoading ? "Uploading..." : "Save New Version"}
                 </button>
@@ -667,44 +668,43 @@ export default function DocumentDetailActions({
         </div>
       )}
 
-      {/* 1B: Proper Destructive Action Confirmation Modal */}
+      {/* Confirmation Modal */}
       {showCloseConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
-          <div className="glass-card rounded-2xl p-6 max-w-md w-full bg-white shadow-2xl space-y-5 border border-red-200 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-red-100 text-red-700 flex items-center justify-center shrink-0">
-                <XCircle className="w-5 h-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md">
+          <div className="glass-panel rounded-3xl p-7 max-w-md w-full bg-white shadow-2xl space-y-5 border border-red-200 animate-in fade-in zoom-in-95">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center shrink-0 shadow-sm">
+                <XCircle className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 text-sm">Terminally Close & Reject Document</h3>
-                <p className="text-xs text-slate-600 mt-1">
-                  This action is <strong>irreversible</strong>. The document will be permanently closed and locked.
-                  The uploader will be notified with your stated reason.
+                <h3 className="font-black text-slate-900 text-base">Terminally Close & Reject</h3>
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                  This action is <strong>irreversible</strong>. The document will be permanently rejected.
                 </p>
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-red-50 border border-red-200">
+            <div className="p-4 rounded-2xl bg-red-50 border border-red-200">
               <span className="text-[11px] font-bold text-red-800 block uppercase tracking-wider mb-1">
-                Your Reason for Closure
+                Stated Reason
               </span>
-              <p className="text-xs text-red-900 italic">&ldquo;{comments}&rdquo;</p>
+              <p className="text-xs text-red-900 italic font-medium">&ldquo;{comments}&rdquo;</p>
             </div>
 
-            <div className="flex justify-end gap-3 pt-1">
+            <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setShowCloseConfirm(false)}
-                className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-semibold text-xs hover:bg-slate-50 transition"
+                className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer"
               >
-                Cancel — Keep Document
+                Cancel
               </button>
               <button
                 onClick={handleConfirmedClose}
                 disabled={isLoading}
-                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 disabled:opacity-50"
+                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
               >
                 <XCircle className="w-3.5 h-3.5" />
-                Confirm: Close & Reject
+                <span>Confirm Closure</span>
               </button>
             </div>
           </div>

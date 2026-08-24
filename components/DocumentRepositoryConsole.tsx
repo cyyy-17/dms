@@ -12,6 +12,10 @@ import {
   LayoutGrid,
   List,
   Download,
+  Filter,
+  ArrowUpRight,
+  Shield,
+  Layers,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
 
@@ -131,23 +135,23 @@ export default function DocumentRepositoryConsole({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Document Repository
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-[#0F2962] text-xs font-bold font-mono">
+            <span className="px-3 py-0.5 rounded-full bg-blue-100/80 border border-blue-200 text-[#0F2962] text-xs font-black font-mono shadow-xs">
               {filteredDocuments.length} Records
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Complete institutional archive with Smart Anchor e-signature tracking and audit history.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
+            Institutional document archive with cryptographic integrity and audit history.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-3 shrink-0">
           <button
             onClick={handleExportCsv}
-            className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition flex items-center gap-1.5"
+            className="px-4 py-2.5 rounded-xl border border-slate-300/90 bg-white/90 hover:bg-slate-50 text-slate-700 text-xs font-bold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
             title="Export filtered records to CSV"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
@@ -156,38 +160,38 @@ export default function DocumentRepositoryConsole({
 
           <Link
             href="/dashboard/documents/new"
-            className="px-4 py-2 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5"
+            className="px-4.5 py-2.5 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
           >
             <Plus className="w-4 h-4 text-amber-400" />
-            <span>Ingest Document</span>
+            <span>New Submission</span>
           </Link>
         </div>
       </div>
 
-      {/* Control Toolbar */}
-      <div className="glass-card rounded-2xl p-4 border border-slate-200 space-y-3 bg-white shadow-sm">
+      {/* Control Filter Bar */}
+      <div className="glass-panel rounded-3xl p-4.5 border border-white/90 shadow-sm space-y-3.5">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
           {/* Search Input */}
           <div className="lg:col-span-4 relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search tracking #, title, or uploader..."
+              placeholder="Search tracking #, title, or staff..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-300 text-xs focus:outline-none focus:ring-2 focus:ring-[#0F2962]"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/90 border border-slate-300/90 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
             />
           </div>
 
-          {/* Unit Filter (If Director or Admin) */}
+          {/* Unit Filter */}
           {isDirectorOrAdmin && (
             <div className="lg:col-span-2">
               <select
                 value={selectedUnit}
                 onChange={(e) => setSelectedUnit(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#0F2962]"
+                className="w-full px-3 py-2.5 rounded-xl bg-white/90 border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
               >
-                <option value="ALL">All Department Units</option>
+                <option value="ALL">All Units</option>
                 {units.map((u) => (
                   <option key={u.id} value={u.code}>
                     {u.code} - {u.name}
@@ -202,9 +206,9 @@ export default function DocumentRepositoryConsole({
             <select
               value={selectedDocType}
               onChange={(e) => setSelectedDocType(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#0F2962]"
+              className="w-full px-3 py-2.5 rounded-xl bg-white/90 border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
             >
-              <option value="ALL">All Document Types</option>
+              <option value="ALL">All Types</option>
               {documentTypes.map((dt) => (
                 <option key={dt.id} value={dt.name}>
                   {dt.name}
@@ -218,7 +222,7 @@ export default function DocumentRepositoryConsole({
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#0F2962]"
+              className="w-full px-3 py-2.5 rounded-xl bg-white/90 border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
             >
               <option value="ALL">All Statuses</option>
               <option value="PENDING_COORDINATOR">Pending Coordinator</option>
@@ -229,14 +233,14 @@ export default function DocumentRepositoryConsole({
             </select>
           </div>
 
-          {/* View Toggle */}
-          <div className="lg:col-span-2 flex items-center justify-end gap-1">
+          {/* View Toggle & Escalated Filter */}
+          <div className="lg:col-span-2 flex items-center justify-end gap-2">
             <button
               onClick={() => setOnlyEscalated(!onlyEscalated)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 ${
+              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
                 onlyEscalated
-                  ? "bg-red-600 text-white"
-                  : "border border-slate-300 text-slate-600 hover:bg-slate-50"
+                  ? "bg-red-600 text-white shadow-red-500/30"
+                  : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
               }`}
             >
               <AlertTriangle className="w-3.5 h-3.5" />
@@ -246,8 +250,8 @@ export default function DocumentRepositoryConsole({
             <div className="border-l border-slate-200 pl-2 flex items-center gap-1">
               <button
                 onClick={() => setViewMode("table")}
-                className={`p-1.5 rounded-lg transition ${
-                  viewMode === "table" ? "bg-[#0F2962] text-white" : "text-slate-500 hover:bg-slate-100"
+                className={`p-2 rounded-xl transition-all cursor-pointer ${
+                  viewMode === "table" ? "bg-[#0F2962] text-white shadow-xs" : "text-slate-500 hover:bg-slate-100"
                 }`}
                 title="Table View"
               >
@@ -255,10 +259,10 @@ export default function DocumentRepositoryConsole({
               </button>
               <button
                 onClick={() => setViewMode("grid")}
-                className={`p-1.5 rounded-lg transition ${
-                  viewMode === "grid" ? "bg-[#0F2962] text-white" : "text-slate-500 hover:bg-slate-100"
+                className={`p-2 rounded-xl transition-all cursor-pointer ${
+                  viewMode === "grid" ? "bg-[#0F2962] text-white shadow-xs" : "text-slate-500 hover:bg-slate-100"
                 }`}
-                title="Grid Cards View"
+                title="Grid View"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
@@ -269,22 +273,24 @@ export default function DocumentRepositoryConsole({
 
       {/* Main Content Area */}
       {filteredDocuments.length === 0 ? (
-        <div className="glass-card rounded-2xl p-12 border border-slate-200 text-center space-y-3 bg-white">
-          <FileText className="w-12 h-12 text-slate-300 mx-auto" />
-          <h3 className="text-sm font-bold text-slate-800">No documents found</h3>
-          <p className="text-xs text-slate-500 max-w-sm mx-auto">
-            Try adjusting your search query, status, or unit filters to view relevant records.
+        <div className="glass-panel rounded-3xl p-14 border border-white/90 text-center space-y-3 shadow-sm">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto shadow-inner">
+            <FileText className="w-7 h-7" />
+          </div>
+          <h3 className="text-base font-black text-slate-800">No matching documents found</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto font-medium">
+            Try adjusting your search criteria, classification type, or status filters.
           </p>
         </div>
       ) : viewMode === "table" ? (
         /* TABLE VIEW */
-        <div className="glass-card rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
+        <div className="glass-panel rounded-3xl border border-white/90 overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
+                <tr className="bg-slate-50/90 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200/80">
                   <th className="py-3.5 px-6">Tracking Number</th>
-                  <th className="py-3.5 px-6">Title & Specifications</th>
+                  <th className="py-3.5 px-6">Title & Type</th>
                   <th className="py-3.5 px-6">Unit</th>
                   <th className="py-3.5 px-6">Uploader</th>
                   <th className="py-3.5 px-6">Status</th>
@@ -292,22 +298,22 @@ export default function DocumentRepositoryConsole({
                   <th className="py-3.5 px-6 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100/90 bg-white/60">
                 {filteredDocuments.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-slate-50/80 transition">
-                    <td className="py-4 px-6 font-mono font-bold text-slate-900">
+                  <tr key={doc.id} className="hover:bg-blue-50/40 transition-colors duration-150">
+                    <td className="py-4 px-6 font-mono font-black text-blue-900">
                       {doc.trackingNumber}
                       {doc.currentVersion && (
-                        <span className="ml-2 px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold">
+                        <span className="ml-2 px-1.5 py-0.5 rounded-md bg-blue-100/80 text-blue-800 text-[10px] font-bold">
                           v{doc.currentVersion.versionNumber}
                         </span>
                       )}
                     </td>
                     <td className="py-4 px-6">
-                      <span className="font-semibold text-slate-900 block truncate max-w-xs">
+                      <span className="font-bold text-slate-900 block truncate max-w-xs">
                         {doc.title}
                       </span>
-                      <span className="text-[11px] text-slate-400 block">
+                      <span className="text-[11px] text-slate-500 font-medium block">
                         {doc.documentType?.name || "General"}
                       </span>
                       {doc.isEscalated && (
@@ -318,11 +324,11 @@ export default function DocumentRepositoryConsole({
                       )}
                     </td>
                     <td className="py-4 px-6 font-medium text-slate-600">
-                      <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-bold font-mono">
+                      <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-800 text-[11px] font-black font-mono">
                         {doc.unit?.code || "GEN"}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-slate-600">
+                    <td className="py-4 px-6 text-slate-600 font-medium">
                       {doc.uploader ? `${doc.uploader.firstName} ${doc.uploader.lastName}` : "Staff Member"}
                     </td>
                     <td className="py-4 px-6">
@@ -336,7 +342,7 @@ export default function DocumentRepositoryConsole({
                     <td className="py-4 px-6 text-right">
                       <Link
                         href={`/dashboard/documents/${doc.id}`}
-                        className="px-3 py-1 rounded-lg border border-slate-300 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition inline-block"
+                        className="px-3.5 py-1.5 rounded-xl border border-slate-300/90 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block hover:-translate-y-0.5 active:scale-98"
                       >
                         Open Details
                       </Link>
@@ -349,50 +355,39 @@ export default function DocumentRepositoryConsole({
         </div>
       ) : (
         /* GRID CARDS VIEW */
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDocuments.map((doc) => (
             <div
               key={doc.id}
-              className="glass-card rounded-2xl p-5 border border-slate-200 hover:shadow-md transition flex flex-col justify-between space-y-4 bg-white"
+              className="glass-panel glass-panel-interactive rounded-3xl p-6 border border-white/90 flex flex-col justify-between space-y-4 shadow-sm"
             >
-              <div className="space-y-3">
+              <div className="space-y-3.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-bold text-[#0F2962] bg-blue-50 px-2 py-0.5 rounded">
+                  <span className="font-mono text-xs font-black text-[#0F2962] bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-200/60">
                     {doc.trackingNumber}
                   </span>
-                  <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                      doc.status === DocumentStatus.APPROVED
-                        ? "badge-approved"
-                        : doc.status === DocumentStatus.REJECTED_RETURNED
-                        ? "badge-returned"
-                        : doc.status === DocumentStatus.PENDING_COORDINATOR ||
-                          doc.status === DocumentStatus.PENDING_DIRECTOR
-                        ? "badge-pending"
-                        : "badge-draft"
-                    }`}
-                  >
-                    {doc.status.replace("_", " ")}
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
+                    {getStatusLabel(doc.status)}
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 line-clamp-2">{doc.title}</h3>
-                  <p className="text-xs text-slate-500 mt-1">{doc.documentType?.name || "General"}</p>
+                  <h3 className="text-sm font-bold text-slate-900 line-clamp-2 leading-snug">{doc.title}</h3>
+                  <p className="text-xs text-slate-500 font-medium mt-1">{doc.documentType?.name || "General"}</p>
                 </div>
 
                 {doc.isEscalated && (
-                  <div className="p-2 rounded-lg bg-red-50 border border-red-200 text-red-700 text-[11px] font-bold flex items-center gap-1.5">
+                  <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-[11px] font-bold flex items-center gap-1.5">
                     <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                    <span>Auto-Escalated to Director Oversight</span>
+                    <span>Auto-Escalated (Rejections: {doc.rejectionCount})</span>
                   </div>
                 )}
               </div>
 
-              <div className="pt-3 border-t border-slate-100 text-xs space-y-3">
+              <div className="pt-3.5 border-t border-slate-100 text-xs space-y-3.5">
                 <div className="flex items-center justify-between text-slate-500 text-[11px]">
-                  <span>Unit: <strong className="text-slate-800 font-mono">{doc.unit?.code}</strong></span>
-                  <span className="flex items-center gap-1">
+                  <span>Unit: <strong className="text-slate-800 font-mono font-bold">{doc.unit?.code}</strong></span>
+                  <span className="flex items-center gap-1 font-mono">
                     <Calendar className="w-3 h-3 text-slate-400" />
                     {new Date(doc.createdAt).toLocaleDateString()}
                   </span>
@@ -400,7 +395,7 @@ export default function DocumentRepositoryConsole({
 
                 <Link
                   href={`/dashboard/documents/${doc.id}`}
-                  className="w-full py-2 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-bold text-center block shadow-sm transition"
+                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold text-center block shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-98"
                 >
                   Live View & Review
                 </Link>

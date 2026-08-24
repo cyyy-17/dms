@@ -3,11 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { loginEmployee } from "@/actions/auth";
-import { Lock, Mail, ArrowRight, AlertCircle } from "lucide-react";
+import { Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -19,7 +20,7 @@ export default function LoginForm() {
     const normalizedEmail = email.trim().toLowerCase();
 
     if (!normalizedEmail.endsWith("@firstasia.edu.ph")) {
-      setError("Access is restricted to official @firstasia.edu.ph institutional accounts.");
+      setError("Access is restricted strictly to official @firstasia.edu.ph institutional accounts.");
       setIsLoading(false);
       return;
     }
@@ -48,32 +49,32 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="glass-card rounded-2xl py-8 px-6 sm:px-10 shadow-xl border border-slate-200">
+    <div className="glass-panel rounded-3xl py-9 px-7 sm:px-11 shadow-2xl border border-white/80 backdrop-blur-2xl transition-all duration-300">
       {error && (
-        <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-start gap-3 text-red-800 text-xs font-medium">
+        <div className="mb-6 p-4 rounded-2xl bg-red-50/90 border border-red-200/90 flex items-start gap-3 text-red-900 text-xs font-semibold shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
           <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-          <span>{error}</span>
+          <span className="leading-relaxed">{error}</span>
         </div>
       )}
 
-      <div className="mb-6 p-3 rounded-lg bg-blue-50/70 border border-blue-200/80 flex items-start gap-2.5 text-blue-900 text-xs">
-        <Lock className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" />
-        <div>
-          <span className="font-semibold">Institutional Access Only:</span> Log in using your registered{" "}
-          <code className="font-mono text-blue-800 bg-blue-100/80 px-1 py-0.5 rounded font-bold">
+      <div className="mb-6 p-3.5 rounded-2xl bg-blue-50/80 border border-blue-200/80 flex items-start gap-3 text-blue-950 text-xs shadow-xs">
+        <ShieldCheck className="w-4 h-4 text-blue-700 shrink-0 mt-0.5" />
+        <div className="leading-relaxed">
+          <span className="font-bold text-blue-900">Institutional Access Only:</span> Log in with your registered{" "}
+          <code className="font-mono text-blue-950 bg-blue-200/60 px-1.5 py-0.5 rounded-md font-bold text-[11px]">
             @firstasia.edu.ph
           </code>{" "}
-          account credentials.
+          credentials.
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
             Institutional Email
           </label>
-          <div className="relative rounded-lg shadow-sm">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+          <div className="relative rounded-xl shadow-xs">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
               <Mail className="w-4 h-4" />
             </div>
             <input
@@ -82,54 +83,65 @@ export default function LoginForm() {
               placeholder="username@firstasia.edu.ph"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="block w-full pl-9 pr-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition bg-white"
+              className="block w-full pl-10 pr-3.5 py-3 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
             />
           </div>
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">
               Password
             </label>
           </div>
-          <div className="relative rounded-lg shadow-sm">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+          <div className="relative rounded-xl shadow-xs">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
               <Lock className="w-4 h-4" />
             </div>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
               placeholder="••••••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block w-full pl-9 pr-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition bg-white"
+              className="block w-full pl-10 pr-11 py-3 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
         </div>
 
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-2.5 px-4 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white font-semibold text-sm shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white font-bold text-sm shadow-lg shadow-blue-950/20 hover:shadow-xl hover:shadow-blue-950/30 transition-all duration-200 flex items-center justify-center gap-2.5 disabled:opacity-60 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
         >
           {isLoading ? (
-            <span>Verifying credentials...</span>
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+              <span>Verifying credentials...</span>
+            </>
           ) : (
             <>
-              <span>Sign In</span>
-              <ArrowRight className="w-4 h-4" />
+              <span>Sign In to Portal</span>
+              <ArrowRight className="w-4 h-4 text-amber-400" />
             </>
           )}
         </button>
       </form>
 
-      <div className="mt-6 pt-6 border-t border-slate-200 text-center">
-        <p className="text-xs text-slate-600">
-          Need access or not yet registered?{" "}
+      <div className="mt-7 pt-6 border-t border-slate-200/80 text-center">
+        <p className="text-xs text-slate-600 font-medium">
+          Not yet registered in the system?{" "}
           <Link
             href="/register"
-            className="font-semibold text-[#0F2962] hover:underline"
+            className="font-bold text-[#0F2962] hover:text-[#1E40AF] hover:underline transition ml-1"
           >
             Register for Staff Approval
           </Link>
