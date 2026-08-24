@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Search,
@@ -25,10 +25,10 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setQuery("");
     onClose();
-  };
+  }, [onClose]);
 
   useEffect(() => {
     if (isOpen) {
@@ -54,7 +54,7 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen, handleClose]);
 
   if (!isOpen) return null;
 
