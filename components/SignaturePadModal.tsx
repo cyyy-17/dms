@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from "react";
 import { saveUserSignatureAction } from "@/actions/auth";
-import { PenLine, Upload, Eraser, CheckCircle2, AlertCircle, X, Loader2, Sparkles } from "lucide-react";
+import { PenLine, Upload, Eraser, CheckCircle2, AlertCircle, X, Loader2 } from "lucide-react";
 
 interface SignaturePadModalProps {
   isOpen: boolean;

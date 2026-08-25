@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { signOutAction } from "@/actions/auth";
-import { Clock, AlertTriangle, LogOut, CheckCircle } from "lucide-react";
+import { Clock, LogOut, CheckCircle } from "lucide-react";
 
 // Inactivity configuration: 13 minutes warning, 15 minutes auto-logout
 const INACTIVITY_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
@@ -14,7 +14,7 @@ export default function SessionTimeoutManager() {
   const [showWarning, setShowWarning] = useState(false);
   const [secondsRemaining, setSecondsRemaining] = useState(120);
 
-  const lastActivityRef = useRef<number>(Date.now());
+  const lastActivityRef = useRef<number>(0);
   const warningTimerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -46,6 +46,10 @@ export default function SessionTimeoutManager() {
   }, [showWarning]);
 
   useEffect(() => {
+    if (!lastActivityRef.current) {
+      lastActivityRef.current = Date.now();
+    }
+
     const checkActivity = () => {
       const now = Date.now();
       const elapsed = now - lastActivityRef.current;

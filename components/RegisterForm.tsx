@@ -16,7 +16,6 @@ import {
   Eye,
   EyeOff,
   Loader2,
-  ShieldCheck,
 } from "lucide-react";
 
 interface UnitOption {

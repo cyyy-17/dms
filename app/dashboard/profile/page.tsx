@@ -5,10 +5,6 @@ import {
   Shield,
   Mail,
   Building2,
-  CheckCircle2,
-  PenLine,
-  FileText,
-  Clock,
   Star,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
@@ -42,25 +38,12 @@ export default async function ProfilePage() {
     totalReturned: 0,
   };
 
-  let recentActions: Array<{
-    id: string;
-    action: string;
-    createdAt: Date;
-    document: { trackingNumber: string; title: string } | null;
-  }> = [];
-
   if (isDatabaseConfigured) {
     try {
-      const [uploaded, pendingSign, returned, actions] = await Promise.all([
+      const [uploaded, pendingSign, returned] = await Promise.all([
         prisma.document.count({ where: { uploaderId: user.id } }),
         prisma.document.count({ where: { currentSignatoryId: user.id } }),
         prisma.document.count({ where: { uploaderId: user.id, status: DocumentStatus.REJECTED_RETURNED } }),
-        prisma.approvalAction.findMany({
-          where: { actorId: user.id },
-          orderBy: { createdAt: "desc" },
-          take: 5,
-          include: { document: { select: { trackingNumber: true, title: true } } },
-        }),
       ]);
 
       const approved = await prisma.document.count({
@@ -68,12 +51,6 @@ export default async function ProfilePage() {
       });
 
       myStats = { totalUploaded: uploaded, totalApproved: approved, totalPendingMySign: pendingSign, totalReturned: returned };
-      recentActions = actions.map((a) => ({
-        id: a.id,
-        action: a.action,
-        createdAt: a.createdAt,
-        document: a.document,
-      }));
     } catch {
       // keep defaults
     }
@@ -91,15 +68,6 @@ export default async function ProfilePage() {
     DIRECTOR: "Executive Director",
     COORDINATOR: "Unit Coordinator",
     STAFF: "Department Staff",
-  };
-
-  const actionLabels: Record<string, string> = {
-    SUBMIT: "Submitted for Review",
-    COORDINATOR_APPROVE: "Approved (Coordinator)",
-    DIRECTOR_APPROVE: "Approved (Director)",
-    REJECT_RETURN: "Returned for Revision",
-    REJECT_CLOSE: "Closed / Rejected",
-    ESCALATE: "Escalated to Director",
   };
 
   return (
