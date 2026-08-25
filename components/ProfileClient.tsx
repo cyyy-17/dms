@@ -14,7 +14,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  ShieldCheck,
   Eye,
   EyeOff,
   LogOut,
@@ -139,7 +138,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         <button
           type="button"
           onClick={() => setActiveTab("details")}
-          className={`flex-1 min-w-[130px] py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 min-w-32.5 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === "details"
               ? "bg-white text-[#0F2962] shadow-sm font-extrabold"
               : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
@@ -152,7 +151,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         <button
           type="button"
           onClick={() => setActiveTab("security")}
-          className={`flex-1 min-w-[130px] py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 min-w-32.5 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === "security"
               ? "bg-white text-[#0F2962] shadow-sm font-extrabold"
               : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
@@ -165,7 +164,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         <button
           type="button"
           onClick={() => setActiveTab("signature")}
-          className={`flex-1 min-w-[130px] py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 min-w-32.5 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === "signature"
               ? "bg-white text-[#0F2962] shadow-sm font-extrabold"
               : "text-slate-600 hover:text-slate-900 hover:bg-white/50"

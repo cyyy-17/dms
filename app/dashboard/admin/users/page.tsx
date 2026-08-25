@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
 import { SEED_UNITS } from "@/lib/constants";
@@ -41,6 +42,10 @@ export default async function AdminUsersPage() {
     unitName: null,
     signaturePath: null,
   };
+
+  if (currentUser.role !== UserRole.ADMIN) {
+    redirect("/dashboard");
+  }
 
   let users: UserWithRelations[] = [];
   let units: UnitItem[] = [];
