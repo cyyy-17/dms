@@ -280,7 +280,11 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
                         }`}
                       >
                         <ShieldCheck className="w-3 h-3" />
-                        <span>{dt.defaultApprovalLevel.replace("_", " ")}</span>
+                        <span>
+                          {dt.defaultApprovalLevel === ApprovalLevel.DIRECTOR_REQUIRED
+                            ? "Coordinator + Director"
+                            : "Coordinator Only"}
+                        </span>
                       </span>
                     </td>
                     <td className="py-4 px-6 font-semibold text-slate-800">

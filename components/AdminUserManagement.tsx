@@ -24,6 +24,7 @@ import {
   Building,
 } from "lucide-react";
 import { UserRole, UserStatus } from "@prisma/client";
+import { getRoleLabel } from "@/lib/status-labels";
 
 interface UserItem {
   id: string;
@@ -309,10 +310,10 @@ export default function AdminUserManagement({
             className="text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
           >
             <option value="ALL">All Roles</option>
-            <option value="STAFF">STAFF</option>
-            <option value="COORDINATOR">COORDINATOR</option>
-            <option value="DIRECTOR">DIRECTOR</option>
-            <option value="ADMIN">ADMIN</option>
+            <option value="STAFF">Department Staff</option>
+            <option value="COORDINATOR">Unit Coordinator</option>
+            <option value="DIRECTOR">Executive Director</option>
+            <option value="ADMIN">System Administrator</option>
           </select>
 
           <select
@@ -320,11 +321,11 @@ export default function AdminUserManagement({
             onChange={(e) => setStatusFilter(e.target.value)}
             className="text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
           >
-            <option value="ALL">All Statuses</option>
-            <option value="ACTIVE">ACTIVE</option>
-            <option value="PENDING_APPROVAL">PENDING APPROVAL</option>
-            <option value="SUSPENDED">SUSPENDED</option>
-            <option value="REJECTED">REJECTED</option>
+            <option value="ALL">All Account Statuses</option>
+            <option value="ACTIVE">Verified Active</option>
+            <option value="PENDING_APPROVAL">Pending Approval</option>
+            <option value="SUSPENDED">Suspended</option>
+            <option value="REJECTED">Rejected</option>
           </select>
 
           <select
@@ -335,7 +336,7 @@ export default function AdminUserManagement({
             <option value="ALL">All Units</option>
             {units.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.name}
+                {u.name} ({u.code})
               </option>
             ))}
           </select>
@@ -343,7 +344,7 @@ export default function AdminUserManagement({
 
         <button
           onClick={() => setIsCreateModalOpen(true)}
-          className="px-4 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5 shrink-0 self-start md:self-auto"
+          className="px-4 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5 shrink-0 self-start md:self-auto cursor-pointer"
         >
           <UserPlus className="w-4 h-4 text-amber-400" />
           <span>Provision Employee</span>
@@ -358,7 +359,7 @@ export default function AdminUserManagement({
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
                 <th className="py-3.5 px-6">Employee</th>
                 <th className="py-3.5 px-6">Employee ID</th>
-                <th className="py-3.5 px-6">Role</th>
+                <th className="py-3.5 px-6">Role & Designation</th>
                 <th className="py-3.5 px-6">Assigned Unit</th>
                 <th className="py-3.5 px-6">Status</th>
                 <th className="py-3.5 px-6 text-right">Actions & Controls</th>
@@ -384,12 +385,12 @@ export default function AdminUserManagement({
                       {u.employeeId || <span className="text-slate-300 italic">Unassigned</span>}
                     </td>
                     <td className="py-4 px-6">
-                      <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 font-bold text-[10px] border border-blue-200 uppercase">
-                        {u.role}
+                      <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-900 font-bold text-[10px] border border-blue-200">
+                        {getRoleLabel(u.role)}
                       </span>
                     </td>
                     <td className="py-4 px-6 font-medium text-slate-700">
-                      {u.unit?.name || <span className="text-slate-400 italic">All Department Units</span>}
+                      {u.unit ? `${u.unit.name} (${u.unit.code})` : <span className="text-slate-400 italic">All Department Units</span>}
                     </td>
                     <td className="py-4 px-6">
                       <span
@@ -403,7 +404,13 @@ export default function AdminUserManagement({
                             : "bg-red-100 text-red-800 border border-red-200"
                         }`}
                       >
-                        {u.status}
+                        {u.status === UserStatus.ACTIVE
+                          ? "Verified Active"
+                          : u.status === UserStatus.PENDING_APPROVAL
+                          ? "Pending Approval"
+                          : u.status === UserStatus.SUSPENDED
+                          ? "Account Suspended"
+                          : "Rejected"}
                       </span>
                     </td>
                     <td className="py-4 px-6 text-right space-x-2">
@@ -557,10 +564,10 @@ export default function AdminUserManagement({
                     onChange={(e) => setCreateForm({ ...createForm, role: e.target.value as UserRole })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
                   >
-                    <option value="STAFF">STAFF</option>
-                    <option value="COORDINATOR">COORDINATOR</option>
-                    <option value="DIRECTOR">DIRECTOR</option>
-                    <option value="ADMIN">ADMIN</option>
+                    <option value="STAFF">Department Staff</option>
+                    <option value="COORDINATOR">Unit Coordinator</option>
+                    <option value="DIRECTOR">Executive Director</option>
+                    <option value="ADMIN">System Administrator</option>
                   </select>
                 </div>
               </div>
@@ -672,10 +679,10 @@ export default function AdminUserManagement({
                   onChange={(e) => setEditForm({ ...editForm, role: e.target.value as UserRole })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
                 >
-                  <option value="STAFF">STAFF</option>
-                  <option value="COORDINATOR">COORDINATOR</option>
-                  <option value="DIRECTOR">DIRECTOR</option>
-                  <option value="ADMIN">ADMIN</option>
+                  <option value="STAFF">Department Staff</option>
+                  <option value="COORDINATOR">Unit Coordinator</option>
+                  <option value="DIRECTOR">Executive Director</option>
+                  <option value="ADMIN">System Administrator</option>
                 </select>
               </div>
 
@@ -702,10 +709,10 @@ export default function AdminUserManagement({
                   onChange={(e) => setEditForm({ ...editForm, status: e.target.value as UserStatus })}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
                 >
-                  <option value="ACTIVE">ACTIVE</option>
-                  <option value="SUSPENDED">SUSPENDED</option>
-                  <option value="PENDING_APPROVAL">PENDING APPROVAL</option>
-                  <option value="REJECTED">REJECTED</option>
+                  <option value="ACTIVE">Verified Active</option>
+                  <option value="SUSPENDED">Account Suspended</option>
+                  <option value="PENDING_APPROVAL">Pending Review</option>
+                  <option value="REJECTED">Rejected</option>
                 </select>
               </div>
 

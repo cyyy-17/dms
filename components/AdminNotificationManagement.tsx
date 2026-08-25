@@ -14,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { NotificationStatus, NotificationType } from "@prisma/client";
+import { formatHumanDateTime } from "@/lib/status-labels";
 
 interface NotificationItem {
   id: string;
@@ -225,7 +226,7 @@ export default function AdminNotificationManagement({
                     </td>
                     <td className="py-4 px-6">
                       <span className="font-bold text-slate-800 block truncate max-w-sm">{n.subject}</span>
-                      <span className="font-mono text-[10px] text-slate-400 block mt-0.5">{n.type}</span>
+                      <span className="font-mono text-[10px] text-slate-400 block mt-0.5">{n.type.replace(/_/g, " ")}</span>
                     </td>
                     <td className="py-4 px-6">
                       <span
@@ -240,17 +241,23 @@ export default function AdminNotificationManagement({
                         {n.status === NotificationStatus.SENT && <CheckCircle className="w-3 h-3" />}
                         {n.status === NotificationStatus.PENDING && <Clock className="w-3 h-3" />}
                         {n.status === NotificationStatus.FAILED && <AlertCircle className="w-3 h-3" />}
-                        <span>{n.status}</span>
+                        <span>
+                          {n.status === NotificationStatus.SENT
+                            ? "Dispatched"
+                            : n.status === NotificationStatus.PENDING
+                            ? "In Queue"
+                            : "Delivery Failed"}
+                        </span>
                       </span>
                     </td>
                     <td className="py-4 px-6 font-mono text-slate-700">
                       {n.attempts} / {n.maxAttempts}
                     </td>
-                    <td className="py-4 px-6 text-slate-600 text-[11px]">
+                    <td className="py-4 px-6 text-slate-600 text-[11px] font-mono">
                       {n.sentAt ? (
-                        <span>Sent: {new Date(n.sentAt).toLocaleString()}</span>
+                        <span>Sent: {formatHumanDateTime(n.sentAt)}</span>
                       ) : (
-                        <span>Sched: {new Date(n.scheduledFor).toLocaleString()}</span>
+                        <span>Sched: {formatHumanDateTime(n.scheduledFor)}</span>
                       )}
                     </td>
                     <td className="py-4 px-6 text-right">
