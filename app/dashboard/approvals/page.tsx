@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/auth/session";
-import { getStatusLabel, getStatusBadgeClass } from "@/lib/status-labels";
+import { getStatusLabel, getStatusBadgeClass, formatHumanDate } from "@/lib/status-labels";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
 import {
   CheckSquare,
@@ -221,7 +221,7 @@ export default async function ApprovalQueuePage() {
                   </span>
                   <span className="flex items-center gap-1.5 font-mono text-[11px]">
                     <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{new Date(doc.createdAt).toLocaleDateString()}</span>
+                    <span>{formatHumanDate(doc.createdAt)}</span>
                   </span>
                 </div>
               </div>

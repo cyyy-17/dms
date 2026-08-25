@@ -140,7 +140,7 @@ export default function DocumentDetailActions({
         setError(res.error || "Failed to submit document.");
       } else {
         setSuccessMessage("Document submitted for sequential review.");
-        window.location.reload();
+        router.refresh();
       }
     } catch {
       setError("Network error submitting document.");
@@ -164,7 +164,7 @@ export default function DocumentDetailActions({
         setError(res.error || "Approval failed.");
       } else {
         setSuccessMessage("Electronic signature stamped & approval recorded!");
-        window.location.reload();
+        router.refresh();
       }
     } catch {
       setError("Network error approving document.");
@@ -192,7 +192,7 @@ export default function DocumentDetailActions({
         setError(res.error || "Failed to return document.");
       } else {
         setSuccessMessage("Document returned to uploader for revision.");
-        window.location.reload();
+        router.refresh();
       }
     } catch {
       setError("Network error returning document.");
@@ -224,7 +224,7 @@ export default function DocumentDetailActions({
         setError(res.error || "Failed to close document.");
       } else {
         setSuccessMessage("Document closed and rejected.");
-        window.location.reload();
+        router.refresh();
       }
     } catch {
       setError("Network error closing document.");
@@ -278,7 +278,7 @@ export default function DocumentDetailActions({
       } else {
         setSuccessMessage("New immutable version uploaded successfully!");
         setShowVersionModal(false);
-        window.location.reload();
+        router.refresh();
       }
     } catch {
       setError("Network error uploading new version.");

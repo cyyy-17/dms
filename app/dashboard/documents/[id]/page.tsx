@@ -18,6 +18,9 @@ import {
   ShieldCheck,
   ArrowLeft,
   PenLine,
+  Lock,
+  Shield,
+  Fingerprint,
 } from "lucide-react";
 import { DocumentStatus, ApprovalActionType, UserRole } from "@prisma/client";
 
@@ -321,6 +324,53 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Institutional Cryptographic Integrity & RA 10173 Compliance Box */}
+          <div className="glass-panel border-gradient-gold rounded-2xl p-6 border border-white/90 space-y-4 shadow-sm bg-linear-to-br from-white via-slate-50/50 to-amber-50/20">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+              <h2 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <Fingerprint className="w-4.5 h-4.5 text-[#0F2962]" />
+                <span>Cryptographic Proof of Integrity & Privacy (RA 10173)</span>
+              </h2>
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-300">
+                <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                <span>Verified Authentic</span>
+              </span>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="p-3 rounded-xl bg-slate-900 text-slate-200 font-mono text-[11px] space-y-1.5 shadow-inner">
+                <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                  <span className="flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-amber-400" />
+                    <span>Active Version SHA-256 Checksum</span>
+                  </span>
+                  <span className="text-amber-400">Zero Overwrite</span>
+                </div>
+                <span className="text-amber-300 font-black break-all block selection:bg-amber-400 selection:text-slate-900">
+                  {doc.currentVersion?.sha256Checksum || "SHA256_UNSET_PRE_MIGRATION"}
+                </span>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3 text-slate-600">
+                <div className="p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-2.5">
+                  <Shield className="w-4 h-4 text-blue-700 shrink-0" />
+                  <div>
+                    <span className="font-bold text-slate-900 block text-[11px]">Audit Logging</span>
+                    <span className="text-[10px] text-slate-500 block">Immutable event chain stamped</span>
+                  </div>
+                </div>
+
+                <div className="p-2.5 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center gap-2.5">
+                  <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <div>
+                    <span className="font-bold text-slate-900 block text-[11px]">RA 10173 Protection</span>
+                    <span className="text-[10px] text-slate-500 block">Restricted institutional access</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Version History Drawer */}

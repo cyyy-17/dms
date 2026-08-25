@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { getStatusLabel, getStatusBadgeClass } from "@/lib/status-labels";
+import { getStatusLabel, getStatusBadgeClass, formatHumanDate } from "@/lib/status-labels";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
 import {
   FileText,
@@ -378,7 +378,7 @@ export default function DocumentRepositoryConsole({
                       </span>
                     </td>
                     <td className="py-4 px-6 text-slate-500 font-mono text-[11px]">
-                      {new Date(doc.createdAt).toLocaleDateString()}
+                      {formatHumanDate(doc.createdAt)}
                     </td>
                     <td className="py-4 px-6 text-right">
                       <Link
@@ -396,11 +396,13 @@ export default function DocumentRepositoryConsole({
         </div>
       ) : (
         /* GRID CARDS VIEW */
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredDocuments.map((doc) => (
             <div
               key={doc.id}
-              className="glass-panel glass-panel-interactive rounded-3xl p-6 border border-white/90 flex flex-col justify-between space-y-4 shadow-sm"
+              className={`glass-panel glass-panel-interactive rounded-3xl p-6 border transition flex flex-col justify-between space-y-4 bg-white/85 ${
+                doc.isEscalated ? "border-red-300 bg-red-50/20" : "border-white/90"
+              }`}
             >
               <div className="space-y-3.5">
                 <div className="flex items-center justify-between">
@@ -428,7 +430,7 @@ export default function DocumentRepositoryConsole({
                   <span>Unit: <strong className="text-slate-800 font-mono font-bold">{doc.unit?.code}</strong></span>
                   <span className="flex items-center gap-1 font-mono">
                     <Calendar className="w-3 h-3 text-slate-400" />
-                    {new Date(doc.createdAt).toLocaleDateString()}
+                    {formatHumanDate(doc.createdAt)}
                   </span>
                 </div>
 

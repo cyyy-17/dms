@@ -10,6 +10,7 @@ import {
   User,
   Users,
   Shield,
+  Building2,
   ArrowRight,
   X,
 } from "lucide-react";
@@ -89,6 +90,16 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
     },
   ];
 
+  const unitShortcuts = [
+    { code: "CAREER", name: "Career Services & Placement" },
+    { code: "ALUMNI", name: "Alumni Relations & Affairs" },
+    { code: "ACTIVITIES", name: "Student Organizations & Activities" },
+    { code: "DISCIPLINE", name: "Student Discipline & Formation" },
+    { code: "GUIDANCE", name: "Guidance & Psychological Services" },
+    { code: "SCHOLARSHIPS", name: "Scholarships & Financial Assistance" },
+    { code: "EXTENSION", name: "Community Extension & Engagement" },
+  ];
+
   if (userRole === "ADMIN") {
     quickActions.push(
       {
@@ -113,6 +124,12 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
       a.title.toLowerCase().includes(query.toLowerCase()) ||
       a.desc.toLowerCase().includes(query.toLowerCase()) ||
       query.trim() === ""
+  );
+
+  const filteredUnits = unitShortcuts.filter(
+    (u) =>
+      u.code.toLowerCase().includes(query.toLowerCase()) ||
+      u.name.toLowerCase().includes(query.toLowerCase())
   );
 
   const handleNavigate = (href: string) => {
@@ -205,6 +222,35 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
               })}
             </div>
           </div>
+
+          {filteredUnits.length > 0 && (
+            <div className="pt-3 border-t border-slate-100">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-2 px-2">
+                SAS Department Units (Direct Filter)
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                {filteredUnits.map((u) => (
+                  <button
+                    key={u.code}
+                    onClick={() => handleNavigate(`/dashboard/documents?unit=${u.code}`)}
+                    className="p-2.5 rounded-xl hover:bg-amber-50/80 border border-slate-200/80 hover:border-amber-300 text-left flex items-center gap-2.5 transition group cursor-pointer"
+                  >
+                    <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center font-mono font-bold text-[10px] shrink-0">
+                      <Building2 className="w-3.5 h-3.5 text-amber-700" />
+                    </div>
+                    <div className="min-w-0">
+                      <span className="font-bold text-xs text-slate-900 block truncate group-hover:text-amber-950">
+                        {u.name}
+                      </span>
+                      <span className="text-[10px] font-mono text-slate-400 block">
+                        {u.code}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer Hint */}

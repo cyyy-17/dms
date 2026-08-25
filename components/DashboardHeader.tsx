@@ -286,7 +286,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
         onClose={() => setIsSignatureModalOpen(false)}
         onSignatureSaved={() => {
           setIsSignatureModalOpen(false);
-          window.location.reload();
+          router.refresh();
         }}
       />
 

@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { loginEmployee } from "@/actions/auth";
 import { Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 
 export default function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -30,7 +32,7 @@ export default function LoginForm() {
       const res = await loginEmployee({ email: normalizedEmail, password });
       if (!res.success) {
         if (res.status === "PENDING_APPROVAL") {
-          window.location.href = "/pending-approval";
+          router.push("/pending-approval");
           return;
         }
         setError(res.error || "Invalid institutional email or password.");
@@ -38,8 +40,8 @@ export default function LoginForm() {
         return;
       }
 
-      // Perform hard navigation to Dashboard to guarantee cookie transmission
-      window.location.href = "/dashboard";
+      router.push("/dashboard");
+      router.refresh();
     } catch (err: unknown) {
       console.error("[LOGIN_PAGE_ERROR]", err);
       const msg = err instanceof Error ? err.message : "An unexpected error occurred during login.";
