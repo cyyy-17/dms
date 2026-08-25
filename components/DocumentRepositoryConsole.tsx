@@ -187,7 +187,7 @@ export default function DocumentRepositoryConsole({
           {/* Filters Area */}
           <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
             {/* Search Input */}
-            <div className="relative flex-1 min-w-[220px] sm:min-w-[260px]">
+            <div className="relative flex-1 min-w-55 sm:min-w-65">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -200,7 +200,7 @@ export default function DocumentRepositoryConsole({
 
             {/* Unit Filter */}
             {isDirectorOrAdmin && (
-              <div className="w-full sm:w-auto min-w-[140px]">
+              <div className="w-full sm:w-auto min-w-35">
                 <select
                   value={selectedUnit}
                   onChange={(e) => setSelectedUnit(e.target.value)}
@@ -217,7 +217,7 @@ export default function DocumentRepositoryConsole({
             )}
 
             {/* Doc Type Filter */}
-            <div className="w-full sm:w-auto min-w-[140px]">
+            <div className="w-full sm:w-auto min-w-35">
               <select
                 value={selectedDocType}
                 onChange={(e) => setSelectedDocType(e.target.value)}
@@ -233,7 +233,7 @@ export default function DocumentRepositoryConsole({
             </div>
 
             {/* Status Filter */}
-            <div className="w-full sm:w-auto min-w-[140px]">
+            <div className="w-full sm:w-auto min-w-35">
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
