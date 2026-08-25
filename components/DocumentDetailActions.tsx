@@ -28,9 +28,6 @@ import {
   CheckCircle2,
   Clock,
   ShieldCheck,
-  Loader2,
-  FileText,
-  Sparkles,
 } from "lucide-react";
 import { DocumentStatus, UserRole } from "@prisma/client";
 
