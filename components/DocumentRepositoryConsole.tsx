@@ -182,89 +182,92 @@ export default function DocumentRepositoryConsole({
       </div>
 
       {/* Control Filter Bar */}
-      <div className="glass-panel rounded-3xl p-4.5 border border-white/90 shadow-sm space-y-3.5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 items-center">
-          {/* Search Input */}
-          <div className="lg:col-span-4 relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search tracking #, title, or staff..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/90 border border-slate-300/90 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
-            />
-          </div>
+      <div className="glass-panel rounded-3xl p-4 sm:p-5 border border-white/90 shadow-sm space-y-3.5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          {/* Filters Area */}
+          <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
+            {/* Search Input */}
+            <div className="relative flex-1 min-w-[220px] sm:min-w-[260px]">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search tracking #, title, or staff..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
+              />
+            </div>
 
-          {/* Unit Filter */}
-          {isDirectorOrAdmin && (
-            <div className="lg:col-span-2">
+            {/* Unit Filter */}
+            {isDirectorOrAdmin && (
+              <div className="w-full sm:w-auto min-w-[140px]">
+                <select
+                  value={selectedUnit}
+                  onChange={(e) => setSelectedUnit(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                >
+                  <option value="ALL">All Units</option>
+                  {units.map((u) => (
+                    <option key={u.id} value={u.code}>
+                      {u.code} - {u.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Doc Type Filter */}
+            <div className="w-full sm:w-auto min-w-[140px]">
               <select
-                value={selectedUnit}
-                onChange={(e) => setSelectedUnit(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-white/90 border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                value={selectedDocType}
+                onChange={(e) => setSelectedDocType(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
               >
-                <option value="ALL">All Units</option>
-                {units.map((u) => (
-                  <option key={u.id} value={u.code}>
-                    {u.code} - {u.name}
+                <option value="ALL">All Types</option>
+                {documentTypes.map((dt) => (
+                  <option key={dt.id} value={dt.name}>
+                    {dt.name}
                   </option>
                 ))}
               </select>
             </div>
-          )}
 
-          {/* Doc Type Filter */}
-          <div className={isDirectorOrAdmin ? "lg:col-span-2" : "lg:col-span-3"}>
-            <select
-              value={selectedDocType}
-              onChange={(e) => setSelectedDocType(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl bg-white/90 border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
-            >
-              <option value="ALL">All Types</option>
-              {documentTypes.map((dt) => (
-                <option key={dt.id} value={dt.name}>
-                  {dt.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Status Filter */}
-          <div className={isDirectorOrAdmin ? "lg:col-span-2" : "lg:col-span-3"}>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl bg-white/90 border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
-            >
-              <option value="ALL">All Statuses</option>
-              <option value="PENDING_COORDINATOR">Pending Coordinator</option>
-              <option value="PENDING_DIRECTOR">Pending Director</option>
-              <option value="APPROVED">Approved</option>
-              <option value="REJECTED_RETURNED">Returned for Rework</option>
-              <option value="ARCHIVED">Archived</option>
-            </select>
+            {/* Status Filter */}
+            <div className="w-full sm:w-auto min-w-[140px]">
+              <select
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+                className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+              >
+                <option value="ALL">All Statuses</option>
+                <option value="PENDING_COORDINATOR">Pending Coordinator</option>
+                <option value="PENDING_DIRECTOR">Pending Director</option>
+                <option value="APPROVED">Approved</option>
+                <option value="REJECTED_RETURNED">Returned for Rework</option>
+                <option value="ARCHIVED">Archived</option>
+              </select>
+            </div>
           </div>
 
           {/* View Toggle & Escalated Filter */}
-          <div className="lg:col-span-2 flex items-center justify-end gap-2">
+          <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 w-full lg:w-auto justify-between lg:justify-end">
             <button
               onClick={() => setOnlyEscalated(!onlyEscalated)}
-              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs ${
+              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap ${
                 onlyEscalated
                   ? "bg-red-600 text-white shadow-red-500/30"
                   : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
               }`}
             >
-              <AlertTriangle className="w-3.5 h-3.5" />
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <span>Escalated</span>
             </button>
 
-            <div className="border-l border-slate-200 pl-2 flex items-center gap-1">
+            <div className="border-l border-slate-200 pl-2.5 flex items-center gap-1.5">
               <button
                 onClick={() => setViewMode("table")}
                 className={`p-2 rounded-xl transition-all cursor-pointer ${
-                  viewMode === "table" ? "bg-[#0F2962] text-white shadow-xs" : "text-slate-500 hover:bg-slate-100"
+                  viewMode === "table" ? "bg-[#0F2962] text-white shadow-xs" : "text-slate-500 hover:bg-slate-100 bg-white border border-slate-200"
                 }`}
                 title="Table View"
               >
@@ -273,7 +276,7 @@ export default function DocumentRepositoryConsole({
               <button
                 onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-xl transition-all cursor-pointer ${
-                  viewMode === "grid" ? "bg-[#0F2962] text-white shadow-xs" : "text-slate-500 hover:bg-slate-100"
+                  viewMode === "grid" ? "bg-[#0F2962] text-white shadow-xs" : "text-slate-500 hover:bg-slate-100 bg-white border border-slate-200"
                 }`}
                 title="Grid View"
               >
