@@ -6,27 +6,35 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
 export const isDatabaseConfigured = !!(
-  (process.env.DIRECT_URL || process.env.DATABASE_URL) &&
-  !(process.env.DIRECT_URL || process.env.DATABASE_URL)?.includes("placeholder")
+  (process.env.DATABASE_URL || process.env.DIRECT_URL) &&
+  !(process.env.DATABASE_URL || process.env.DIRECT_URL)?.includes("placeholder")
 );
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  pool: Pool | undefined;
 };
 
 function createPrismaClient() {
+  // Prioritize pooled DATABASE_URL for runtime queries; fallback to DIRECT_URL
   const connectionString =
-    process.env.DIRECT_URL || process.env.DATABASE_URL || "postgresql://postgres:postgres@localhost:5432/postgres";
+    process.env.DATABASE_URL || process.env.DIRECT_URL || "postgresql://postgres:postgres@localhost:5432/postgres";
 
   const isCloud = connectionString.includes("supabase.com") || connectionString.includes("pooler");
 
-  const pool = new Pool({
-    connectionString,
-    ssl: isCloud ? { rejectUnauthorized: false } : undefined,
-    max: 10,
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,
-  });
+  // In serverless / Supabase environments, keep connection pool small (max 2) per worker
+  // and short idle timeout to prevent exhausting Supabase pool_size: 15
+  const pool =
+    globalForPrisma.pool ??
+    new Pool({
+      connectionString,
+      ssl: isCloud ? { rejectUnauthorized: false } : undefined,
+      max: isCloud ? 2 : 10,
+      idleTimeoutMillis: 5000,
+      connectionTimeoutMillis: 10000,
+    });
+
+  globalForPrisma.pool = pool;
 
   const adapter = new PrismaPg(pool);
 
@@ -38,6 +46,7 @@ function createPrismaClient() {
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient();
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Ensure prisma and pool singleton are preserved across all environments
+globalForPrisma.prisma = prisma;
 
 export default prisma;
