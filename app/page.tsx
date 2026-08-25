@@ -22,66 +22,205 @@ import {
   Activity,
   ArrowUpRight,
 } from "lucide-react";
+import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 
-export default function HomePage() {
-  const sasUnits = [
-    {
-      code: "GCO",
-      name: "Guidance & Counseling Office",
-      icon: Compass,
-      desc: "Confidential student intake profiles, psychological evaluations, graduation clearances, and counselor endorsement slips.",
-      badge: "Confidentiality High",
-      color: "from-blue-500/20 to-blue-600/5 text-blue-400 border-blue-500/30",
-    },
-    {
-      code: "AAPO",
-      name: "Alumni Affairs & Placement Office",
-      icon: GraduationCap,
-      desc: "Industry MOA agreements, alumni tracer reports, graduate networking clearances, and institutional partnership charters.",
-      badge: "Partnership MOAs",
-      color: "from-amber-500/20 to-amber-600/5 text-amber-400 border-amber-500/30",
-    },
-    {
-      code: "SOA",
-      name: "Student Organizations & Activities",
-      icon: Users,
-      desc: "Accreditation charters, campus activity proposals, off-campus event permits, and student council budget requisitions.",
-      badge: "Event Permits",
-      color: "from-purple-500/20 to-purple-600/5 text-purple-400 border-purple-500/30",
-    },
-    {
-      code: "SFA",
-      name: "Scholarship & Financial Assistance",
-      icon: Award,
-      desc: "Academic grant applications, third-party sponsor MOAs, financial aid validation vouchers, and donor audit covenants.",
-      badge: "Grants & Vouchers",
-      color: "from-emerald-500/20 to-emerald-600/5 text-emerald-400 border-emerald-500/30",
-    },
-    {
-      code: "DSW",
-      name: "Discipline & Student Welfare",
-      icon: Scale,
-      desc: "Incident resolution logs, behavioral clearances, student handbook notices, and official inquiry proceedings.",
-      badge: "Compliance Logs",
-      color: "from-rose-500/20 to-rose-600/5 text-rose-400 border-rose-500/30",
-    },
-    {
-      code: "CSIR",
-      name: "Career Services & Industry Relations",
-      icon: Briefcase,
-      desc: "On-the-Job Training (OJT) memorandums, employer internship endorsements, student placement releases, and company profiles.",
-      badge: "OJT Agreements",
-      color: "from-indigo-500/20 to-indigo-600/5 text-indigo-400 border-indigo-500/30",
-    },
-    {
-      code: "CEE",
-      name: "Community Engagement & Extension",
-      icon: HeartHandshake,
-      desc: "Community outreach agreements, barangay LGU permits, volunteer service records, and social responsibility accreditations.",
-      badge: "Outreach Charters",
-      color: "from-teal-500/20 to-teal-600/5 text-teal-400 border-teal-500/30",
-    },
-  ];
+export const dynamic = "force-dynamic";
+
+const UNIT_METADATA_MAP: Record<
+  string,
+  {
+    icon: any;
+    desc?: string;
+    badge?: string;
+    color?: string;
+  }
+> = {
+  GCO: {
+    icon: Compass,
+    badge: "Confidentiality High",
+    color: "from-blue-500/20 to-blue-600/5 text-blue-400 border-blue-500/30",
+    desc: "Confidential student intake profiles, psychological evaluations, graduation clearances, and counselor endorsement slips.",
+  },
+  GUIDANCE: {
+    icon: Compass,
+    badge: "Counseling & Psych",
+    color: "from-blue-500/20 to-blue-600/5 text-blue-400 border-blue-500/30",
+    desc: "Counseling documentation, intake assessments, peer facilitator programs, and psycho-educational modules.",
+  },
+  AAPO: {
+    icon: GraduationCap,
+    badge: "Partnership MOAs",
+    color: "from-amber-500/20 to-amber-600/5 text-amber-400 border-amber-500/30",
+    desc: "Industry MOA agreements, alumni tracer reports, graduate networking clearances, and institutional partnership charters.",
+  },
+  ALUMNI: {
+    icon: GraduationCap,
+    badge: "Alumni Relations",
+    color: "from-amber-500/20 to-amber-600/5 text-amber-400 border-amber-500/30",
+    desc: "Alumni registry, homecoming event documentation, alumni tracer studies, and chapter engagements.",
+  },
+  SOA: {
+    icon: Users,
+    badge: "Event Permits",
+    color: "from-purple-500/20 to-purple-600/5 text-purple-400 border-purple-500/30",
+    desc: "Accreditation charters, campus activity proposals, off-campus event permits, and student council budget requisitions.",
+  },
+  ACTIVITIES: {
+    icon: Users,
+    badge: "Student Org Charters",
+    color: "from-purple-500/20 to-purple-600/5 text-purple-400 border-purple-500/30",
+    desc: "Accredited student organizations, event proposals, campus permits, and activity liquidations.",
+  },
+  SFA: {
+    icon: Award,
+    badge: "Grants & Vouchers",
+    color: "from-emerald-500/20 to-emerald-600/5 text-emerald-400 border-emerald-500/30",
+    desc: "Academic grant applications, third-party sponsor MOAs, financial aid validation vouchers, and donor audit covenants.",
+  },
+  SCHOLARSHIPS: {
+    icon: Award,
+    badge: "Scholarships & Aid",
+    color: "from-emerald-500/20 to-emerald-600/5 text-emerald-400 border-emerald-500/30",
+    desc: "Institutional grants, government assistance endorsements, donor memoranda, and billing rosters.",
+  },
+  DSW: {
+    icon: Scale,
+    badge: "Compliance Logs",
+    color: "from-rose-500/20 to-rose-600/5 text-rose-400 border-rose-500/30",
+    desc: "Incident resolution logs, behavioral clearances, student handbook notices, and official inquiry proceedings.",
+  },
+  DISCIPLINE: {
+    icon: Scale,
+    badge: "Student Discipline",
+    color: "from-rose-500/20 to-rose-600/5 text-rose-400 border-rose-500/30",
+    desc: "Student handbook enforcement, incident investigations, clearance clearances, and character formation.",
+  },
+  CSIR: {
+    icon: Briefcase,
+    badge: "OJT Agreements",
+    color: "from-indigo-500/20 to-indigo-600/5 text-indigo-400 border-indigo-500/30",
+    desc: "On-the-Job Training (OJT) memorandums, employer internship endorsements, student placement releases, and company profiles.",
+  },
+  CAREER: {
+    icon: Briefcase,
+    badge: "Placement & OJT",
+    color: "from-indigo-500/20 to-indigo-600/5 text-indigo-400 border-indigo-500/30",
+    desc: "Industry partnerships, internship agreements, on-campus recruitments, and graduate placement.",
+  },
+  CEE: {
+    icon: HeartHandshake,
+    badge: "Outreach Charters",
+    color: "from-teal-500/20 to-teal-600/5 text-teal-400 border-teal-500/30",
+    desc: "Community outreach agreements, barangay LGU permits, volunteer service records, and social responsibility accreditations.",
+  },
+  EXTENSION: {
+    icon: HeartHandshake,
+    badge: "Community Extension",
+    color: "from-teal-500/20 to-teal-600/5 text-teal-400 border-teal-500/30",
+    desc: "Institutional outreach programs, community MOUs, volunteer logs, and project impact assessments.",
+  },
+};
+
+const FALLBACK_PALETTES = [
+  { color: "from-cyan-500/20 to-cyan-600/5 text-cyan-400 border-cyan-500/30", icon: Building2 },
+  { color: "from-violet-500/20 to-violet-600/5 text-violet-400 border-violet-500/30", icon: FileText },
+  { color: "from-pink-500/20 to-pink-600/5 text-pink-400 border-pink-500/30", icon: ShieldCheck },
+  { color: "from-orange-500/20 to-orange-600/5 text-orange-400 border-orange-500/30", icon: GitBranch },
+  { color: "from-lime-500/20 to-lime-600/5 text-lime-400 border-lime-500/30", icon: Activity },
+];
+
+const DEFAULT_SAS_UNITS = [
+  {
+    code: "GCO",
+    name: "Guidance & Counseling Office",
+    icon: Compass,
+    desc: "Confidential student intake profiles, psychological evaluations, graduation clearances, and counselor endorsement slips.",
+    badge: "Confidentiality High",
+    color: "from-blue-500/20 to-blue-600/5 text-blue-400 border-blue-500/30",
+  },
+  {
+    code: "AAPO",
+    name: "Alumni Affairs & Placement Office",
+    icon: GraduationCap,
+    desc: "Industry MOA agreements, alumni tracer reports, graduate networking clearances, and institutional partnership charters.",
+    badge: "Partnership MOAs",
+    color: "from-amber-500/20 to-amber-600/5 text-amber-400 border-amber-500/30",
+  },
+  {
+    code: "SOA",
+    name: "Student Organizations & Activities",
+    icon: Users,
+    desc: "Accreditation charters, campus activity proposals, off-campus event permits, and student council budget requisitions.",
+    badge: "Event Permits",
+    color: "from-purple-500/20 to-purple-600/5 text-purple-400 border-purple-500/30",
+  },
+  {
+    code: "SFA",
+    name: "Scholarship & Financial Assistance",
+    icon: Award,
+    desc: "Academic grant applications, third-party sponsor MOAs, financial aid validation vouchers, and donor audit covenants.",
+    badge: "Grants & Vouchers",
+    color: "from-emerald-500/20 to-emerald-600/5 text-emerald-400 border-emerald-500/30",
+  },
+  {
+    code: "DSW",
+    name: "Discipline & Student Welfare",
+    icon: Scale,
+    desc: "Incident resolution logs, behavioral clearances, student handbook notices, and official inquiry proceedings.",
+    badge: "Compliance Logs",
+    color: "from-rose-500/20 to-rose-600/5 text-rose-400 border-rose-500/30",
+  },
+  {
+    code: "CSIR",
+    name: "Career Services & Industry Relations",
+    icon: Briefcase,
+    desc: "On-the-Job Training (OJT) memorandums, employer internship endorsements, student placement releases, and company profiles.",
+    badge: "OJT Agreements",
+    color: "from-indigo-500/20 to-indigo-600/5 text-indigo-400 border-indigo-500/30",
+  },
+  {
+    code: "CEE",
+    name: "Community Engagement & Extension",
+    icon: HeartHandshake,
+    desc: "Community outreach agreements, barangay LGU permits, volunteer service records, and social responsibility accreditations.",
+    badge: "Outreach Charters",
+    color: "from-teal-500/20 to-teal-600/5 text-teal-400 border-teal-500/30",
+  },
+];
+
+export default async function HomePage() {
+  let sasUnits = DEFAULT_SAS_UNITS;
+
+  if (isDatabaseConfigured) {
+    try {
+      const dbUnits = await prisma.unit.findMany({
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+      });
+
+      if (dbUnits && dbUnits.length > 0) {
+        sasUnits = dbUnits.map((u, idx) => {
+          const upperCode = u.code.toUpperCase();
+          const meta = UNIT_METADATA_MAP[upperCode];
+          const fallbackPalette = FALLBACK_PALETTES[idx % FALLBACK_PALETTES.length];
+
+          return {
+            code: u.code,
+            name: u.name,
+            desc:
+              u.description ||
+              meta?.desc ||
+              "Specialized departmental role permissions, compliance protocols, and document approval workflows.",
+            badge: meta?.badge || "Active Unit",
+            color: meta?.color || fallbackPalette.color,
+            icon: meta?.icon || fallbackPalette.icon,
+          };
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch units for landing page:", err);
+    }
+  }
 
   const pillars = [
     {
@@ -268,7 +407,9 @@ export default function HomePage() {
               {/* Institutional Metrics Banner */}
               <div className="pt-8 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
                 <div>
-                  <span className="text-2xl sm:text-3xl font-black text-white font-mono block">7</span>
+                  <span className="text-2xl sm:text-3xl font-black text-white font-mono block">
+                    {sasUnits.length}
+                  </span>
                   <span className="text-xs text-slate-400 font-medium">SAS Units Integrated</span>
                 </div>
                 <div>
@@ -391,7 +532,7 @@ export default function HomePage() {
                 <span>Department Tenancy Matrix</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-                7 Integrated SAS Department Units
+                {sasUnits.length} Integrated SAS Department Units
               </h2>
               <p className="text-sm sm:text-base text-slate-400 leading-relaxed font-normal">
                 Every unit in Student & Alumni Services operates with dedicated role permissions, specialized document taxonomies, and cross-unit visibility for the Department Director.
