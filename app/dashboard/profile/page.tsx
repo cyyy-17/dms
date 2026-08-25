@@ -24,6 +24,7 @@ export default async function ProfilePage() {
       firstName: "Aljon",
       lastName: "Tolentino",
       fullName: "Aljon Tolentino",
+      employeeId: "EMP-2026-001",
       role: "ADMIN",
       status: "ACTIVE",
       unitId: null,
@@ -106,15 +107,15 @@ export default async function ProfilePage() {
       {/* Page Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-          My Profile & E-Signature
+          My Profile & Security
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
-          Manage your registered electronic signature and review your institutional activity history.
+          Manage your personal details, credentials, electronic signature, and audit log.
         </p>
       </div>
 
       <div className="grid lg:grid-cols-12 gap-6">
-        {/* Left: Profile Card */}
+        {/* Left: Profile Card & Activity Summary */}
         <div className="lg:col-span-4 space-y-5">
           {/* Identity Card */}
           <div className="glass-panel rounded-3xl p-6 border border-white/90 bg-white/80 space-y-4 shadow-sm">
@@ -173,91 +174,9 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        {/* Right: E-Signature Management + Activity */}
+        {/* Right: Comprehensive Self Profile Client */}
         <div className="lg:col-span-8 space-y-6">
-          {/* E-Signature Section */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-white/90 bg-white/80 shadow-sm space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
-              <div className="flex items-center gap-2.5">
-                <PenLine className="w-5 h-5 text-[#0F2962]" />
-                <h2 className="text-base font-bold text-slate-900">Electronic Signature (Smart Anchor)</h2>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/80">
-              <div className="flex items-center gap-3.5">
-                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${user.signaturePath ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>
-                  {user.signaturePath ? (
-                    <CheckCircle2 className="w-5 h-5" />
-                  ) : (
-                    <PenLine className="w-5 h-5" />
-                  )}
-                </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-900 block">
-                    {user.signaturePath ? "Electronic Signature Registered & Active" : "No Signature on File"}
-                  </span>
-                  <span className="text-[11px] text-slate-500 font-medium block mt-0.5">
-                    {user.signaturePath
-                      ? "Your signature image is encrypted in the private vault and will be automatically stamped when you approve documents."
-                      : "Draw or upload your signature image to enable one-click document approvals."}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <ProfileClient hasSignature={!!user.signaturePath} signaturePath={user.signaturePath} />
-
-            <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200/70 space-y-2">
-              <span className="text-xs font-bold text-blue-950 block">How Smart Anchor E-Signatures Work</span>
-              <ul className="space-y-1.5 text-xs text-blue-900">
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-600 font-bold shrink-0">1.</span>
-                  Draw or upload your handwritten signature in the authenticated pad.
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-600 font-bold shrink-0">2.</span>
-                  When reviewing a document, clicking &ldquo;Approve & Sign&rdquo; stamps your vector signature above your typed name.
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-600 font-bold shrink-0">3.</span>
-                  The system signs the PDF binary and records an immutable SHA-256 cryptographic audit record.
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Recent Activity */}
-          {recentActions.length > 0 && (
-            <div className="glass-panel rounded-3xl p-6 border border-white/90 bg-white/80 shadow-sm space-y-4">
-              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-                <Clock className="w-4 h-4 text-slate-500" />
-                <h2 className="text-sm font-bold text-slate-900">Recent Approval Actions</h2>
-              </div>
-              <div className="space-y-3">
-                {recentActions.map((action) => (
-                  <div key={action.id} className="flex items-start gap-3 p-3 rounded-2xl bg-slate-50/70 border border-slate-200/60">
-                    <div className="w-8 h-8 rounded-xl bg-blue-100 text-[#0F2962] flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                      <FileText className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-xs font-bold text-slate-900 block truncate">
-                        {actionLabels[action.action] || action.action}
-                      </span>
-                      {action.document && (
-                        <span className="text-[11px] text-slate-600 block font-mono truncate mt-0.5">
-                          {action.document.trackingNumber} — {action.document.title}
-                        </span>
-                      )}
-                      <span className="text-[10px] text-slate-400 block mt-0.5">
-                        {new Date(action.createdAt).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          <ProfileClient user={user} />
         </div>
       </div>
     </div>

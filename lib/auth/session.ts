@@ -8,6 +8,7 @@ export interface AuthenticatedUser {
   firstName: string;
   lastName: string;
   fullName: string;
+  employeeId?: string | null;
   role: UserRole;
   status: UserStatus;
   unitId: string | null;
@@ -54,6 +55,7 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> 
       firstName: profile.firstName,
       lastName: profile.lastName,
       fullName: `${profile.firstName} ${profile.lastName}`,
+      employeeId: profile.employeeId || null,
       role: profile.role,
       status: profile.status,
       unitId: profile.unitId,

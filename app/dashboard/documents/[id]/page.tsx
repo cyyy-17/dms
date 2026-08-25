@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/auth/session";
+import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
 import DocumentDetailActions from "@/components/DocumentDetailActions";
 import LiveDocumentViewer from "@/components/LiveDocumentViewer";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
@@ -86,22 +86,20 @@ export const dynamic = "force-dynamic";
 
 export default async function DocumentDetailPage({ params }: PageProps) {
   const { id } = await params;
-  let currentUser = await getAuthenticatedUser();
-  if (!currentUser) {
-    currentUser = {
-      id: "demo-staff-user",
-      email: "demo.staff@firstasia.edu.ph",
-      firstName: "Maria",
-      lastName: "Santos",
-      fullName: "Maria Santos",
-      role: UserRole.COORDINATOR,
-      status: "ACTIVE",
-      unitId: "demo-unit-career",
-      unitCode: "CAREER",
-      unitName: "Career Services & Placement",
-      signaturePath: null,
-    };
-  }
+  const currentUser: AuthenticatedUser = (await getAuthenticatedUser()) || {
+    id: "demo-staff-user",
+    email: "demo.staff@firstasia.edu.ph",
+    firstName: "Maria",
+    lastName: "Santos",
+    fullName: "Maria Santos",
+    employeeId: "EMP-2026-042",
+    role: UserRole.COORDINATOR,
+    status: "ACTIVE",
+    unitId: "demo-unit-career",
+    unitCode: "CAREER",
+    unitName: "Career Services & Placement",
+    signaturePath: null,
+  };
 
   let doc: DocumentDetail | null = null;
 

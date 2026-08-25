@@ -361,3 +361,165 @@ export async function getSignedSignatureUrlAction(storagePath: string): Promise<
     return { success: false, error: err instanceof Error ? err.message : "Error generating URL." };
   }
 }
+
+/**
+ * Update Self Profile Details (First Name, Last Name, Employee ID)
+ */
+export async function updateUserProfileDetailsAction(input: {
+  firstName: string;
+  lastName: string;
+  employeeId?: string;
+}): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    return { success: false, error: "Unauthorized. Please log in." };
+  }
+
+  const cleanFirstName = input.firstName.trim();
+  const cleanLastName = input.lastName.trim();
+  const cleanEmployeeId = input.employeeId?.trim() || null;
+
+  if (!cleanFirstName || !cleanLastName) {
+    return { success: false, error: "First and last names are strictly mandatory." };
+  }
+
+  try {
+    if (isDatabaseConfigured) {
+      // Check if employeeId is provided and not taken by another user
+      if (cleanEmployeeId) {
+        const existing = await prisma.user.findFirst({
+          where: {
+            employeeId: cleanEmployeeId,
+            id: { not: currentUser.id },
+          },
+        });
+        if (existing) {
+          return { success: false, error: "This Employee ID is already associated with another account." };
+        }
+      }
+
+      await prisma.user.update({
+        where: { id: currentUser.id },
+        data: {
+          firstName: cleanFirstName,
+          lastName: cleanLastName,
+          employeeId: cleanEmployeeId,
+        },
+      });
+
+      // Update Supabase Auth user metadata
+      try {
+        await supabaseAdmin.auth.admin.updateUserById(currentUser.id, {
+          user_metadata: {
+            firstName: cleanFirstName,
+            lastName: cleanLastName,
+          },
+        });
+      } catch {
+        // Continue if metadata sync is soft-failed
+      }
+
+      await logAuditEvent({
+        actorId: currentUser.id,
+        unitId: currentUser.unitId,
+        action: "USER_ROLE_CHANGE",
+        targetType: "USER",
+        targetId: currentUser.id,
+        details: {
+          actionType: "PROFILE_DETAILS_UPDATED",
+          firstName: cleanFirstName,
+          lastName: cleanLastName,
+          employeeId: cleanEmployeeId,
+        },
+      });
+    }
+
+    revalidatePath("/dashboard/profile", "page");
+    revalidatePath("/dashboard", "layout");
+    return { success: true };
+  } catch (err: unknown) {
+    console.error("[UPDATE_PROFILE_ERROR]", err);
+    return { success: false, error: err instanceof Error ? err.message : "Failed to update profile." };
+  }
+}
+
+/**
+ * Update Self Password with Mandatory Auto-Logout
+ */
+export async function updateUserPasswordAction(input: {
+  currentPassword?: string;
+  newPassword: string;
+  confirmPassword: string;
+}): Promise<{
+  success: boolean;
+  error?: string;
+  loggedOut?: boolean;
+}> {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    return { success: false, error: "Unauthorized. Please log in." };
+  }
+
+  const { currentPassword, newPassword, confirmPassword } = input;
+
+  if (!newPassword || newPassword.length < 8) {
+    return { success: false, error: "New password must contain at least 8 characters." };
+  }
+
+  if (newPassword !== confirmPassword) {
+    return { success: false, error: "New password and confirmation do not match." };
+  }
+
+  try {
+    const supabase = await createClient();
+
+    // Verify current password if provided
+    if (currentPassword) {
+      const { error: verifyError } = await supabase.auth.signInWithPassword({
+        email: currentUser.email,
+        password: currentPassword,
+      });
+
+      if (verifyError) {
+        return { success: false, error: "Current password verification failed. Please check your credentials." };
+      }
+    }
+
+    // Update password via Supabase Admin
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(currentUser.id, {
+      password: newPassword,
+    });
+
+    if (updateError) {
+      console.error("[PASSWORD_UPDATE_AUTH_ERROR]", updateError);
+      return { success: false, error: updateError.message || "Failed to update password." };
+    }
+
+    if (isDatabaseConfigured) {
+      await logAuditEvent({
+        actorId: currentUser.id,
+        unitId: currentUser.unitId,
+        action: "USER_ROLE_CHANGE",
+        targetType: "USER",
+        targetId: currentUser.id,
+        details: { actionType: "PASSWORD_CHANGED_SELF_LOGOUT" },
+      });
+    }
+
+    // Invalidate and sign out current session
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Ignore if session already terminated
+    }
+
+    revalidatePath("/", "layout");
+    return { success: true, loggedOut: true };
+  } catch (err: unknown) {
+    console.error("[PASSWORD_UPDATE_ERROR]", err);
+    return { success: false, error: err instanceof Error ? err.message : "Failed to update password." };
+  }
+}

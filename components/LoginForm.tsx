@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { loginEmployee } from "@/actions/auth";
-import { Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff, Loader2, ShieldCheck, CheckCircle2, Clock } from "lucide-react";
 
 export default function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const reason = searchParams.get("reason");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -52,6 +55,20 @@ export default function LoginForm() {
 
   return (
     <div className="glass-panel rounded-3xl py-9 px-7 sm:px-11 shadow-2xl border border-white/80 backdrop-blur-2xl transition-all duration-300">
+      {reason === "password_changed" && (
+        <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-300 flex items-start gap-3 text-emerald-950 text-xs font-semibold shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
+          <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+          <span className="leading-relaxed">Your password has been changed successfully. Please sign in with your new credentials.</span>
+        </div>
+      )}
+
+      {reason === "session_timeout" && (
+        <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-300 flex items-start gap-3 text-amber-950 text-xs font-semibold shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
+          <Clock className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+          <span className="leading-relaxed">Your session expired due to inactivity. Please sign in again to continue.</span>
+        </div>
+      )}
+
       {error && (
         <div className="mb-6 p-4 rounded-2xl bg-red-50/90 border border-red-200/90 flex items-start gap-3 text-red-900 text-xs font-semibold shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
           <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />

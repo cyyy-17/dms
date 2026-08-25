@@ -2,6 +2,7 @@ import { getAuthenticatedUser } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import DashboardHeader from "@/components/DashboardHeader";
+import SessionTimeoutManager from "@/components/SessionTimeoutManager";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,6 @@ export default async function DashboardLayout({
   const user = await getAuthenticatedUser();
 
   // Hard auth guard — unauthenticated users are redirected to login.
-  // The demo fallback has been removed; this system is production-only.
   if (!user) {
     redirect("/login");
   }
@@ -27,6 +27,7 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
+      <SessionTimeoutManager />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/auth/session";
+import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
 import { getStatusLabel, getStatusBadgeClass, formatHumanDate } from "@/lib/status-labels";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
 import {
@@ -38,22 +38,20 @@ interface ApprovalQueueItem {
 export const dynamic = "force-dynamic";
 
 export default async function ApprovalQueuePage() {
-  let user = await getAuthenticatedUser();
-  if (!user) {
-    user = {
-      id: "demo-admin-user",
-      email: "mclemente08@firstasia.edu.ph",
-      firstName: "Aljon",
-      lastName: "Tolentino",
-      fullName: "Aljon Tolentino",
-      role: "ADMIN",
-      status: "ACTIVE",
-      unitId: null,
-      unitCode: "ADMIN",
-      unitName: "System Administration",
-      signaturePath: null,
-    };
-  }
+  const user: AuthenticatedUser = (await getAuthenticatedUser()) || {
+    id: "demo-admin-user",
+    email: "mclemente08@firstasia.edu.ph",
+    firstName: "Aljon",
+    lastName: "Tolentino",
+    fullName: "Aljon Tolentino",
+    employeeId: "EMP-2026-001",
+    role: "ADMIN",
+    status: "ACTIVE",
+    unitId: null,
+    unitCode: "ADMIN",
+    unitName: "System Administration",
+    signaturePath: null,
+  };
 
   const isDirectorOrAdmin = user.role === "DIRECTOR" || user.role === "ADMIN";
 

@@ -1,5 +1,5 @@
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/auth/session";
+import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
 import DocumentRepositoryConsole, { DocumentRow } from "@/components/DocumentRepositoryConsole";
 import { DocumentStatus, Prisma } from "@prisma/client";
 
@@ -17,22 +17,20 @@ export const dynamic = "force-dynamic";
 
 export default async function DocumentsPage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
-  let user = await getAuthenticatedUser();
-  if (!user) {
-    user = {
-      id: "demo-staff-user",
-      email: "demo.staff@firstasia.edu.ph",
-      firstName: "Maria",
-      lastName: "Santos",
-      fullName: "Maria Santos",
-      role: "COORDINATOR",
-      status: "ACTIVE",
-      unitId: "demo-unit-career",
-      unitCode: "CAREER",
-      unitName: "Career Services & Placement",
-      signaturePath: null,
-    };
-  }
+  const user: AuthenticatedUser = (await getAuthenticatedUser()) || {
+    id: "demo-staff-user",
+    email: "demo.staff@firstasia.edu.ph",
+    firstName: "Maria",
+    lastName: "Santos",
+    fullName: "Maria Santos",
+    employeeId: "EMP-2026-042",
+    role: "COORDINATOR",
+    status: "ACTIVE",
+    unitId: "demo-unit-career",
+    unitCode: "CAREER",
+    unitName: "Career Services & Placement",
+    signaturePath: null,
+  };
 
   const isDirectorOrAdmin = user.role === "DIRECTOR" || user.role === "ADMIN";
 

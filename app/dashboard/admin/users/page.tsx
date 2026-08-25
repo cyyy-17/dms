@@ -1,5 +1,5 @@
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/auth/session";
+import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
 import { SEED_UNITS } from "@/lib/constants";
 import AdminUserManagement from "@/components/AdminUserManagement";
 import { Users, ShieldAlert } from "lucide-react";
@@ -27,22 +27,20 @@ interface UnitItem {
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage() {
-  let currentUser = await getAuthenticatedUser();
-  if (!currentUser) {
-    currentUser = {
-      id: "demo-admin-user",
-      email: "admin@firstasia.edu.ph",
-      firstName: "Admin",
-      lastName: "System",
-      fullName: "Admin System",
-      role: UserRole.ADMIN,
-      status: UserStatus.ACTIVE,
-      unitId: null,
-      unitCode: null,
-      unitName: null,
-      signaturePath: null,
-    };
-  }
+  const currentUser: AuthenticatedUser = (await getAuthenticatedUser()) || {
+    id: "demo-admin-user",
+    email: "admin@firstasia.edu.ph",
+    firstName: "Admin",
+    lastName: "System",
+    fullName: "Admin System",
+    employeeId: "EMP-ADMIN-001",
+    role: UserRole.ADMIN,
+    status: UserStatus.ACTIVE,
+    unitId: null,
+    unitCode: null,
+    unitName: null,
+    signaturePath: null,
+  };
 
   let users: UserWithRelations[] = [];
   let units: UnitItem[] = [];
