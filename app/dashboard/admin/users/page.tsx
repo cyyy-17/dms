@@ -112,7 +112,7 @@ export default async function AdminUsersPage() {
   const pendingCount = users.filter((u) => u.status === UserStatus.PENDING_APPROVAL).length;
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">

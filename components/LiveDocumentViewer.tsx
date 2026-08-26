@@ -202,7 +202,7 @@ export default function LiveDocumentViewer({
       {isPreviewOpen && (
         <div
           className={`relative bg-slate-950 overflow-hidden flex items-center justify-center transition-all ${
-            isFullscreen ? "flex-1 w-full rounded-2xl mt-4 border border-slate-800" : "h-130 lg:h-160"
+            isFullscreen ? "flex-1 w-full rounded-2xl mt-4 border border-slate-800" : "h-96 sm:h-130 lg:h-160"
           }`}
         >
           {isLoading && (

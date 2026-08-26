@@ -8,7 +8,7 @@ export default function PendingApprovalPage() {
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-162.5 h-100 bg-linear-to-tr from-amber-500/20 via-blue-900/30 to-indigo-900/20 blur-[130px] pointer-events-none rounded-full" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-lg px-4 sm:px-0 relative z-10">
-        <div className="glass-panel rounded-3xl py-10 px-7 sm:px-11 shadow-2xl border border-white/80 backdrop-blur-2xl text-center space-y-7 transition-all duration-300">
+        <div className="glass-panel rounded-3xl py-8 px-5 sm:py-10 sm:px-11 shadow-2xl border border-white/80 backdrop-blur-2xl text-center space-y-7 transition-all duration-300">
           <div className="relative mx-auto w-20 h-20">
             <div className="absolute inset-0 rounded-2xl bg-amber-400/20 animate-ping" />
             <div className="relative w-20 h-20 rounded-2xl bg-linear-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-xl shadow-amber-500/30 border border-amber-300/40">

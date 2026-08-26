@@ -157,8 +157,8 @@ export default function SignaturePadModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <div className="glass-panel rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl space-y-5 border border-white/90 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4">
+      <div className="glass-panel rounded-3xl max-w-lg w-full p-5 sm:p-7 max-h-[90vh] overflow-y-auto shadow-2xl space-y-5 border border-white/90 animate-in fade-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
           <div className="flex items-center gap-3">

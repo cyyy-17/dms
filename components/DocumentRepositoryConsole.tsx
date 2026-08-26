@@ -163,7 +163,7 @@ export default function DocumentRepositoryConsole({
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -180,10 +180,10 @@ export default function DocumentRepositoryConsole({
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0">
           <button
             onClick={handleExportCsv}
-            className="px-4 py-2.5 rounded-xl border border-slate-300/90 bg-white/90 hover:bg-slate-50 text-slate-700 text-xs font-bold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
+            className="px-3.5 sm:px-4 py-2.5 rounded-xl border border-slate-300/90 bg-white/90 hover:bg-slate-50 text-slate-700 text-xs font-bold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
             title="Export filtered records to CSV"
           >
             <Download className="w-3.5 h-3.5 text-slate-500" />
@@ -192,7 +192,7 @@ export default function DocumentRepositoryConsole({
 
           <Link
             href="/dashboard/documents/new"
-            className="px-4.5 py-2.5 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
+            className="px-4 sm:px-4.5 py-2.5 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
           >
             <Plus className="w-4 h-4 text-amber-400" />
             <span>New Submission</span>

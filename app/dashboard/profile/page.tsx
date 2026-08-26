@@ -71,7 +71,7 @@ export default async function ProfilePage() {
   };
 
   return (
-    <div className="p-6 lg:p-8 space-y-8 max-w-5xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-5xl mx-auto w-full">
       {/* Page Header */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">

@@ -29,18 +29,18 @@ export default function LandingCtaSection() {
           </p>
         </div>
 
-        <div className="relative z-10 flex flex-wrap justify-center items-center gap-4 pt-2">
+        <div className="relative z-10 flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-3 sm:gap-4 pt-2 max-w-md sm:max-w-none mx-auto">
           <Link
             href="/login"
-            className="px-8 py-4 rounded-2xl bg-linear-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm shadow-xl shadow-amber-400/20 hover:shadow-amber-400/40 transition-all duration-200 flex items-center gap-2 transform active:scale-95 cursor-pointer"
+            className="px-8 py-4 rounded-2xl bg-linear-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-sm shadow-xl shadow-amber-400/20 hover:shadow-amber-400/40 transition-all duration-200 flex items-center justify-center gap-2 transform active:scale-95 cursor-pointer whitespace-nowrap"
           >
             <span>Sign In to Dashboard</span>
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-4 h-4 shrink-0" />
           </Link>
 
           <Link
             href="/register"
-            className="px-7 py-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 hover:border-slate-500 text-white font-bold text-sm shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+            className="px-7 py-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 hover:border-slate-500 text-white font-bold text-sm shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-95 text-center whitespace-nowrap"
           >
             Apply for Staff Registration
           </Link>

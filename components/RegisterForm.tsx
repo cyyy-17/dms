@@ -84,7 +84,7 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
   };
 
   return (
-    <div className="glass-panel rounded-3xl py-9 px-7 sm:px-11 shadow-2xl border border-white/80 backdrop-blur-2xl transition-all duration-300">
+    <div className="glass-panel rounded-3xl py-7 px-5 sm:py-9 sm:px-11 shadow-2xl border border-white/80 backdrop-blur-2xl transition-all duration-300">
       {error && (
         <div className="mb-6 p-4 rounded-2xl bg-red-50/90 border border-red-200/90 flex items-start gap-3 text-red-900 text-xs font-semibold shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
           <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
@@ -140,7 +140,7 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
                 placeholder="Juan"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="block w-full pl-9.5 pr-3 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+                className="block w-full pl-9.5 pr-3 py-2.5 text-base sm:text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
               />
             </div>
           </div>

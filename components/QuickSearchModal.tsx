@@ -146,15 +146,15 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-16 sm:pt-24 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-10 sm:pt-24 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-150">
       <div className="glass-panel rounded-3xl max-w-2xl w-full bg-white shadow-2xl border border-white/90 overflow-hidden space-y-0">
         {/* Search Input Bar */}
-        <form onSubmit={handleSearchSubmit} className="p-4 sm:p-5 border-b border-slate-200/80 flex items-center gap-3">
+        <form onSubmit={handleSearchSubmit} className="p-3.5 sm:p-5 border-b border-slate-200/80 flex items-center gap-2.5 sm:gap-3">
           <Search className="w-5 h-5 text-slate-400 shrink-0" />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search tracking number (e.g. SAS-2026-), document title, or action..."
+            placeholder="Search tracking number, document title, or module..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full text-sm font-medium text-slate-900 placeholder:text-slate-400 bg-transparent focus:outline-none"
@@ -163,7 +163,7 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
             <button
               type="button"
               onClick={() => setQuery("")}
-              className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+              className="p-1 text-slate-400 hover:text-slate-600 rounded-lg shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
@@ -174,7 +174,7 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
         </form>
 
         {/* Search Recommendations / Quick Jump list */}
-        <div className="p-4 sm:p-5 max-h-96 overflow-y-auto space-y-2">
+        <div className="p-3.5 sm:p-5 max-h-[65vh] sm:max-h-96 overflow-y-auto space-y-2">
           {query.trim() !== "" && (
             <button
               type="button"

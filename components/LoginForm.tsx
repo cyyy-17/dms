@@ -54,7 +54,7 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="glass-panel rounded-3xl py-9 px-7 sm:px-11 shadow-2xl border border-white/80 backdrop-blur-2xl transition-all duration-300">
+    <div className="glass-panel rounded-3xl py-7 px-5 sm:py-9 sm:px-11 shadow-2xl border border-white/80 backdrop-blur-2xl transition-all duration-300">
       {reason === "password_changed" && (
         <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-300 flex items-start gap-3 text-emerald-950 text-xs font-semibold shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
           <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
@@ -102,7 +102,7 @@ export default function LoginForm() {
               placeholder="username@firstasia.edu.ph"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="block w-full pl-10 pr-3.5 py-3 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+              className="block w-full pl-10 pr-3.5 py-3 text-base sm:text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
             />
           </div>
         </div>
@@ -123,7 +123,7 @@ export default function LoginForm() {
               placeholder="••••••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block w-full pl-10 pr-11 py-3 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+              className="block w-full pl-10 pr-11 py-3 text-base sm:text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
             />
             <button
               type="button"

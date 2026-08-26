@@ -25,37 +25,37 @@ export default function LandingNavbar() {
   ];
 
   return (
-    <header className="sticky top-3.5 z-50 px-3 sm:px-6 lg:px-8 transition-all duration-300">
+    <header className="sticky top-2.5 sm:top-3.5 z-50 px-2 sm:px-6 lg:px-8 transition-all duration-300">
       <div
-        className={`max-w-7xl mx-auto rounded-2xl transition-all duration-300 px-4 sm:px-5 py-2.5 flex items-center justify-between gap-4 ${
+        className={`max-w-7xl mx-auto rounded-2xl transition-all duration-300 px-3 sm:px-5 py-2 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-4 ${
           isScrolled
             ? "bg-slate-950/90 backdrop-blur-2xl border border-slate-700/80 shadow-2xl shadow-black/60"
             : "bg-slate-950/75 backdrop-blur-xl border border-slate-800/80 shadow-xl shadow-black/40"
         }`}
       >
         {/* Left: Brand Lockup */}
-        <Link href="/" className="flex items-center gap-3 group shrink-0">
+        <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group min-w-0 shrink">
           <div className="relative shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#0F2962] via-[#1E40AF] to-[#0A1A3F] flex items-center justify-center text-amber-400 font-black text-lg shadow-md shadow-blue-950/80 border border-blue-400/30 group-hover:scale-105 transition-transform">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-linear-to-br from-[#0F2962] via-[#1E40AF] to-[#0A1A3F] flex items-center justify-center text-amber-400 font-black text-base sm:text-lg shadow-md shadow-blue-950/80 border border-blue-400/30 group-hover:scale-105 transition-transform">
               FA
             </div>
-            <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3">
+            <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5 sm:h-3 sm:w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-slate-950"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-emerald-500 border-2 border-slate-950"></span>
             </span>
           </div>
 
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-white text-base tracking-tight group-hover:text-amber-300 transition-colors whitespace-nowrap">
+          <div className="flex flex-col min-w-0">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="font-extrabold text-white text-sm sm:text-base tracking-tight group-hover:text-amber-300 transition-colors whitespace-nowrap">
                 SASDMS
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-              <span className="text-[11px] font-mono font-semibold text-slate-400 whitespace-nowrap hidden sm:inline">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+              <span className="text-[11px] font-mono font-semibold text-slate-400 whitespace-nowrap hidden md:inline">
                 Institutional Portal
               </span>
             </div>
-            <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap">
+            <span className="text-[10px] text-slate-400 font-medium truncate max-w-32.5 xs:max-w-50 sm:max-w-none">
               FAITH Colleges • Student & Alumni Services
             </span>
           </div>
@@ -101,17 +101,17 @@ export default function LandingNavbar() {
         </div>
 
         {/* Mobile Hamburger / Quick Sign-In */}
-        <div className="flex sm:hidden items-center gap-2 shrink-0">
+        <div className="flex sm:hidden items-center gap-1.5 shrink-0">
           <Link
             href="/login"
-            className="text-xs font-bold text-slate-200 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 whitespace-nowrap"
+            className="text-xs font-bold text-slate-200 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 hover:text-white transition whitespace-nowrap"
           >
             Sign In
           </Link>
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white focus:outline-none cursor-pointer"
+            className="p-1.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white focus:outline-none cursor-pointer shrink-0"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}

@@ -124,7 +124,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
   ];
 
   return (
-    <aside className="w-68 bg-slate-950 text-slate-300 flex flex-col shrink-0 border-r border-slate-800/80 selection:bg-amber-400 selection:text-slate-950 z-40">
+    <aside className="hidden lg:flex w-68 bg-slate-950 text-slate-300 flex-col shrink-0 border-r border-slate-800/80 selection:bg-amber-400 selection:text-slate-950 z-40">
       {/* Brand Header */}
       <div className="h-18 px-6 flex items-center gap-3.5 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
         <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] flex items-center justify-center text-amber-400 font-black text-lg shadow-lg shadow-blue-950/50 border border-blue-400/30 shrink-0">

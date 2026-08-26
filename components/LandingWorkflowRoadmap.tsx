@@ -35,30 +35,30 @@ export default function LandingWorkflowRoadmap() {
           </p>
 
           {/* Workflow Toggle */}
-          <div className="inline-flex p-1.5 rounded-2xl bg-slate-950 border border-slate-800 gap-1.5 mt-4">
+          <div className="flex flex-col sm:inline-flex sm:flex-row p-1.5 rounded-2xl bg-slate-950 border border-slate-800 gap-1.5 mt-4 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setActiveWorkflowView("standard")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-2 ${
+              className={`px-4 py-2.5 sm:py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
                 activeWorkflowView === "standard"
                   ? "bg-linear-to-r from-[#1E40AF] to-[#0F2962] text-amber-300 border border-blue-400/40 shadow-md font-black"
                   : "text-slate-400 hover:text-slate-200"
               }`}
             >
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
               <span>Standard 4-Stage Approval Path</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveWorkflowView("escalated")}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-2 ${
+              className={`px-4 py-2.5 sm:py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
                 activeWorkflowView === "escalated"
                   ? "bg-linear-to-r from-rose-900 to-red-900 text-white border border-red-500/50 shadow-md font-black"
                   : "text-slate-400 hover:text-slate-200"
               }`}
             >
-              <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
+              <ShieldAlert className="w-3.5 h-3.5 text-rose-400 shrink-0" />
               <span>2-Rejection Auto-Escalation Safeguard</span>
             </button>
           </div>

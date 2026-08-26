@@ -277,7 +277,7 @@ export default function DocumentUploadForm({
         </div>
 
         {/* 3 Step Indicator Nodes */}
-        <div className="grid grid-cols-3 gap-2 pt-1 text-xs">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
           <div className={`p-2.5 rounded-xl border transition-all flex items-center gap-2.5 ${
             isStep1Done ? "bg-emerald-50/80 border-emerald-300 text-emerald-900" : "bg-slate-50 border-slate-200 text-slate-600"
           }`}>
@@ -335,7 +335,7 @@ export default function DocumentUploadForm({
       )}
 
       {/* 1. Metadata Box */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/90 space-y-6 shadow-sm">
+      <div className="glass-panel rounded-3xl p-5 sm:p-8 border border-white/90 space-y-6 shadow-sm">
         <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
           <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2.5">
             <Building2 className="w-5 h-5 text-[#0F2962]" />
@@ -635,18 +635,18 @@ export default function DocumentUploadForm({
       </div>
 
       {/* Action Buttons */}
-      <div className="flex justify-end gap-3.5 pt-2">
+      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-3.5 pt-2">
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-5 py-3 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition-all shadow-xs cursor-pointer"
+          className="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition-all shadow-xs cursor-pointer text-center"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting || isHashing || !file}
-          className="px-6 py-3 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white font-bold text-xs shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2.5 disabled:opacity-50 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
+          className="w-full sm:w-auto px-6 py-3 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white font-bold text-xs shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2.5 disabled:opacity-50 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
         >
           {isSubmitting ? (
             <>

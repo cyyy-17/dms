@@ -132,24 +132,24 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
   return (
     <>
-      <header className="h-18 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-4 sm:px-8 flex items-center justify-between shrink-0 sticky top-0 z-30 shadow-xs transition-all">
+      <header className="h-16 sm:h-18 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-3 sm:px-8 flex items-center justify-between shrink-0 sticky top-0 z-30 shadow-xs transition-all">
         {/* Left: Hamburger & Dynamic Breadcrumbs */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none"
+            className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none shrink-0"
             aria-label="Toggle Navigation"
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-            <Link href="/dashboard" className="hidden sm:flex items-center gap-1.5 text-slate-400 hover:text-slate-700 transition focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none rounded-lg p-0.5">
+          <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-semibold text-slate-500 min-w-0">
+            <Link href="/dashboard" className="hidden sm:flex items-center gap-1.5 text-slate-400 hover:text-slate-700 transition focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none rounded-lg p-0.5 shrink-0">
               <Home className="w-3.5 h-3.5" />
               <span>Portal</span>
             </Link>
-            <ChevronRight className="hidden sm:inline w-3.5 h-3.5 text-slate-300" />
-            <span className="font-black text-slate-900 text-sm sm:text-base tracking-tight truncate max-w-40 sm:max-w-none">
+            <ChevronRight className="hidden sm:inline w-3.5 h-3.5 text-slate-300 shrink-0" />
+            <span className="font-black text-slate-900 text-xs sm:text-base tracking-tight truncate max-w-30 xs:max-w-50 sm:max-w-none">
               {currentTitle}
             </span>
           </div>

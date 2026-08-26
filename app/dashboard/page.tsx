@@ -3,6 +3,7 @@ import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
 import { getStatusLabel, getStatusBadgeClass, getRoleLabel } from "@/lib/status-labels";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
+import DataTableWrapper from "@/components/DataTableWrapper";
 import {
   FileText,
   Clock,
@@ -140,9 +141,9 @@ export default async function DashboardPage() {
   const approvalRate = stats.total > 0 ? Math.round((stats.approved / stats.total) * 100) : 0;
 
   return (
-    <div className="p-6 lg:p-8 space-y-8 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
       {/* Top Welcome Banner with Ambient Glassmorphism & Gold Accent */}
-      <div className="glass-panel border-gradient-gold rounded-3xl p-6 sm:p-8 border border-white/90 relative overflow-hidden shadow-xl transition-all">
+      <div className="glass-panel border-gradient-gold rounded-3xl p-5 sm:p-8 border border-white/90 relative overflow-hidden shadow-xl transition-all">
         <div className="absolute top-0 right-0 w-96 h-96 bg-linear-to-bl from-blue-600/15 via-amber-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -168,10 +169,10 @@ export default async function DashboardPage() {
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0">
             <Link
               href="/dashboard/documents/new"
-              className="px-5 py-3 rounded-2xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-extrabold shadow-lg shadow-blue-950/25 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
+              className="px-4.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-extrabold shadow-lg shadow-blue-950/25 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
             >
               <Plus className="w-4 h-4 text-amber-400" />
               <span>Ingest Document</span>
@@ -180,7 +181,7 @@ export default async function DashboardPage() {
             {(user.role === "COORDINATOR" || user.role === "DIRECTOR" || user.role === "ADMIN") && (
               <Link
                 href="/dashboard/approvals"
-                className="px-5 py-3 rounded-2xl bg-white/95 border border-slate-300 hover:border-blue-400 text-slate-800 text-xs font-extrabold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
+                className="px-4.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-white/95 border border-slate-300 hover:border-blue-400 text-slate-800 text-xs font-extrabold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
               >
                 <Clock className="w-4 h-4 text-amber-600" />
                 <span>Review Queue ({stats.pendingCoordinator + stats.pendingDirector})</span>
@@ -415,7 +416,7 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
-        <div className="overflow-x-auto">
+        <DataTableWrapper>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50/90 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200/80">
@@ -467,7 +468,7 @@ export default async function DashboardPage() {
               ))}
             </tbody>
           </table>
-        </div>
+        </DataTableWrapper>
       </div>
     </div>
   );

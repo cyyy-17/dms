@@ -128,7 +128,7 @@ export default async function ApprovalQueuePage() {
   const escalatedCount = pendingDocs.filter((d) => d.isEscalated).length;
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
