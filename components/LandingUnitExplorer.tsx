@@ -45,23 +45,9 @@ const ICON_MAP: Record<string, LucideIcon> = {
 };
 
 export default function LandingUnitExplorer({ units = [] }: LandingUnitExplorerProps) {
-  const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [expandedUnit, setExpandedUnit] = useState<string | null>(null);
 
   const displayUnits = units || [];
-
-  const filteredUnits = displayUnits.filter((unit) => {
-    if (selectedFilter === "all") return true;
-    return unit.category === selectedFilter;
-  });
-
-  const filterTabs = [
-    { id: "all", label: `All SAS Units (${displayUnits.length})` },
-    { id: "counseling", label: "Counseling & Welfare" },
-    { id: "career", label: "Career & Placement" },
-    { id: "student_life", label: "Student Life & Aid" },
-    { id: "governance", label: "Discipline & Extension" },
-  ];
 
   return (
     <section id="units" className="py-24 bg-slate-900/60 border-t border-slate-800/80 relative">
@@ -80,26 +66,8 @@ export default function LandingUnitExplorer({ units = [] }: LandingUnitExplorerP
           </p>
         </div>
 
-        {/* Filter Navigation Tabs */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
-          {filterTabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setSelectedFilter(tab.id)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer ${
-                selectedFilter === tab.id
-                  ? "bg-amber-400 text-slate-950 shadow-lg shadow-amber-400/20 font-black"
-                  : "bg-slate-950/80 text-slate-400 border border-slate-800 hover:text-white hover:border-slate-700"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
         {/* Units Grid */}
-        {filteredUnits.length === 0 ? (
+        {displayUnits.length === 0 ? (
           <div className="p-12 text-center bg-slate-950/60 rounded-3xl border border-slate-800 text-slate-400 space-y-2">
             <Building2 className="w-10 h-10 mx-auto text-slate-600" />
             <p className="font-bold text-slate-300 text-sm">No Department Units Configured Yet</p>
@@ -109,7 +77,7 @@ export default function LandingUnitExplorer({ units = [] }: LandingUnitExplorerP
           </div>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredUnits.map((unit) => {
+            {displayUnits.map((unit) => {
               const Icon = ICON_MAP[unit.code.toUpperCase()] || Building2;
               const isExpanded = expandedUnit === unit.code;
 
