@@ -25,7 +25,7 @@ interface DocTypeOption {
   code: string;
   name: string;
   requiresExpiryTracking: boolean;
-  defaultApprovalLevel: string;
+  defaultApprovalLevel?: string;
 }
 
 interface UnitOption {

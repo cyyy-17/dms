@@ -26,7 +26,7 @@ interface DocTypeItem {
   code: string;
   name: string;
   description: string | null;
-  defaultApprovalLevel: ApprovalLevel;
+  defaultApprovalLevel?: ApprovalLevel;
   requiresExpiryTracking: boolean;
   defaultRetentionDays: number;
   isActive: boolean;
@@ -39,7 +39,6 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [levelFilter, setLevelFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -57,7 +56,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
     code: "",
     name: "",
     description: "",
-    defaultApprovalLevel: ApprovalLevel.DIRECTOR_REQUIRED,
+    defaultApprovalLevel: ApprovalLevel.COORDINATOR_ONLY,
     requiresExpiryTracking: false,
     defaultRetentionDays: 365,
     isActive: true,
@@ -72,11 +71,10 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
       dt.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (dt.description && dt.description.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    const matchesLevel = levelFilter === "ALL" || dt.defaultApprovalLevel === levelFilter;
     const matchesStatus =
       statusFilter === "ALL" || (statusFilter === "ACTIVE" ? dt.isActive : !dt.isActive);
 
-    return matchesSearch && matchesLevel && matchesStatus;
+    return matchesSearch && matchesStatus;
   });
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -102,7 +100,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
         code: "",
         name: "",
         description: "",
-        defaultApprovalLevel: ApprovalLevel.DIRECTOR_REQUIRED,
+        defaultApprovalLevel: ApprovalLevel.COORDINATOR_ONLY,
         requiresExpiryTracking: false,
         defaultRetentionDays: 365,
         isActive: true,
@@ -181,11 +179,11 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
         </div>
       )}
 
-      {/* Filter / Action Bar */}
-      <div className="glass-card rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 flex-1">
-          <div className="relative min-w-56 flex-1">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
+      {/* Control Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <div className="relative min-w-64">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
             <input
               type="text"
               placeholder="Search by Classification Code or Title..."
@@ -194,16 +192,6 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
               className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
             />
           </div>
-
-          <select
-            value={levelFilter}
-            onChange={(e) => setLevelFilter(e.target.value)}
-            className="text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
-          >
-            <option value="ALL">All Approval Chains</option>
-            <option value="COORDINATOR_ONLY">Coordinator Only</option>
-            <option value="DIRECTOR_REQUIRED">Director Required</option>
-          </select>
 
           <select
             value={statusFilter}
@@ -222,7 +210,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
               code: "",
               name: "",
               description: "",
-              defaultApprovalLevel: ApprovalLevel.DIRECTOR_REQUIRED,
+              defaultApprovalLevel: ApprovalLevel.COORDINATOR_ONLY,
               requiresExpiryTracking: false,
               defaultRetentionDays: 365,
               isActive: true,
@@ -244,7 +232,6 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
                 <th className="py-3.5 px-6">Classification Code</th>
                 <th className="py-3.5 px-6">Document Type Name</th>
-                <th className="py-3.5 px-6">Required Approval Chain</th>
                 <th className="py-3.5 px-6">RA 10173 Retention</th>
                 <th className="py-3.5 px-6">Expiry Tracking</th>
                 <th className="py-3.5 px-6">Status</th>
@@ -254,7 +241,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
             <tbody className="divide-y divide-slate-100 bg-white">
               {filteredTypes.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={6} className="py-12 text-center text-slate-400">
                     No document classification types found.
                   </td>
                 </tr>
@@ -265,13 +252,6 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
                     <td className="py-4 px-6">
                       <span className="font-bold text-slate-900 block">{dt.name}</span>
                       {dt.description && <span className="text-[11px] text-slate-500 line-clamp-1">{dt.description}</span>}
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-900 font-bold text-[10px] border border-blue-200">
-                        {dt.defaultApprovalLevel === ApprovalLevel.DIRECTOR_REQUIRED
-                          ? "Director Approval Required"
-                          : "Coordinator Level Only"}
-                      </span>
                     </td>
                     <td className="py-4 px-6 font-mono text-slate-700">
                       <span className="inline-flex items-center gap-1 font-bold text-[11px]">
@@ -309,7 +289,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
                             code: dt.code,
                             name: dt.name,
                             description: dt.description || "",
-                            defaultApprovalLevel: dt.defaultApprovalLevel,
+                            defaultApprovalLevel: dt.defaultApprovalLevel || ApprovalLevel.COORDINATOR_ONLY,
                             requiresExpiryTracking: dt.requiresExpiryTracking,
                             defaultRetentionDays: dt.defaultRetentionDays,
                             isActive: dt.isActive,
@@ -361,35 +341,20 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
             </div>
 
             <form onSubmit={editingType ? handleUpdate : handleCreate} className="space-y-3.5 text-xs">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 uppercase mb-1 block">Classification Code</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="MOU_MOA"
-                    value={form.code}
-                    onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg uppercase font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 uppercase mb-1 block">Required Approval Chain</label>
-                  <select
-                    value={form.defaultApprovalLevel}
-                    onChange={(e) =>
-                      setForm({ ...form, defaultApprovalLevel: e.target.value as ApprovalLevel })
-                    }
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
-                  >
-                    <option value="COORDINATOR_ONLY">COORDINATOR_ONLY (Terminal Level-1)</option>
-                    <option value="DIRECTOR_REQUIRED">DIRECTOR_REQUIRED (Full Chain)</option>
-                  </select>
-                </div>
+              <div>
+                <label className="font-bold text-slate-700 uppercase mb-1 block">Classification Code *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. MOU_MOA, EVENT_PERMIT"
+                  value={form.code}
+                  onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg uppercase font-mono"
+                />
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 uppercase mb-1 block">Document Type Name</label>
+                <label className="font-bold text-slate-700 uppercase mb-1 block">Document Type Name *</label>
                 <input
                   type="text"
                   required
@@ -404,7 +369,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
                 <label className="font-bold text-slate-700 uppercase mb-1 block">Description & Scope</label>
                 <textarea
                   rows={2}
-                  placeholder="Purpose, validity criteria, and required signatories..."
+                  placeholder="Purpose, validity criteria, and required context..."
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   className="w-full p-2.5 border border-slate-300 rounded-lg"

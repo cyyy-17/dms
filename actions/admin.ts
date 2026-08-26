@@ -533,7 +533,7 @@ export interface DocumentTypeInput {
   code: string;
   name: string;
   description?: string;
-  defaultApprovalLevel: ApprovalLevel;
+  defaultApprovalLevel?: ApprovalLevel;
   requiresExpiryTracking: boolean;
   defaultRetentionDays: number;
   isActive?: boolean;
@@ -561,7 +561,7 @@ export async function createDocumentTypeAction(input: DocumentTypeInput): Promis
         code: upperCode,
         name: input.name.trim(),
         description: input.description?.trim() || null,
-        defaultApprovalLevel: input.defaultApprovalLevel,
+        defaultApprovalLevel: input.defaultApprovalLevel || ApprovalLevel.COORDINATOR_ONLY,
         requiresExpiryTracking: input.requiresExpiryTracking,
         defaultRetentionDays: input.defaultRetentionDays || 365,
         isActive: input.isActive ?? true,
@@ -577,7 +577,6 @@ export async function createDocumentTypeAction(input: DocumentTypeInput): Promis
         actionType: "DOC_TYPE_CREATE",
         code: docType.code,
         name: docType.name,
-        approvalLevel: docType.defaultApprovalLevel,
         retentionDays: docType.defaultRetentionDays,
       },
     });
@@ -609,7 +608,7 @@ export async function updateDocumentTypeAction(input: DocumentTypeInput): Promis
         code: upperCode,
         name: input.name.trim(),
         description: input.description?.trim() || null,
-        defaultApprovalLevel: input.defaultApprovalLevel,
+        ...(input.defaultApprovalLevel ? { defaultApprovalLevel: input.defaultApprovalLevel } : {}),
         requiresExpiryTracking: input.requiresExpiryTracking,
         defaultRetentionDays: input.defaultRetentionDays,
         ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),

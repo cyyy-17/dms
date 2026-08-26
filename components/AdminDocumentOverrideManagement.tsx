@@ -50,11 +50,9 @@ export default function AdminDocumentOverrideManagement({
 
   const [overrideForm, setOverrideForm] = useState<{
     targetStatus: DocumentStatus;
-    approvalLevel: ApprovalLevel;
     reason: string;
   }>({
     targetStatus: DocumentStatus.APPROVED,
-    approvalLevel: ApprovalLevel.DIRECTOR_REQUIRED,
     reason: "",
   });
 
@@ -85,7 +83,6 @@ export default function AdminDocumentOverrideManagement({
     const res = await adminOverrideDocumentStatusAction({
       documentId: overrideDoc.id,
       targetStatus: overrideForm.targetStatus,
-      approvalLevel: overrideForm.approvalLevel,
       reason: overrideForm.reason,
     });
 
@@ -278,7 +275,6 @@ export default function AdminDocumentOverrideManagement({
                           setOverrideDoc(doc);
                           setOverrideForm({
                             targetStatus: doc.status,
-                            approvalLevel: doc.approvalLevel,
                             reason: "",
                           });
                         }}
@@ -346,19 +342,7 @@ export default function AdminDocumentOverrideManagement({
                 </select>
               </div>
 
-              <div>
-                <label className="font-bold text-slate-700 uppercase mb-1 block">Approval Chain Scope</label>
-                <select
-                  value={overrideForm.approvalLevel}
-                  onChange={(e) =>
-                    setOverrideForm({ ...overrideForm, approvalLevel: e.target.value as ApprovalLevel })
-                  }
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
-                >
-                  <option value="COORDINATOR_ONLY">Coordinator Endorsement Only</option>
-                  <option value="DIRECTOR_REQUIRED">Coordinator + Director Sign-off Required</option>
-                </select>
-              </div>
+
 
               <div>
                 <label className="font-bold text-slate-700 uppercase mb-1 block">
