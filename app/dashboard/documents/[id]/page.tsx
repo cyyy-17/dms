@@ -369,8 +369,11 @@ export default async function DocumentDetailPage({ params }: PageProps) {
               <div>
                 <span className="text-slate-400 block mb-0.5">Assigned Signatory Chain</span>
                 <span className="font-semibold text-[#0F2962]">
-                  {Array.isArray(doc.signatoryFlow) && (doc.signatoryFlow as any[]).length > 0
-                    ? (doc.signatoryFlow as any[]).map((s) => s.fullName || s.title || s.role).join(" → ")
+                  {Array.isArray(doc.signatoryFlow) &&
+                  (doc.signatoryFlow as Array<{ fullName?: string; title?: string; role?: string }>).length > 0
+                    ? (doc.signatoryFlow as Array<{ fullName?: string; title?: string; role?: string }>)
+                        .map((s) => s.fullName || s.title || s.role)
+                        .join(" → ")
                     : "Assigned Signatories"}
                 </span>
               </div>
