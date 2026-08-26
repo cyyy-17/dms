@@ -232,7 +232,7 @@ const DEFAULT_UNITS_DATA: SasUnitItem[] = [
 ];
 
 export default async function HomePage() {
-  let sasUnits: SasUnitItem[] = DEFAULT_UNITS_DATA;
+  let sasUnits: SasUnitItem[] = [];
 
   if (isDatabaseConfigured) {
     try {

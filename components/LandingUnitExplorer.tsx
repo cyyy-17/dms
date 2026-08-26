@@ -179,83 +179,93 @@ export default function LandingUnitExplorer({ units = DEFAULT_UNITS }: LandingUn
         </div>
 
         {/* Units Grid */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredUnits.map((unit) => {
-            const Icon = ICON_MAP[unit.code.toUpperCase()] || Building2;
-            const isExpanded = expandedUnit === unit.code;
+        {filteredUnits.length === 0 ? (
+          <div className="p-12 text-center bg-slate-950/60 rounded-3xl border border-slate-800 text-slate-400 space-y-2">
+            <Building2 className="w-10 h-10 mx-auto text-slate-600" />
+            <p className="font-bold text-slate-300 text-sm">No Department Units Configured Yet</p>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              Administrator has not yet provisioned departmental units. Units can be configured in the Staff & Admin Portal.
+            </p>
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredUnits.map((unit) => {
+              const Icon = ICON_MAP[unit.code.toUpperCase()] || Building2;
+              const isExpanded = expandedUnit === unit.code;
 
-            return (
-              <div
-                key={unit.code}
-                className="p-6 rounded-3xl bg-slate-950/80 border border-slate-800/90 hover:border-slate-600 transition-all duration-300 flex flex-col justify-between space-y-4 hover:-translate-y-1 shadow-xl group backdrop-blur-xl"
-              >
-                <div className="space-y-4">
-                  {/* Card Top Row */}
-                  <div className="flex items-center justify-between">
-                    <div className={`w-12 h-12 rounded-2xl bg-linear-to-br ${unit.color || "from-blue-500/20 to-blue-600/5 text-blue-400 border-blue-500/30"} border flex items-center justify-center shadow-md group-hover:scale-105 transition-transform`}>
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono font-bold text-slate-400 px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800">
-                        {unit.sla || "< 24h SLA"}
-                      </span>
-                      <span className="font-mono text-xs font-black px-2.5 py-1 rounded-full bg-slate-900 border border-slate-700 text-amber-400">
-                        {unit.code}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Title & Description */}
-                  <div>
-                    <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors">
-                      {unit.name}
-                    </h3>
-                    <p className="text-xs text-slate-300 leading-relaxed mt-1.5 font-normal">
-                      {unit.desc}
-                    </p>
-                  </div>
-
-                  {/* Expandable Document Taxonomy Preview */}
-                  {isExpanded && unit.sampleDocs && (
-                    <div className="pt-3 border-t border-slate-900 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
-                        Official Document Taxonomies:
-                      </span>
-                      <div className="space-y-1.5">
-                        {unit.sampleDocs.map((doc, idx) => (
-                          <div
-                            key={idx}
-                            className="flex items-center gap-2 text-xs text-slate-300 bg-slate-900/90 px-2.5 py-1.5 rounded-xl border border-slate-800"
-                          >
-                            <FileCheck2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                            <span className="truncate">{doc}</span>
-                          </div>
-                        ))}
+              return (
+                <div
+                  key={unit.code}
+                  className="p-6 rounded-3xl bg-slate-950/80 border border-slate-800/90 hover:border-slate-600 transition-all duration-300 flex flex-col justify-between space-y-4 hover:-translate-y-1 shadow-xl group backdrop-blur-xl"
+                >
+                  <div className="space-y-4">
+                    {/* Card Top Row */}
+                    <div className="flex items-center justify-between">
+                      <div className={`w-12 h-12 rounded-2xl bg-linear-to-br ${unit.color || "from-blue-500/20 to-blue-600/5 text-blue-400 border-blue-500/30"} border flex items-center justify-center shadow-md group-hover:scale-105 transition-transform`}>
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold text-slate-400 px-2 py-0.5 rounded-full bg-slate-900 border border-slate-800">
+                          {unit.sla || "< 24h SLA"}
+                        </span>
+                        <span className="font-mono text-xs font-black px-2.5 py-1 rounded-full bg-slate-900 border border-slate-700 text-amber-400">
+                          {unit.code}
+                        </span>
                       </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Card Bottom Footer with Expand Trigger */}
-                <div className="pt-3 border-t border-slate-900/90 flex items-center justify-between text-[11px] font-bold text-slate-400">
-                  <span className="flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>{unit.badge}</span>
-                  </span>
+                    {/* Title & Description */}
+                    <div>
+                      <h3 className="text-base font-bold text-white group-hover:text-amber-300 transition-colors">
+                        {unit.name}
+                      </h3>
+                      <p className="text-xs text-slate-300 leading-relaxed mt-1.5 font-normal">
+                        {unit.desc}
+                      </p>
+                    </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setExpandedUnit(isExpanded ? null : unit.code)}
-                    className="text-slate-400 hover:text-amber-400 flex items-center gap-1 transition"
-                  >
-                    <span>{isExpanded ? "Hide" : "Taxonomy"}</span>
-                    {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                  </button>
+                    {/* Expandable Document Taxonomy Preview */}
+                    {isExpanded && unit.sampleDocs && (
+                      <div className="pt-3 border-t border-slate-900 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                          Official Document Taxonomies:
+                        </span>
+                        <div className="space-y-1.5">
+                          {unit.sampleDocs.map((doc, idx) => (
+                            <div
+                              key={idx}
+                              className="flex items-center gap-2 text-xs text-slate-300 bg-slate-900/90 px-2.5 py-1.5 rounded-xl border border-slate-800"
+                            >
+                              <FileCheck2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                              <span className="truncate">{doc}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Bottom Footer with Expand Trigger */}
+                  <div className="pt-3 border-t border-slate-900/90 flex items-center justify-between text-[11px] font-bold text-slate-400">
+                    <span className="flex items-center gap-1.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>{unit.badge}</span>
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() => setExpandedUnit(isExpanded ? null : unit.code)}
+                      className="text-slate-400 hover:text-amber-400 flex items-center gap-1 transition"
+                    >
+                      <span>{isExpanded ? "Hide" : "Taxonomy"}</span>
+                      {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

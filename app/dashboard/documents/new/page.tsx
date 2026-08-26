@@ -99,24 +99,6 @@ export default async function NewDocumentPage() {
     }
   }
 
-  if (docTypes.length === 0) {
-    docTypes = SEED_DOCUMENT_TYPES.map((d, i) => ({
-      id: `doc-type-${i + 1}`,
-      code: d.code,
-      name: d.name,
-      requiresExpiryTracking: d.requiresExpiryTracking,
-      defaultApprovalLevel: d.defaultApprovalLevel,
-    }));
-  }
-
-  if (units.length === 0) {
-    units = SEED_UNITS.map((u, i) => ({
-      id: `unit-${i + 1}`,
-      code: u.code,
-      name: u.name,
-    }));
-  }
-
   const isCrossUnit = user.role === "DIRECTOR" || user.role === "ADMIN";
 
   return (

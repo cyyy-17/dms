@@ -39,20 +39,6 @@ export default async function AdminDocumentTypesPage() {
     }
   }
 
-  if (docTypes.length === 0) {
-    docTypes = SEED_DOCUMENT_TYPES.map((dt, idx) => ({
-      id: `doc-type-${idx + 1}`,
-      code: dt.code,
-      name: dt.name,
-      description: dt.description,
-      defaultApprovalLevel: dt.defaultApprovalLevel,
-      requiresExpiryTracking: dt.requiresExpiryTracking,
-      defaultRetentionDays: dt.defaultRetentionDays,
-      isActive: true,
-      _count: { documents: 3 },
-    }));
-  }
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
       <div>

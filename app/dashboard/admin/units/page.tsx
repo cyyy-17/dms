@@ -37,21 +37,6 @@ export default async function AdminUnitsPage() {
     }
   }
 
-  if (units.length === 0) {
-    units = SEED_UNITS.map((u, idx) => ({
-      id: `unit-${idx + 1}`,
-      code: u.code,
-      name: u.name,
-      description: u.description,
-      isActive: true,
-      createdAt: new Date("2026-08-24T00:00:00.000Z"),
-      _count: {
-        users: 2,
-        documents: 5,
-      },
-    }));
-  }
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
       <div>

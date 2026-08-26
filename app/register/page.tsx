@@ -26,14 +26,6 @@ export default async function RegisterPage() {
     }
   }
 
-  if (units.length === 0) {
-    units = SEED_UNITS.map((u, idx) => ({
-      id: `placeholder-unit-${idx + 1}`,
-      code: u.code,
-      name: u.name,
-    }));
-  }
-
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden selection:bg-amber-400 selection:text-slate-950">
       {/* Background Ambient Glows */}

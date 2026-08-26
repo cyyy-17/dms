@@ -90,41 +90,9 @@ async function resetForProduction() {
   }
 
   // ---------------------------------------------------------------------------
-  // STEP 4: Seed Canonical SAS Department Units
+  // STEP 4: Units and Document Types intentionally kept empty (0 records)
   // ---------------------------------------------------------------------------
-  console.log("\n4. Seeding official Student & Alumni Services (SAS) Units...");
-  const createdUnits = [];
-  for (const u of SEED_UNITS) {
-    const createdUnit = await prisma.unit.create({
-      data: {
-        code: u.code,
-        name: u.name,
-        description: u.description,
-        isActive: true,
-      },
-    });
-    createdUnits.push(createdUnit);
-    console.log(`  ✓ Seeded Unit: [${createdUnit.code}] ${createdUnit.name}`);
-  }
-
-  // ---------------------------------------------------------------------------
-  // STEP 5: Seed Canonical SAS Document Types
-  // ---------------------------------------------------------------------------
-  console.log("\n5. Seeding official Document Types & Retention Rules...");
-  for (const dt of SEED_DOCUMENT_TYPES) {
-    const createdDocType = await prisma.documentType.create({
-      data: {
-        code: dt.code,
-        name: dt.name,
-        description: dt.description,
-        defaultApprovalLevel: dt.defaultApprovalLevel as ApprovalLevel,
-        requiresExpiryTracking: dt.requiresExpiryTracking,
-        defaultRetentionDays: dt.defaultRetentionDays,
-        isActive: true,
-      },
-    });
-    console.log(`  ✓ Seeded DocType: [${createdDocType.code}] ${createdDocType.name} (${createdDocType.defaultApprovalLevel})`);
-  }
+  console.log("\n4. Units & Document Types initialized as clean empty tables (0 records)");
 
   // ---------------------------------------------------------------------------
   // STEP 6: Create & Verify Single Super Admin Account
