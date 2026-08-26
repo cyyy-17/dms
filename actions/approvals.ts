@@ -143,6 +143,9 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
           documentId: doc.id,
           trackingNumber: doc.trackingNumber,
           title: doc.title,
+          requestorName: `${doc.uploader.firstName} ${doc.uploader.lastName}`,
+          unitName: doc.unit.name,
+          totalSignatories: flow.length > 0 ? flow.length : 1,
         },
       });
     }

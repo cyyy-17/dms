@@ -97,12 +97,18 @@ export function renderNotificationEmail(params: EmailRenderParams): RenderedEmai
     }
 
     case "document-approved": {
-      badgeText = "Approved & Sealed";
+      const requestorName = payload.requestorName ? String(payload.requestorName) : null;
+      const unitName = payload.unitName ? String(payload.unitName) : null;
+      const totalSignatories = payload.totalSignatories ? Number(payload.totalSignatories) : null;
+
+      badgeText = "All Signatories Completed • Sealed & Approved";
       badgeBg = "#059669";
       badgeColor = "#FFFFFF";
 
-      headline = "Document Fully Approved & Sealed";
-      leadText = "Your document has successfully passed all sequential review and signatory levels. It is now archived and sealed in the digital vault.";
+      headline = "Document Fully Approved & Sealed in Digital Vault";
+      leadText = requestorName
+        ? `Hello ${escapeHtml(requestorName)}, your document submission has successfully completed all assigned approvals and electronic signatory steps. The sealed document is now archived in the vault.`
+        : "Your document submission has successfully completed all assigned approvals and electronic signatory steps. The sealed document is now archived in the vault.";
 
       bodyHtml = `
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 20px 0; border-collapse: collapse; background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 10px; overflow: hidden;">
@@ -111,15 +117,24 @@ export function renderNotificationEmail(params: EmailRenderParams): RenderedEmai
             <td style="padding: 12px 18px; font-size: 13px; color: #14532D; border-bottom: 1px solid #BBF7D0; font-weight: 700; font-family: monospace;">${escapeHtml(trackingNumber || "N/A")}</td>
           </tr>
           <tr>
-            <td style="padding: 12px 18px; font-size: 13px; color: #166534; font-weight: 600;">Document Title</td>
-            <td style="padding: 12px 18px; font-size: 13px; color: #14532D; font-weight: 600;">${escapeHtml(title || "Document")}</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #166534; border-bottom: 1px solid #BBF7D0; font-weight: 600;">Document Title</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #14532D; border-bottom: 1px solid #BBF7D0; font-weight: 600;">${escapeHtml(title || "Document")}</td>
+          </tr>
+          ${unitName ? `
+          <tr>
+            <td style="padding: 12px 18px; font-size: 13px; color: #166534; border-bottom: 1px solid #BBF7D0; font-weight: 600;">Department Unit</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #14532D; border-bottom: 1px solid #BBF7D0; font-weight: 600;">${escapeHtml(unitName)}</td>
+          </tr>` : ""}
+          <tr>
+            <td style="padding: 12px 18px; font-size: 13px; color: #166534; font-weight: 600;">Signatory Chain Status</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #047857; font-weight: 700;">✓ All ${totalSignatories ? `${totalSignatories} Steps` : "Signatories"} Completed &amp; Cryptographically Sealed</td>
           </tr>
         </table>
       `;
 
-      ctaText = "View Document in Vault";
+      ctaText = "Access Approved Document in Vault";
       ctaUrl = docId ? `${baseUrl}/dashboard/documents/${docId}` : `${baseUrl}/dashboard/documents`;
-      plainDetails = `Tracking Number: ${trackingNumber}\nTitle: ${title}\nStatus: Approved & Sealed in Vault\nURL: ${ctaUrl}`;
+      plainDetails = `Tracking Number: ${trackingNumber}\nTitle: ${title}\nUnit: ${unitName || "N/A"}\nStatus: All Signatories Completed & Sealed\nVault URL: ${ctaUrl}`;
       break;
     }
 
