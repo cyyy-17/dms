@@ -35,7 +35,7 @@ export default function LandingFooter() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span>System Operational • All 7 SAS Units Connected • Latency &lt; 15ms</span>
+              <span>System Operational • Zero-Trust Perimeter Active • Latency &lt; 15ms</span>
             </div>
           </div>
 

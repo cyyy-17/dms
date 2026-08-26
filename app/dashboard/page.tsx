@@ -48,6 +48,8 @@ export default async function DashboardPage() {
   };
 
   let activeUnitCount = 0;
+  let totalVersionsCount = 0;
+  let verifiedVersionsCount = 0;
   let unitCounts: Array<{ code: string; name: string; count: number }> = [];
 
   let recentDocs: Array<{
@@ -89,6 +91,8 @@ export default async function DashboardPage() {
         allUnits,
         myItems,
         totalActiveUnits,
+        totalVersions,
+        sha256VerifiedVersions,
       ] = await Promise.all([
         prisma.document.count({ where: unitFilter }),
         prisma.document.count({ where: { ...unitFilter, status: DocumentStatus.PENDING_COORDINATOR } }),
@@ -116,11 +120,15 @@ export default async function DashboardPage() {
           include: { unit: true, uploader: true },
         }),
         prisma.unit.count({ where: { isActive: true } }),
+        prisma.documentVersion.count(),
+        prisma.documentVersion.count({ where: { sha256Checksum: { not: "" } } }),
       ]);
 
       stats = { total, pendingCoordinator, pendingDirector, approved, returned, escalated, awaitingMySignature };
       recentDocs = docs;
       activeUnitCount = totalActiveUnits;
+      totalVersionsCount = totalVersions;
+      verifiedVersionsCount = sha256VerifiedVersions;
 
       if (allUnits.length > 0) {
         unitCounts = allUnits
@@ -143,6 +151,8 @@ export default async function DashboardPage() {
   }
 
   const approvalRate = stats.total > 0 ? Math.round((stats.approved / stats.total) * 100) : 0;
+  const slaOnTimeRate = stats.total > 0 ? Math.round(((stats.total - stats.escalated) / stats.total) * 100) : 100;
+  const sha256Rate = totalVersionsCount > 0 ? Math.round((verifiedVersionsCount / totalVersionsCount) * 100) : 100;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
@@ -200,14 +210,14 @@ export default async function DashboardPage() {
             <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
             <div>
               <span className="text-[10px] text-slate-400 uppercase font-black block">Review SLA</span>
-              <span className="font-bold text-slate-900">99.4% On-Time</span>
+              <span className="font-bold text-slate-900">{slaOnTimeRate}% On-Time</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
             <div>
               <span className="text-[10px] text-slate-400 uppercase font-black block">Integrity</span>
-              <span className="font-bold text-slate-900">100% SHA-256</span>
+              <span className="font-bold text-slate-900">{sha256Rate}% SHA-256</span>
             </div>
           </div>
           <div className="flex items-center gap-2">
