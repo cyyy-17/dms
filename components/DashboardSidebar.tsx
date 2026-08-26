@@ -190,7 +190,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 group ${
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 group focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none ${
                     isActive
                       ? "bg-linear-to-r from-[#1E40AF] to-[#0F2962] text-white shadow-md shadow-blue-950/40 border border-blue-400/30"
                       : "text-slate-400 hover:bg-slate-900/80 hover:text-white"
@@ -218,7 +218,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 group ${
+                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 group focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none ${
                     isActive
                       ? "bg-linear-to-r from-[#1E40AF] to-[#0F2962] text-white shadow-md shadow-blue-950/40 border border-blue-400/30"
                       : "text-slate-400 hover:bg-slate-900/80 hover:text-white"
@@ -241,7 +241,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
         <button
           onClick={handleSignOut}
           disabled={isSigningOut}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-red-400 bg-red-950/30 hover:bg-red-950/60 hover:text-red-300 border border-red-900/40 transition-all duration-200 disabled:opacity-50 cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-red-400 bg-red-950/30 hover:bg-red-950/60 hover:text-red-300 border border-red-900/40 transition-all duration-200 disabled:opacity-50 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
         >
           {isSigningOut ? (
             <>

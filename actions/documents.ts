@@ -85,6 +85,15 @@ export async function createDocumentAction(input: CreateDocumentInput): Promise<
       return { success: false, error: "Invalid document type specified." };
     }
 
+    // Validate File Size (25MB Max) & MIME Type
+    const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
+    if (input.fileSize > MAX_FILE_SIZE_BYTES) {
+      return { success: false, error: "File exceeds the maximum allowable size of 25MB." };
+    }
+    if (input.mimeType !== "application/pdf") {
+      return { success: false, error: "Only official PDF documents (application/pdf) are permitted." };
+    }
+
     // 1. Generate Sequential Tracking Number
     const countInYear = await prisma.document.count({
       where: {
@@ -224,6 +233,15 @@ export async function createDocumentVersionAction(input: CreateVersionInput): Pr
     const editableStatuses = ["DRAFT", "REJECTED_RETURNED"];
     if (!editableStatuses.includes(doc.status)) {
       return { success: false, error: `Cannot upload a new version while the document is in '${doc.status}' status.` };
+    }
+
+    // Validate File Size (25MB Max) & MIME Type
+    const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
+    if (input.fileSize > MAX_FILE_SIZE_BYTES) {
+      return { success: false, error: "File exceeds the maximum allowable size of 25MB." };
+    }
+    if (input.mimeType !== "application/pdf") {
+      return { success: false, error: "Only official PDF documents (application/pdf) are permitted." };
     }
 
     const nextVersionNumber = (doc.versions[0]?.versionNumber || 0) + 1;
@@ -409,7 +427,7 @@ export async function submitDocumentForReviewAction(documentId: string): Promise
 
 /**
  * Generate Secure Short-Lived Signed Download URL (15 mins)
- * Optionally accepts documentId for complete audit trail.
+ * Validates requester role and tenancy boundaries.
  */
 export async function getSignedDocumentUrlAction(
   storagePath: string,
@@ -421,7 +439,7 @@ export async function getSignedDocumentUrlAction(
 }> {
   const currentUser = await getAuthenticatedUser();
   if (!currentUser) {
-    return { success: false, error: "Unauthorized." };
+    return { success: false, error: "Unauthorized. Please log in." };
   }
 
   if (!isDatabaseConfigured) {
@@ -432,6 +450,34 @@ export async function getSignedDocumentUrlAction(
   }
 
   try {
+    // Strict Tenancy & Authorization Verification
+    if (currentUser.role !== "ADMIN" && currentUser.role !== "DIRECTOR") {
+      let targetDoc = null;
+      if (documentId) {
+        targetDoc = await prisma.document.findUnique({
+          where: { id: documentId },
+          select: { unitId: true, uploaderId: true, currentSignatoryId: true },
+        });
+      } else {
+        const version = await prisma.documentVersion.findFirst({
+          where: { storagePath },
+          include: { document: { select: { unitId: true, uploaderId: true, currentSignatoryId: true } } },
+        });
+        targetDoc = version?.document || null;
+      }
+
+      if (targetDoc) {
+        const isAuthorized =
+          targetDoc.unitId === currentUser.unitId ||
+          targetDoc.uploaderId === currentUser.id ||
+          targetDoc.currentSignatoryId === currentUser.id;
+
+        if (!isAuthorized) {
+          return { success: false, error: "Access denied. Cross-unit document download is strictly restricted." };
+        }
+      }
+    }
+
     const { data, error } = await supabaseAdmin.storage
       .from(STORAGE_BUCKETS.DOCUMENTS)
       .createSignedUrl(storagePath, 900); // 15 minutes (900 seconds)
@@ -440,7 +486,7 @@ export async function getSignedDocumentUrlAction(
       return { success: false, error: "Unable to generate secure download link." };
     }
 
-    // 1C: Include documentId in audit trail for complete download tracking
+    // Include in audit trail for RA 10173 compliance
     await logAuditEvent({
       actorId: currentUser.id,
       unitId: currentUser.unitId,

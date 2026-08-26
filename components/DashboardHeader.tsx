@@ -98,14 +98,14 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer"
+            className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none"
             aria-label="Toggle Navigation"
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
 
           <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
-            <Link href="/dashboard" className="hidden sm:flex items-center gap-1.5 text-slate-400 hover:text-slate-700 transition">
+            <Link href="/dashboard" className="hidden sm:flex items-center gap-1.5 text-slate-400 hover:text-slate-700 transition focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none rounded-lg p-0.5">
               <Home className="w-3.5 h-3.5" />
               <span>Portal</span>
             </Link>
@@ -120,7 +120,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
         <button
           type="button"
           onClick={() => setIsQuickSearchOpen(true)}
-          className="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100/80 text-slate-400 hover:text-slate-700 text-xs font-medium transition-all shadow-inner cursor-pointer"
+          className="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100/80 text-slate-400 hover:text-slate-700 text-xs font-medium transition-all shadow-inner cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none"
           title="Quick search tracking numbers and shortcuts (Ctrl+K)"
         >
           <Search className="w-3.5 h-3.5 text-slate-400" />
@@ -136,15 +136,16 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           <button
             type="button"
             onClick={() => setIsQuickSearchOpen(true)}
-            className="md:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 cursor-pointer"
+            className="md:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none"
             title="Search"
+            aria-label="Open Search"
           >
             <Search className="w-4 h-4" />
           </button>
 
           <button
             onClick={() => setIsSignatureModalOpen(true)}
-            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-xs hover:-translate-y-0.5 active:scale-98 cursor-pointer ${
+            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-xs hover:-translate-y-0.5 active:scale-98 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none ${
               hasSignature
                 ? "bg-emerald-50/80 border-emerald-200/80 text-emerald-800 hover:bg-emerald-100"
                 : "bg-amber-50/80 border-amber-200/80 text-amber-900 hover:bg-amber-100"
@@ -165,7 +166,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           {/* User Identity Chip */}
           <Link
             href="/dashboard/profile"
-            className="flex items-center gap-2.5 hover:opacity-90 transition group cursor-pointer"
+            className="flex items-center gap-2.5 hover:opacity-90 transition group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none rounded-xl p-1"
             title="View profile & settings"
           >
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center border border-blue-900 shadow-md shrink-0">

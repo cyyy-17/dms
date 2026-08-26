@@ -114,10 +114,32 @@ export default function DocumentUploadForm({
 
   const selectedDocType = docTypes.find((d) => d.id === documentTypeId);
 
-  // Compute SHA-256 checksum on file selection
+  // Compute SHA-256 checksum on file selection with instant client validation
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
+
+    // Validate size (25MB limit)
+    const MAX_SIZE = 25 * 1024 * 1024;
+    if (selectedFile.size > MAX_SIZE) {
+      setError("File exceeds the maximum allowable size of 25MB.");
+      setFile(null);
+      setFileChecksum(null);
+      e.target.value = "";
+      return;
+    }
+
+    // Validate PDF MIME/extension
+    if (
+      selectedFile.type !== "application/pdf" &&
+      !selectedFile.name.toLowerCase().endsWith(".pdf")
+    ) {
+      setError("Only official PDF documents are supported for ingestion.");
+      setFile(null);
+      setFileChecksum(null);
+      e.target.value = "";
+      return;
+    }
 
     setFile(selectedFile);
     setIsHashing(true);
