@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import SignaturePadModal from "@/components/SignaturePadModal";
+import dynamic from "next/dynamic";
+
+const SignaturePadModal = dynamic(() => import("@/components/SignaturePadModal"), { ssr: false });
 import {
   updateUserProfileDetailsAction,
   updateUserPasswordAction,

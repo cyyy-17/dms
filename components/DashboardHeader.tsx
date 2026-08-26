@@ -26,8 +26,10 @@ import {
 } from "lucide-react";
 import { signOutAction } from "@/actions/auth";
 import { getRoleLabel } from "@/lib/status-labels";
-import SignaturePadModal from "@/components/SignaturePadModal";
-import QuickSearchModal from "@/components/QuickSearchModal";
+import dynamic from "next/dynamic";
+
+const SignaturePadModal = dynamic(() => import("@/components/SignaturePadModal"), { ssr: false });
+const QuickSearchModal = dynamic(() => import("@/components/QuickSearchModal"), { ssr: false });
 
 interface DashboardHeaderProps {
   user: {
