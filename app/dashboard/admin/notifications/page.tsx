@@ -35,37 +35,6 @@ export default async function AdminNotificationsPage() {
     }
   }
 
-  if (notifications.length === 0) {
-    notifications = [
-      {
-        id: "notif-1",
-        recipientEmail: "msantos@firstasia.edu.ph",
-        type: NotificationType.DOCUMENT_SUBMITTED_COORDINATOR,
-        subject: "SASDMS: Document Awaiting Review - SAS-2026-CAR-00001",
-        status: NotificationStatus.SENT,
-        attempts: 1,
-        maxAttempts: 3,
-        scheduledFor: new Date("2026-08-24T00:00:00.000Z"),
-        sentAt: new Date("2026-08-24T00:00:00.000Z"),
-        createdAt: new Date("2026-08-24T00:00:00.000Z"),
-        recipient: { firstName: "Maria", lastName: "Santos" },
-      },
-      {
-        id: "notif-2",
-        recipientEmail: "director@firstasia.edu.ph",
-        type: NotificationType.DOCUMENT_ESCALATED_DIRECTOR,
-        subject: "SASDMS: Auto-Escalation Alert (2x Rejection) - SAS-2026-ALM-00002",
-        status: NotificationStatus.PENDING,
-        attempts: 0,
-        maxAttempts: 3,
-        scheduledFor: new Date("2026-08-24T00:00:00.000Z"),
-        sentAt: null,
-        createdAt: new Date("2026-08-24T00:00:00.000Z"),
-        recipient: { firstName: "Department", lastName: "Director" },
-      },
-    ];
-  }
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
       <div>

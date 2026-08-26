@@ -39,37 +39,6 @@ export default async function AdminAuditPage() {
     }
   }
 
-  if (auditLogs.length === 0) {
-    auditLogs = [
-      {
-        id: "log-1",
-        action: AuditAction.DOCUMENT_APPROVE_COORDINATOR,
-        targetType: "DOCUMENT",
-        targetId: "doc-uuid-1",
-        ipAddress: "192.168.1.45",
-        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-        createdAt: new Date("2026-08-24T00:00:00.000Z"),
-        actor: { firstName: "Maria", lastName: "Santos", email: "msantos@firstasia.edu.ph" },
-        unit: { code: "CAREER" },
-        document: { trackingNumber: "SAS-2026-CAR-00001", title: "AY 2026-2027 Industry Internship Partner MOU" },
-        details: { nextStatus: "PENDING_DIRECTOR", comments: "Endorsed for final Director signature." },
-      },
-      {
-        id: "log-2",
-        action: AuditAction.DOCUMENT_REJECT_RETURN,
-        targetType: "DOCUMENT",
-        targetId: "doc-uuid-2",
-        ipAddress: "192.168.1.88",
-        userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)",
-        createdAt: new Date("2026-08-24T00:00:00.000Z"),
-        actor: { firstName: "Director", lastName: "Executive", email: "director@firstasia.edu.ph" },
-        unit: { code: "ALUMNI" },
-        document: { trackingNumber: "SAS-2026-ALM-00002", title: "Grand Alumni Homecoming 2026 Budget & Facility Permit" },
-        details: { comments: "Budget breakdown missing annex C. Please revise.", rejectionCount: 2, isEscalated: true },
-      },
-    ];
-  }
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
       <div>

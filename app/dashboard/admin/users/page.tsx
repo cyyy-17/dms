@@ -80,35 +80,6 @@ export default async function AdminUsersPage() {
     }));
   }
 
-  if (users.length === 0) {
-    users = [
-      {
-        id: "sample-user-pending",
-        firstName: "Ricardo",
-        lastName: "Dalisay",
-        email: "rdalisay@firstasia.edu.ph",
-        employeeId: "EMP-2026-092",
-        role: UserRole.STAFF,
-        status: UserStatus.PENDING_APPROVAL,
-        unitId: units[0].id,
-        createdAt: new Date(),
-        unit: { id: units[0].id, code: units[0].code, name: units[0].name },
-      },
-      {
-        id: "sample-user-coord",
-        firstName: "Maria",
-        lastName: "Santos",
-        email: "msantos@firstasia.edu.ph",
-        employeeId: "EMP-2024-012",
-        role: UserRole.COORDINATOR,
-        status: UserStatus.ACTIVE,
-        unitId: units[0].id,
-        createdAt: new Date(),
-        unit: { id: units[0].id, code: units[0].code, name: units[0].name },
-      },
-    ];
-  }
-
   const pendingCount = users.filter((u) => u.status === UserStatus.PENDING_APPROVAL).length;
 
   return (

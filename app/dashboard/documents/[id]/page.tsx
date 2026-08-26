@@ -174,77 +174,28 @@ export default async function DocumentDetailPage({ params }: PageProps) {
   }
 
   if (!doc) {
-    // Demo Mock Document for UI Preview
-    doc = {
-      id: id,
-      trackingNumber: "SAS-2026-CAR-00001",
-      title: "AY 2026-2027 Industry Internship Partner MOU",
-      description:
-        "Standard institutional Memorandum of Agreement covering student internship placements and industry immersion programs.",
-      status: DocumentStatus.PENDING_DIRECTOR,
-      approvalLevel: "DIRECTOR_REQUIRED",
-      rejectionCount: 1,
-      isEscalated: false,
-      effectiveDate: new Date("2026-09-01T00:00:00.000Z"),
-      expiryDate: new Date("2027-08-31T00:00:00.000Z"),
-      uploaderId: currentUser.id,
-      unitId: currentUser.unitId || "unit-career",
-      unit: { code: "CAREER", name: "Career Services & Placement" },
-      uploader: { firstName: "Juan", lastName: "Dela Cruz", email: "jdelacruz@firstasia.edu.ph" },
-      documentType: {
-        code: "MOU_MOA",
-        name: "Memorandum of Agreement / Understanding",
-        defaultApprovalLevel: "DIRECTOR_REQUIRED",
-        defaultRetentionDays: 3650,
-      },
-      currentVersion: {
-        id: "ver-1",
-        versionNumber: 1,
-        fileName: "Industry_Partner_MOU_Draft.pdf",
-        fileSize: 1048576,
-        mimeType: "application/pdf",
-        sha256Checksum: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        storagePath: "documents/CAREER/MOU_MOA/SAS-2026-CAR-00001/v1_draft.pdf",
-        changeSummary: "Initial Version (v1) Submission",
-        createdAt: new Date("2026-08-24T00:00:00.000Z"),
-      },
-      versions: [
-        {
-          id: "ver-1",
-          versionNumber: 1,
-          fileName: "Industry_Partner_MOU_Draft.pdf",
-          fileSize: 1048576,
-          mimeType: "application/pdf",
-          sha256Checksum: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-          storagePath: "documents/CAREER/MOU_MOA/SAS-2026-CAR-00001/v1_draft.pdf",
-          changeSummary: "Initial Version (v1) Submission",
-          createdAt: new Date("2026-08-24T00:00:00.000Z"),
-          uploadedBy: { firstName: "Juan", lastName: "Dela Cruz" },
-        },
-      ],
-      approvalActions: [
-        {
-          id: "action-1",
-          action: ApprovalActionType.SUBMIT,
-          actorRole: UserRole.STAFF,
-          comments: "Submitted for initial Coordinator review",
-          signatureApplied: false,
-          createdAt: new Date("2026-08-24T01:00:00.000Z"),
-          actor: { firstName: "Juan", lastName: "Dela Cruz", email: "jdelacruz@firstasia.edu.ph" },
-          version: { versionNumber: 1 },
-        },
-        {
-          id: "action-2",
-          action: ApprovalActionType.COORDINATOR_APPROVE,
-          actorRole: UserRole.COORDINATOR,
-          comments: "Reviewed and endorsed for Director signature.",
-          signatureApplied: true,
-          createdAt: new Date("2026-08-24T02:00:00.000Z"),
-          actor: { firstName: "Maria", lastName: "Santos", email: "msantos@firstasia.edu.ph" },
-          version: { versionNumber: 1 },
-        },
-      ],
-    };
+    return (
+      <div className="p-6 lg:p-12 max-w-2xl mx-auto w-full text-center space-y-6 animate-in fade-in duration-200">
+        <div className="w-16 h-16 rounded-3xl bg-slate-100 text-slate-500 flex items-center justify-center mx-auto shadow-inner">
+          <Shield className="w-8 h-8" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Document Not Found</h1>
+          <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-md mx-auto">
+            The requested document record does not exist or has been removed from the repository.
+          </p>
+        </div>
+        <div className="pt-2">
+          <Link
+            href="/dashboard/documents"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F2962] text-white text-xs font-bold shadow-md hover:bg-[#1E40AF] transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Return to Repository</span>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -41,41 +41,6 @@ export default async function AdminDocumentsOverridePage() {
     }
   }
 
-  if (documents.length === 0) {
-    documents = [
-      {
-        id: "sample-doc-1",
-        trackingNumber: "SAS-2026-CAR-00001",
-        title: "AY 2026-2027 Industry Internship Partner MOU",
-        status: DocumentStatus.PENDING_DIRECTOR,
-        approvalLevel: ApprovalLevel.DIRECTOR_REQUIRED,
-        isEscalated: false,
-        rejectionCount: 0,
-        createdAt: new Date("2026-08-24T00:00:00.000Z"),
-        updatedAt: new Date("2026-08-24T00:00:00.000Z"),
-        unit: { code: "CAREER", name: "Career Services & Placement" },
-        uploader: { firstName: "Juan", lastName: "Dela Cruz", email: "jdelacruz@firstasia.edu.ph" },
-        documentType: { code: "MOU_MOA", name: "Memorandum of Agreement / Understanding" },
-        currentVersion: { versionNumber: 1, fileName: "Industry_Partner_MOU.pdf" },
-      },
-      {
-        id: "sample-doc-2",
-        trackingNumber: "SAS-2026-ALM-00002",
-        title: "Grand Alumni Homecoming 2026 Budget & Facility Permit",
-        status: DocumentStatus.REJECTED_RETURNED,
-        approvalLevel: ApprovalLevel.DIRECTOR_REQUIRED,
-        isEscalated: true,
-        rejectionCount: 2,
-        createdAt: new Date("2026-08-24T00:00:00.000Z"),
-        updatedAt: new Date("2026-08-24T00:00:00.000Z"),
-        unit: { code: "ALUMNI", name: "Alumni Relations & Affairs" },
-        uploader: { firstName: "Maria", lastName: "Santos", email: "msantos@firstasia.edu.ph" },
-        documentType: { code: "CAMPUS_PERMIT", name: "Off-Campus / Campus Facility Permit" },
-        currentVersion: { versionNumber: 2, fileName: "Homecoming_Permit_v2.pdf" },
-      },
-    ];
-  }
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
       <div>

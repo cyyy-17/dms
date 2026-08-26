@@ -77,27 +77,6 @@ export default async function AdminDelegationsPage() {
     units = SEED_UNITS.map((u, i) => ({ id: `unit-${i + 1}`, code: u.code, name: u.name }));
   }
 
-  if (users.length === 0) {
-    users = [
-      {
-        id: "sample-u-1",
-        firstName: "Maria",
-        lastName: "Santos",
-        email: "msantos@firstasia.edu.ph",
-        role: "COORDINATOR",
-        unitId: units[0].id,
-      },
-      {
-        id: "sample-u-2",
-        firstName: "Juan",
-        lastName: "Dela Cruz",
-        email: "jdelacruz@firstasia.edu.ph",
-        role: "STAFF",
-        unitId: units[0].id,
-      },
-    ];
-  }
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl mx-auto w-full">
       <div>

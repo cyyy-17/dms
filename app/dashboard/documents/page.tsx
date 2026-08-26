@@ -91,40 +91,6 @@ export default async function DocumentsPage({ searchParams }: PageProps) {
     }
   }
 
-  if (documents.length === 0) {
-    const fallbackDate = new Date("2026-09-18T00:00:00.000Z");
-    documents = [
-      {
-        id: "sample-doc-1",
-        trackingNumber: "SAS-2026-CAR-00001",
-        title: "AY 2026-2027 Industry Internship Partner MOU",
-        status: DocumentStatus.PENDING_DIRECTOR,
-        isEscalated: false,
-        rejectionCount: 0,
-        createdAt: new Date("2026-08-24T00:00:00.000Z"),
-        expiryDate: fallbackDate,
-        unit: { code: "CAREER", name: "Career Services & Placement" },
-        uploader: { firstName: "Juan", lastName: "Dela Cruz" },
-        documentType: { name: "Memorandum of Agreement / Understanding" },
-        currentVersion: { versionNumber: 1, fileName: "Industry_MOU_Draft.pdf", fileSize: 1048576 },
-      },
-      {
-        id: "sample-doc-2",
-        trackingNumber: "SAS-2026-ALM-00002",
-        title: "Grand Alumni Homecoming 2026 Budget & Facility Permit",
-        status: DocumentStatus.REJECTED_RETURNED,
-        isEscalated: true,
-        rejectionCount: 2,
-        createdAt: new Date("2026-08-24T00:00:00.000Z"),
-        expiryDate: null,
-        unit: { code: "ALUMNI", name: "Alumni Relations & Affairs" },
-        uploader: { firstName: "Maria", lastName: "Santos" },
-        documentType: { name: "Off-Campus / Campus Facility Permit" },
-        currentVersion: { versionNumber: 2, fileName: "Homecoming_Permit_v2.pdf", fileSize: 2097152 },
-      },
-    ];
-  }
-
   return (
     <DocumentRepositoryConsole
       initialDocuments={documents}

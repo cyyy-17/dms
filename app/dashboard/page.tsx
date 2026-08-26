@@ -116,7 +116,7 @@ export default async function DashboardPage() {
       ]);
 
       stats = { total, pendingCoordinator, pendingDirector, approved, returned, escalated, awaitingMySignature };
-      if (docs.length > 0) recentDocs = docs;
+      recentDocs = docs;
 
       if (allUnits.length > 0) {
         unitCounts = allUnits
@@ -429,43 +429,57 @@ export default async function DashboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/90 bg-white/60">
-              {recentDocs.map((doc) => (
-                <tr key={doc.id} className="hover:bg-blue-50/50 transition-colors duration-150">
-                  <td className="py-4 px-6">
-                    <CopyTrackingButton trackingNumber={doc.trackingNumber} />
-                  </td>
-                  <td className="py-4 px-6">
-                    <span className="font-bold text-slate-900 block truncate max-w-xs">
-                      {doc.title}
-                    </span>
-                    {doc.isEscalated && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 mt-0.5">
-                        <AlertTriangle className="w-3 h-3" />
-                        <span>Escalated (Rejections: {doc.rejectionCount})</span>
+              {recentDocs.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 px-6 text-center text-slate-400">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <FileText className="w-8 h-8 text-slate-300" />
+                      <span className="font-bold text-slate-600 text-xs">No documents registered yet</span>
+                      <span className="text-[11px] text-slate-400">
+                        Ingest a new document or wait for unit submissions.
                       </span>
-                    )}
-                  </td>
-                  <td className="py-4 px-6 font-medium text-slate-600">
-                    {doc.unit?.code || "GENERAL"}
-                  </td>
-                  <td className="py-4 px-6 text-slate-600">
-                    {doc.uploader ? `${doc.uploader.firstName} ${doc.uploader.lastName}` : "Staff Member"}
-                  </td>
-                  <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
-                      {getStatusLabel(doc.status)}
-                    </span>
-                  </td>
-                  <td className="py-4 px-6 text-right">
-                    <Link
-                      href={`/dashboard/documents/${doc.id}`}
-                      className="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block"
-                    >
-                      Details
-                    </Link>
+                    </div>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                recentDocs.map((doc) => (
+                  <tr key={doc.id} className="hover:bg-blue-50/50 transition-colors duration-150">
+                    <td className="py-4 px-6">
+                      <CopyTrackingButton trackingNumber={doc.trackingNumber} />
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className="font-bold text-slate-900 block truncate max-w-xs">
+                        {doc.title}
+                      </span>
+                      {doc.isEscalated && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 mt-0.5">
+                          <AlertTriangle className="w-3 h-3" />
+                          <span>Escalated (Rejections: {doc.rejectionCount})</span>
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-4 px-6 font-medium text-slate-600">
+                      {doc.unit?.code || "GENERAL"}
+                    </td>
+                    <td className="py-4 px-6 text-slate-600">
+                      {doc.uploader ? `${doc.uploader.firstName} ${doc.uploader.lastName}` : "Staff Member"}
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
+                        {getStatusLabel(doc.status)}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6 text-right">
+                      <Link
+                        href={`/dashboard/documents/${doc.id}`}
+                        className="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block"
+                      >
+                        Details
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </DataTableWrapper>
