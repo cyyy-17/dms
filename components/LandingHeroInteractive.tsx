@@ -151,7 +151,7 @@ export default function LandingHeroInteractive({ unitCount = 7 }: LandingHeroInt
             <div className="flex flex-wrap items-center gap-4 pt-2">
               <Link
                 href="/dashboard"
-                className="px-7 py-4 rounded-2xl bg-linear-to-r from-[#1E40AF] via-[#1A3694] to-[#0F2962] hover:from-[#2563EB] hover:to-[#1E40AF] text-white font-black text-sm shadow-xl shadow-blue-900/40 border border-blue-400/40 transition-all duration-200 flex items-center gap-3 hover:-translate-y-0.5 active:scale-95 group cursor-pointer"
+                className="px-7 py-4 rounded-2xl bg-linear-to-r from-[#1E40AF] via-[#1A3694] to-[#0F2962] hover:from-[#2563EB] hover:to-[#1E40AF] text-white font-black text-sm shadow-xl shadow-blue-900/40 border border-blue-400/40 transition-all duration-200 flex items-center gap-3 hover:-translate-y-0.5 active:scale-95 group cursor-pointer whitespace-nowrap shrink-0"
               >
                 <Building2 className="w-4.5 h-4.5 text-amber-400 group-hover:scale-110 transition-transform" />
                 <span>Enter Staff Portal</span>
@@ -160,7 +160,7 @@ export default function LandingHeroInteractive({ unitCount = 7 }: LandingHeroInt
 
               <a
                 href="#tracker"
-                className="px-6 py-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-700/80 hover:border-amber-400/50 text-slate-200 hover:text-amber-300 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 backdrop-blur-md active:scale-95 flex items-center gap-2"
+                className="px-6 py-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-700/80 hover:border-amber-400/50 text-slate-200 hover:text-amber-300 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 backdrop-blur-md active:scale-95 flex items-center gap-2 whitespace-nowrap shrink-0"
               >
                 <Search className="w-4 h-4 text-amber-400" />
                 <span>Verify Document</span>
@@ -168,7 +168,7 @@ export default function LandingHeroInteractive({ unitCount = 7 }: LandingHeroInt
 
               <Link
                 href="/register"
-                className="text-xs font-semibold text-slate-400 hover:text-slate-200 underline underline-offset-4 transition py-2"
+                className="text-xs font-semibold text-slate-400 hover:text-slate-200 underline underline-offset-4 transition py-2 whitespace-nowrap"
               >
                 Need staff verification? Apply here →
               </Link>
