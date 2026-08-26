@@ -52,14 +52,51 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
   const isAdmin = user.role === "ADMIN";
 
-  // Breadcrumbs title
-  const pathSegments = pathname.split("/").filter(Boolean);
-  const currentTitle =
-    pathSegments.length > 1
-      ? pathSegments[pathSegments.length - 1]
-          .replace(/-/g, " ")
-          .replace(/\b\w/g, (c) => c.toUpperCase())
-      : "Overview";
+  // Human-Friendly Breadcrumbs Title
+  const getBreadcrumbTitle = (path: string): string => {
+    const segments = path.split("/").filter(Boolean);
+    if (segments.length <= 1) return "Overview";
+
+    const last = segments[segments.length - 1];
+    const prev = segments[segments.length - 2];
+
+    // Detect UUID or database ID pattern
+    const isId =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(last) ||
+      /^[0-9a-f]{24,}$/i.test(last) ||
+      (prev === "documents" && last !== "new");
+
+    if (isId) {
+      if (prev === "documents") return "Document Inspector";
+      if (prev === "users") return "User Account Details";
+      if (prev === "units") return "Unit Specifications";
+      return "Record Details";
+    }
+
+    const routeMap: Record<string, string> = {
+      dashboard: "Overview",
+      documents: "Document Repository",
+      new: "Document Ingestion",
+      approvals: "Sequential Approvals",
+      profile: "My Profile & E-Signature",
+      admin: "Administration",
+      users: "User Governance",
+      units: "Department Units",
+      "document-types": "Document Classification Catalog",
+      delegations: "Signatory Delegations",
+      "documents-override": "Governance State Overrides",
+      audit: "RA 10173 Audit Explorer",
+      notifications: "System Notifications Queue",
+    };
+
+    if (routeMap[last]) return routeMap[last];
+
+    return last
+      .replace(/-/g, " ")
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  };
+
+  const currentTitle = getBreadcrumbTitle(pathname);
 
   const hasSignature = !!user.signaturePath;
 
