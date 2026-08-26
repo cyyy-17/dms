@@ -1,8 +1,8 @@
 import "dotenv/config";
 import { prisma } from "../lib/prisma";
 import { supabaseAdmin } from "../lib/supabase/admin";
-import { SEED_UNITS, SEED_DOCUMENT_TYPES, STORAGE_BUCKETS } from "../lib/constants";
-import { UserRole, UserStatus, ApprovalLevel, AuditAction } from "@prisma/client";
+import { STORAGE_BUCKETS } from "../lib/constants";
+import { UserRole, UserStatus, AuditAction } from "@prisma/client";
 
 async function resetForProduction() {
   console.log("=================================================");

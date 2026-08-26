@@ -1,6 +1,5 @@
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
-import { SEED_DOCUMENT_TYPES, SEED_UNITS } from "@/lib/constants";
 import DocumentUploadForm from "@/components/DocumentUploadForm";
 
 interface DocTypeOption {

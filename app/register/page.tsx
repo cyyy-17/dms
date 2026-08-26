@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
-import { SEED_UNITS } from "@/lib/constants";
 import RegisterForm from "@/components/RegisterForm";
 
 interface UnitOption {

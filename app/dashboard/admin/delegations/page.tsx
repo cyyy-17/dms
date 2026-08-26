@@ -1,5 +1,4 @@
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
-import { SEED_UNITS } from "@/lib/constants";
 import AdminDelegationManagement from "@/components/AdminDelegationManagement";
 import { FileCheck2 } from "lucide-react";
 
@@ -71,10 +70,6 @@ export default async function AdminDelegationsPage() {
       users = [];
       units = [];
     }
-  }
-
-  if (units.length === 0) {
-    units = SEED_UNITS.map((u, i) => ({ id: `unit-${i + 1}`, code: u.code, name: u.name }));
   }
 
   return (

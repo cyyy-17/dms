@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
-import { SEED_UNITS } from "@/lib/constants";
 import AdminUserManagement from "@/components/AdminUserManagement";
 import { Users, ShieldAlert } from "lucide-react";
 import { UserRole, UserStatus } from "@prisma/client";
@@ -70,14 +69,6 @@ export default async function AdminUsersPage() {
       users = [];
       units = [];
     }
-  }
-
-  if (units.length === 0) {
-    units = SEED_UNITS.map((u, idx) => ({
-      id: `unit-${idx + 1}`,
-      code: u.code,
-      name: u.name,
-    }));
   }
 
   const pendingCount = users.filter((u) => u.status === UserStatus.PENDING_APPROVAL).length;

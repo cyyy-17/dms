@@ -1,5 +1,4 @@
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
-import { SEED_DOCUMENT_TYPES } from "@/lib/constants";
 import AdminDocTypeManagement from "@/components/AdminDocTypeManagement";
 import { FileCode2 } from "lucide-react";
 import { ApprovalLevel } from "@prisma/client";

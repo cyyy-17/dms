@@ -1,5 +1,4 @@
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
-import { SEED_UNITS } from "@/lib/constants";
 import AdminUnitManagement from "@/components/AdminUnitManagement";
 import { Building2 } from "lucide-react";
 
