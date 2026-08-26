@@ -237,73 +237,87 @@ export default async function DocumentDetailPage({ params }: PageProps) {
         </div>
 
         {/* 📊 Visual Sequential Turn Progress Bar */}
-        <div className="p-4.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-extrabold uppercase tracking-wider text-slate-600">
-              Sequential Review Pipeline Progress
-            </span>
-            <span className="font-mono font-bold text-[#0F2962]">
-              {doc.status === "APPROVED" || doc.status === "ARCHIVED"
-                ? "100% • Sealed & Completed"
-                : doc.status === "PENDING_DIRECTOR"
-                ? "75% • Director Review Stage"
-                : doc.status === "PENDING_COORDINATOR"
-                ? "50% • Coordinator Review Stage"
-                : doc.status === "REJECTED_RETURNED"
-                ? "35% • Returned to Originator"
-                : "25% • Draft & Ingestion"}
-            </span>
-          </div>
+        {(() => {
+          const flowList = Array.isArray(doc.signatoryFlow)
+            ? (doc.signatoryFlow as Array<{ fullName?: string; title?: string; role?: string; status?: string }>)
+            : [];
+          const totalSteps = flowList.length > 0 ? flowList.length : 1;
+          const currentStep = (doc.currentSignatoryIndex ?? 0) + 1;
+          const isApproved = doc.status === "APPROVED" || doc.status === "ARCHIVED";
+          const isReturned = doc.status === "REJECTED_RETURNED";
+          const progressPercent = isApproved
+            ? 100
+            : isReturned
+            ? 25
+            : Math.max(15, Math.min(95, Math.round(((currentStep - 0.5) / totalSteps) * 100)));
 
-          <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden p-0.5 shadow-inner">
-            <div
-              className={`h-full rounded-full transition-all duration-500 shadow-sm ${
-                doc.status === "APPROVED" || doc.status === "ARCHIVED"
-                  ? "bg-linear-to-r from-emerald-500 to-teal-400"
-                  : doc.status === "REJECTED_RETURNED"
-                  ? "bg-linear-to-r from-amber-500 to-orange-400"
-                  : "bg-linear-to-r from-[#0F2962] via-blue-600 to-amber-400"
-              }`}
-              style={{
-                width:
-                  doc.status === "APPROVED" || doc.status === "ARCHIVED"
-                    ? "100%"
-                    : doc.status === "PENDING_DIRECTOR"
-                    ? "75%"
-                    : doc.status === "PENDING_COORDINATOR"
-                    ? "50%"
-                    : doc.status === "REJECTED_RETURNED"
-                    ? "35%"
-                    : "25%",
-              }}
-            />
-          </div>
+          return (
+            <div className="p-4.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-extrabold uppercase tracking-wider text-slate-600">
+                  Sequential Review Pipeline Progress
+                </span>
+                <span className="font-mono font-bold text-[#0F2962]">
+                  {isApproved
+                    ? "100% • Sealed & Completed"
+                    : isReturned
+                    ? "Returned for Revision"
+                    : flowList.length > 0
+                    ? `Step ${currentStep} of ${flowList.length} • Awaiting ${flowList[doc.currentSignatoryIndex ?? 0]?.fullName || "Signatory"}`
+                    : "In Review"}
+                </span>
+              </div>
 
-          <div className="grid grid-cols-4 gap-2 pt-1 text-[11px]">
-            <div className="text-left font-bold text-emerald-800">
-              <span>✓ Ingested</span>
+              <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden p-0.5 shadow-inner">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 shadow-sm ${
+                    isApproved
+                      ? "bg-linear-to-r from-emerald-500 to-teal-400"
+                      : isReturned
+                      ? "bg-linear-to-r from-amber-500 to-orange-400"
+                      : "bg-linear-to-r from-[#0F2962] via-blue-600 to-amber-400"
+                  }`}
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+
+              {flowList.length > 0 ? (
+                <div className="flex items-center justify-between gap-2 pt-1 text-[11px] overflow-x-auto">
+                  <div className="text-left font-bold text-emerald-800 shrink-0">
+                    <span>✓ Ingested</span>
+                  </div>
+                  {flowList.map((step, idx) => {
+                    const isDone = step.status === "APPROVED" || isApproved;
+                    const isCurrent = !isApproved && (doc.currentSignatoryIndex ?? 0) === idx;
+                    return (
+                      <div
+                        key={idx}
+                        className={`text-center font-bold truncate max-w-32 shrink-0 ${
+                          isDone ? "text-emerald-700" : isCurrent ? "text-[#0F2962] font-black" : "text-slate-400"
+                        }`}
+                        title={step.fullName}
+                      >
+                        <span>{idx + 1}. {step.fullName || `Signer ${idx + 1}`}</span>
+                      </div>
+                    );
+                  })}
+                  <div className={`text-right font-bold shrink-0 ${isApproved ? "text-emerald-800" : "text-slate-400"}`}>
+                    <span>Sealed Vault</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
+                  <div className="text-left font-bold text-emerald-800">
+                    <span>✓ Ingested</span>
+                  </div>
+                  <div className={`text-right font-bold ${isApproved ? "text-emerald-800" : "text-slate-400"}`}>
+                    <span>{isApproved ? "✓ Sealed Vault" : "Pending Signatory"}</span>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className={`text-center font-bold ${
-              doc.status !== "DRAFT" ? "text-blue-900" : "text-slate-400"
-            }`}>
-              <span>Coordinator</span>
-            </div>
-            <div className={`text-center font-bold ${
-              doc.status === "PENDING_DIRECTOR" || doc.status === "APPROVED" || doc.status === "ARCHIVED"
-                ? "text-blue-900"
-                : "text-slate-400"
-            }`}>
-              <span>Executive Director</span>
-            </div>
-            <div className={`text-right font-bold ${
-              doc.status === "APPROVED" || doc.status === "ARCHIVED"
-                ? "text-emerald-800"
-                : "text-slate-400"
-            }`}>
-              <span>Sealed Vault</span>
-            </div>
-          </div>
-        </div>
+          );
+        })()}
       </div>
 
       {/* Grid: Details & Actions */}
@@ -353,10 +367,11 @@ export default async function DocumentDetailPage({ params }: PageProps) {
               </div>
 
               <div>
-                <span className="text-slate-400 block mb-0.5">Required Approval Chain</span>
+                <span className="text-slate-400 block mb-0.5">Assigned Signatory Chain</span>
                 <span className="font-semibold text-[#0F2962]">
-                  Unit Staff → Unit Coordinator{" "}
-                  {doc.approvalLevel === "DIRECTOR_REQUIRED" ? "→ Director" : ""}
+                  {Array.isArray(doc.signatoryFlow) && (doc.signatoryFlow as any[]).length > 0
+                    ? (doc.signatoryFlow as any[]).map((s) => s.fullName || s.title || s.role).join(" → ")
+                    : "Assigned Signatories"}
                 </span>
               </div>
 

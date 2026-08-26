@@ -192,13 +192,13 @@ export default async function DashboardPage() {
               <span>Ingest Document</span>
             </Link>
 
-            {(user.role === "COORDINATOR" || user.role === "DIRECTOR" || user.role === "ADMIN") && (
+            {(stats.awaitingMySignature > 0 || user.role === "COORDINATOR" || user.role === "DIRECTOR" || user.role === "ADMIN") && (
               <Link
                 href="/dashboard/approvals"
                 className="px-4.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-white/95 border border-slate-300 hover:border-blue-400 text-slate-800 text-xs font-extrabold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
               >
                 <Clock className="w-4 h-4 text-amber-600" />
-                <span>Review Queue ({stats.pendingCoordinator + stats.pendingDirector})</span>
+                <span>Review Queue ({stats.awaitingMySignature > 0 ? stats.awaitingMySignature : stats.pendingCoordinator + stats.pendingDirector})</span>
               </Link>
             )}
           </div>
@@ -293,38 +293,38 @@ export default async function DashboardPage() {
         <div className="glass-panel stat-kpi-card glow-amber rounded-3xl p-5 sm:p-6 border border-amber-200/80 bg-amber-50/40">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-black uppercase tracking-wider text-amber-900">
-              Pending Coordinator
+              In Sequential Review
             </span>
             <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 border border-amber-300/80 flex items-center justify-center shadow-xs">
               <Clock className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3.5 flex items-baseline justify-between">
-            <span className="text-3xl font-black text-amber-950 tracking-tight">{stats.pendingCoordinator}</span>
+            <span className="text-3xl font-black text-amber-950 tracking-tight">{stats.pendingCoordinator + stats.pendingDirector}</span>
             <span className="text-[10px] font-extrabold text-amber-800 bg-amber-200/70 px-2.5 py-0.5 rounded-full">
-              Level-1 Review
+              In Pipeline
             </span>
           </div>
-          <p className="mt-2 text-[11px] text-amber-800/80 font-medium">Unit-level operational validation</p>
+          <p className="mt-2 text-[11px] text-amber-800/80 font-medium">Assigned signatory flow active</p>
         </div>
 
         {/* KPI 3 */}
         <div className="glass-panel stat-kpi-card glow-purple rounded-3xl p-5 sm:p-6 border border-purple-200/80 bg-purple-50/40">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-black uppercase tracking-wider text-purple-900">
-              Pending Director
+              Awaiting My Turn
             </span>
             <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-800 border border-purple-300/80 flex items-center justify-center shadow-xs">
               <Building2 className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3.5 flex items-baseline justify-between">
-            <span className="text-3xl font-black text-purple-950 tracking-tight">{stats.pendingDirector}</span>
+            <span className="text-3xl font-black text-purple-950 tracking-tight">{stats.awaitingMySignature}</span>
             <span className="text-[10px] font-extrabold text-purple-800 bg-purple-200/70 px-2.5 py-0.5 rounded-full">
-              Level-2 Final
+              My Action
             </span>
           </div>
-          <p className="mt-2 text-[11px] text-purple-800/80 font-medium">Executive sign-off stage</p>
+          <p className="mt-2 text-[11px] text-purple-800/80 font-medium">Ready for your e-signature</p>
         </div>
 
         {/* KPI 4 */}

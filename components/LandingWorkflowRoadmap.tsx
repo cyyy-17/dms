@@ -96,18 +96,18 @@ export default function LandingWorkflowRoadmap() {
                   02
                 </span>
                 <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-blue-950/80 text-blue-300 border border-blue-500/30">
-                  Turn-Based Lock
+                  Turn-Based Routing
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">Unit Coordinator Endorsement</h3>
+                <h3 className="text-base font-bold text-white">Assigned Signatory Review</h3>
                 <p className="text-xs text-slate-300 leading-relaxed mt-1.5">
-                  The document advances to the designated unit coordinator. The reviewer applies Smart Anchor endorsement with line-item remarks if revisions are required.
+                  The document advances step-by-step to each designated reviewer in the assigned signatory chain. Reviewers apply electronic signatures and line-item remarks.
                 </p>
               </div>
               <div className="pt-3 border-t border-slate-900 text-[11px] text-slate-400 flex items-center gap-1.5">
                 <GitBranch className="w-3.5 h-3.5 text-blue-400" />
-                <span>Status: PENDING_REVIEW (Turn 1)</span>
+                <span>Status: IN_REVIEW (Turn-Based)</span>
               </div>
             </div>
 
@@ -122,14 +122,14 @@ export default function LandingWorkflowRoadmap() {
                 </span>
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">Executive Director Review</h3>
+                <h3 className="text-base font-bold text-white">Sequential Sign-Off Chain</h3>
                 <p className="text-xs text-slate-300 leading-relaxed mt-1.5">
-                  The SAS Director evaluates the comprehensive package across cross-unit contexts and applies the verified electronic signature with mandatory audit log records.
+                  As each designated signatory approves, the system stamps cryptographic signatures and auto-notifies the subsequent assigned signatory until all required steps complete.
                 </p>
               </div>
               <div className="pt-3 border-t border-slate-900 text-[11px] text-slate-400 flex items-center gap-1.5">
                 <Award className="w-3.5 h-3.5 text-amber-400" />
-                <span>Status: PENDING_REVIEW (Turn 2)</span>
+                <span>Status: MULTI_SIGNATORY_ACTIVE</span>
               </div>
             </div>
 

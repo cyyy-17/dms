@@ -8,8 +8,8 @@ import { DocumentStatus } from "@prisma/client";
 
 export const STATUS_LABELS: Record<DocumentStatus, string> = {
   [DocumentStatus.DRAFT]: "Draft (In Preparation)",
-  [DocumentStatus.PENDING_COORDINATOR]: "Pending Coordinator Review",
-  [DocumentStatus.PENDING_DIRECTOR]: "Pending Director Sign-off",
+  [DocumentStatus.PENDING_COORDINATOR]: "In Review (Pending Signatory)",
+  [DocumentStatus.PENDING_DIRECTOR]: "Pending Final Signatory",
   [DocumentStatus.APPROVED]: "Fully Approved & Sealed",
   [DocumentStatus.REJECTED_RETURNED]: "Returned for Revision",
   [DocumentStatus.REJECTED_CLOSED]: "Closed & Rejected",
@@ -29,6 +29,35 @@ export const STATUS_BADGE_CLASSES: Record<DocumentStatus, string> = {
 export function getStatusLabel(status: DocumentStatus | string | null | undefined): string {
   if (!status) return "Unknown Status";
   return STATUS_LABELS[status as DocumentStatus] ?? status.replace(/_/g, " ");
+}
+
+export function getDocumentWorkflowStatusLabel(doc: {
+  status?: DocumentStatus | string | null;
+  currentSignatoryIndex?: number | null;
+  signatoryFlow?: unknown;
+  currentSignatory?: { firstName?: string; lastName?: string; fullName?: string } | null;
+}): string {
+  if (!doc.status) return "Unknown Status";
+  if (doc.status === DocumentStatus.APPROVED) return "Fully Approved & Sealed";
+  if (doc.status === DocumentStatus.DRAFT) return "Draft (In Preparation)";
+  if (doc.status === DocumentStatus.REJECTED_RETURNED) return "Returned for Revision";
+  if (doc.status === DocumentStatus.REJECTED_CLOSED) return "Closed & Rejected";
+  if (doc.status === DocumentStatus.ARCHIVED) return "Archived (Preserved)";
+
+  const flow = Array.isArray(doc.signatoryFlow)
+    ? (doc.signatoryFlow as Array<{ fullName?: string; title?: string }>)
+    : [];
+  const idx = doc.currentSignatoryIndex ?? 0;
+  if (flow.length > 0 && flow[idx]) {
+    return `Step ${idx + 1} of ${flow.length} • Awaiting ${flow[idx].fullName || flow[idx].title || "Signatory"}`;
+  }
+  if (doc.currentSignatory) {
+    const signerName =
+      doc.currentSignatory.fullName ||
+      `${doc.currentSignatory.firstName || ""} ${doc.currentSignatory.lastName || ""}`.trim();
+    return `Awaiting Signature • ${signerName}`;
+  }
+  return "In Sequential Review";
 }
 
 export function getStatusBadgeClass(status: DocumentStatus | string | null | undefined): string {

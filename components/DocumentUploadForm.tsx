@@ -73,41 +73,8 @@ export default function DocumentUploadForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Signatory Flow State (Default Coordinator + Director)
-  const [signatoryChain, setSignatoryChain] = useState<AssignedSignatoryStep[]>(() => {
-    const defaultChain: AssignedSignatoryStep[] = [];
-    if (availableUsers.length > 0) {
-      const initialUnitId = currentUserUnitId || units[0]?.id || "";
-      const currentUnitCode = units.find((un) => un.id === initialUnitId)?.code;
-
-      const unitCoord = availableUsers.find(
-        (u) => (u.unitCode === currentUnitCode || u.role === "COORDINATOR") && u.role === "COORDINATOR"
-      );
-      if (unitCoord) {
-        defaultChain.push({
-          userId: unitCoord.id,
-          fullName: unitCoord.fullName,
-          role: unitCoord.role,
-          title: "Recommending Approval",
-          stepOrder: 0,
-          status: "PENDING",
-        });
-      }
-
-      const director = availableUsers.find((u) => u.role === "DIRECTOR");
-      if (director && (!unitCoord || director.id !== unitCoord.id)) {
-        defaultChain.push({
-          userId: director.id,
-          fullName: director.fullName,
-          role: director.role,
-          title: "Approved by",
-          stepOrder: defaultChain.length,
-          status: "PENDING",
-        });
-      }
-    }
-    return defaultChain;
-  });
+  // Assigned Signatory Flow State
+  const [signatoryChain, setSignatoryChain] = useState<AssignedSignatoryStep[]>([]);
 
   const [selectedUserToAdd, setSelectedUserToAdd] = useState<string>("");
   const [selectedTitleToAdd, setSelectedTitleToAdd] = useState<string>("Recommending Approval");

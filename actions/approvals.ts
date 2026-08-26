@@ -68,7 +68,7 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
 
     const currentIndex = doc.currentSignatoryIndex || 0;
     const nextIndex = currentIndex + 1;
-    const isFinalStep = flow.length === 0 ? (doc.status === DocumentStatus.PENDING_DIRECTOR || doc.approvalLevel === ApprovalLevel.COORDINATOR_ONLY) : nextIndex >= flow.length;
+    const isFinalStep = flow.length === 0 ? true : nextIndex >= flow.length;
     const nextSigner = !isFinalStep && flow[nextIndex] ? flow[nextIndex] : null;
 
     // Update flow array
@@ -85,8 +85,6 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
 
     const nextStatus = isFinalStep
       ? DocumentStatus.APPROVED
-      : nextSigner?.role === "DIRECTOR"
-      ? DocumentStatus.PENDING_DIRECTOR
       : DocumentStatus.PENDING_COORDINATOR;
 
     await prisma.$transaction(async (tx) => {
@@ -106,8 +104,8 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
           versionId: doc.currentVersion!.id,
           actorId: currentUser.id,
           actorRole: currentUser.role,
-          action: currentUser.role === "DIRECTOR" ? ApprovalActionType.DIRECTOR_APPROVE : ApprovalActionType.COORDINATOR_APPROVE,
-          comments: input.comments?.trim() || `Approved by ${currentUser.fullName} (${currentUser.role})`,
+          action: isFinalStep ? ApprovalActionType.DIRECTOR_APPROVE : ApprovalActionType.COORDINATOR_APPROVE,
+          comments: input.comments?.trim() || `Approved by ${currentUser.fullName} (${currentUser.role || "Signatory"})`,
           signatureApplied: !!input.signatureApplied,
           signaturePath: input.signatureApplied ? currentUser.signaturePath : null,
         },
@@ -122,13 +120,15 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
           recipientId: nextUser.id,
           recipientEmail: nextUser.email,
           type: "DOCUMENT_SUBMITTED_COORDINATOR",
-          subject: `SASDMS: Document Awaiting Your Signature - ${doc.trackingNumber}`,
+          subject: `SASDMS: Document Awaiting Your Signature (Step ${nextIndex + 1} of ${flow.length}) - ${doc.trackingNumber}`,
           templateName: "coordinator-review-alert",
           payload: {
             trackingNumber: doc.trackingNumber,
             title: doc.title,
             uploaderName: `${doc.uploader.firstName} ${doc.uploader.lastName}`,
             documentId: doc.id,
+            stepOrder: nextIndex + 1,
+            totalSteps: flow.length,
           },
         });
       }
