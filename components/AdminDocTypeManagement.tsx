@@ -179,11 +179,11 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
         </div>
       )}
 
-      {/* Control Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          <div className="relative min-w-64">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+      {/* Filter / Action Bar */}
+      <div className="glass-card rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-3 flex-1">
+          <div className="relative min-w-56 flex-1">
+            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
             <input
               type="text"
               placeholder="Search by Classification Code or Title..."
