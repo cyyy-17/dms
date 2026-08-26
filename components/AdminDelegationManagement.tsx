@@ -13,6 +13,7 @@ import {
   UserCheck,
   Calendar,
 } from "lucide-react";
+import DataTableWrapper from "@/components/DataTableWrapper";
 import { getRoleLabel, formatHumanDate } from "@/lib/status-labels";
 
 interface DelegationItem {
@@ -200,7 +201,7 @@ export default function AdminDelegationManagement({
 
       {/* Delegations Table */}
       <div className="glass-card rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        <DataTableWrapper>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
@@ -232,7 +233,7 @@ export default function AdminDelegationManagement({
                           {d.delegator.firstName} {d.delegator.lastName}
                         </span>
                         <span className="text-[10px] text-slate-400 font-semibold uppercase">
-                          {d.delegator.role}
+                          {getRoleLabel(d.delegator.role)}
                         </span>
                       </td>
                       <td className="py-4 px-6">
@@ -290,7 +291,7 @@ export default function AdminDelegationManagement({
               )}
             </tbody>
           </table>
-        </div>
+        </DataTableWrapper>
       </div>
 
       {/* Modal: Assign Delegation */}

@@ -36,6 +36,30 @@ export function getStatusBadgeClass(status: DocumentStatus | string | null | und
   return STATUS_BADGE_CLASSES[status as DocumentStatus] ?? "badge-draft";
 }
 
+// User Status Formatters
+export const USER_STATUS_LABELS: Record<string, string> = {
+  ACTIVE: "Verified Active",
+  PENDING_APPROVAL: "Pending Verification",
+  SUSPENDED: "Account Suspended",
+  REJECTED: "Registration Rejected",
+};
+
+export function getUserStatusLabel(status: string | null | undefined): string {
+  if (!status) return "Unknown Status";
+  return USER_STATUS_LABELS[status] ?? status.replace(/_/g, " ");
+}
+
+// Approval Level Formatters
+export const APPROVAL_LEVEL_LABELS: Record<string, string> = {
+  COORDINATOR_ONLY: "Coordinator Level Only",
+  DIRECTOR_REQUIRED: "Coordinator + Director Sign-off Required",
+};
+
+export function getApprovalLevelLabel(level: string | null | undefined): string {
+  if (!level) return "Standard Approval";
+  return APPROVAL_LEVEL_LABELS[level] ?? level.replace(/_/g, " ");
+}
+
 // Role Formatters
 export const ROLE_LABELS: Record<string, string> = {
   ADMIN: "System Administrator",
@@ -49,17 +73,43 @@ export function getRoleLabel(role: string | null | undefined): string {
   return ROLE_LABELS[role] ?? role.replace(/_/g, " ");
 }
 
-// Action Formatters
+// Action & Audit Formatters
 export const ACTION_LABELS: Record<string, string> = {
+  // Approval Action Types
   SUBMIT: "Submitted for Sequential Review",
   COORDINATOR_APPROVE: "Approved by Unit Coordinator",
   DIRECTOR_APPROVE: "Final Executive Approval by Director",
   REJECT_RETURN: "Returned for Author Revision",
-  REJECT_CLOSE: "Formally Closed / Rejected",
+  REJECT_CLOSE: "Formally Closed / Terminated",
+  AUTO_ESCALATE: "Auto-Escalated to Executive Director",
   ESCALATE: "Auto-Escalated to Executive Director",
   DOCUMENT_OVERRIDE: "Administrative Governance Override",
   SIGNATURE_REGISTERED: "Electronic Signature Registered",
-  USER_STATUS_CHANGE: "User Verification Status Updated",
+  USER_STATUS_CHANGE: "User Status Updated",
+
+  // Audit Actions (Prisma Enum)
+  USER_REGISTER: "User Account Registered",
+  USER_APPROVE: "Account Verified & Approved",
+  USER_REJECT: "Registration Request Denied",
+  USER_SUSPEND: "Account Suspended",
+  USER_ROLE_CHANGE: "Role / Unit Reassigned",
+  DOCUMENT_CREATE: "Document Ingested into Vault",
+  DOCUMENT_VERSION_UPLOAD: "New Version Attached",
+  DOCUMENT_VIEW: "Document Inspected",
+  DOCUMENT_DOWNLOAD: "Document PDF Exported",
+  DOCUMENT_SUBMIT: "Submitted for Sequential Review",
+  DOCUMENT_APPROVE_COORDINATOR: "Approved by Unit Coordinator",
+  DOCUMENT_APPROVE_DIRECTOR: "Executive Approval by Director",
+  DOCUMENT_REJECT_RETURN: "Returned for Author Revision",
+  DOCUMENT_REJECT_CLOSE: "Permanently Terminated",
+  DOCUMENT_AUTO_ESCALATE: "Auto-Escalated to Executive Director",
+  DOCUMENT_ARCHIVE: "RA 10173 Compliance Archival",
+  DOCUMENT_ARCHIVE_RA10173: "RA 10173 Compliance Archival",
+  DOCUMENT_ADMIN_OVERRIDE: "Administrative Governance Override",
+  DOCUMENT_EXPIRY_ALERT: "Document Expiry Alert Dispatched",
+  DOCUMENT_PURGE: "Automated Retention Cleanup",
+  DELEGATION_ASSIGNED: "Acting Signatory Delegated",
+  DELEGATION_REVOKED: "Acting Signatory Revoked",
   DELEGATION_CREATED: "Review Authority Delegated",
   RETENTION_PURGE: "Automated Lifecycle Retention Purge",
 };

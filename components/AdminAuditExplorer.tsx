@@ -87,17 +87,17 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
             className="text-xs py-2.5 px-3.5 bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition shadow-inner text-slate-900 font-bold"
           >
             <option value="ALL">All Event Actions</option>
-            <option value="USER_REGISTER">USER_REGISTER</option>
-            <option value="USER_APPROVE">USER_APPROVE</option>
-            <option value="USER_REJECT">USER_REJECT</option>
-            <option value="USER_ROLE_CHANGE">USER_ROLE_CHANGE</option>
-            <option value="DOCUMENT_CREATE">DOCUMENT_CREATE</option>
-            <option value="DOCUMENT_SUBMIT">DOCUMENT_SUBMIT</option>
-            <option value="DOCUMENT_APPROVE_COORDINATOR">DOCUMENT_APPROVE_COORDINATOR</option>
-            <option value="DOCUMENT_APPROVE_DIRECTOR">DOCUMENT_APPROVE_DIRECTOR</option>
-            <option value="DOCUMENT_REJECT_RETURN">DOCUMENT_REJECT_RETURN</option>
-            <option value="DOCUMENT_ADMIN_OVERRIDE">DOCUMENT_ADMIN_OVERRIDE</option>
-            <option value="DOCUMENT_ARCHIVE_RA10173">DOCUMENT_ARCHIVE_RA10173</option>
+            <option value="USER_REGISTER">User Account Registered</option>
+            <option value="USER_APPROVE">Account Verified & Approved</option>
+            <option value="USER_REJECT">Registration Request Denied</option>
+            <option value="USER_ROLE_CHANGE">Role / Unit Reassigned</option>
+            <option value="DOCUMENT_CREATE">Document Ingested into Vault</option>
+            <option value="DOCUMENT_SUBMIT">Submitted for Sequential Review</option>
+            <option value="DOCUMENT_APPROVE_COORDINATOR">Approved by Unit Coordinator</option>
+            <option value="DOCUMENT_APPROVE_DIRECTOR">Executive Approval by Director</option>
+            <option value="DOCUMENT_REJECT_RETURN">Returned for Author Revision</option>
+            <option value="DOCUMENT_ADMIN_OVERRIDE">Administrative Governance Override</option>
+            <option value="DOCUMENT_ARCHIVE_RA10173">RA 10173 Compliance Archival</option>
           </select>
         </div>
 

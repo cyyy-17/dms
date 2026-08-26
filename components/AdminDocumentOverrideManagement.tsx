@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { DocumentStatus, ApprovalLevel } from "@prisma/client";
 import { getStatusLabel } from "@/lib/status-labels";
+import DataTableWrapper from "@/components/DataTableWrapper";
 
 interface DocumentWithDetails {
   id: string;
@@ -180,22 +181,22 @@ export default function AdminDocumentOverrideManagement({
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
+          className="text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white font-medium text-slate-800"
         >
           <option value="ALL">All Statuses</option>
-          <option value="DRAFT">DRAFT</option>
-          <option value="PENDING_COORDINATOR">PENDING COORDINATOR</option>
-          <option value="PENDING_DIRECTOR">PENDING DIRECTOR</option>
-          <option value="APPROVED">APPROVED</option>
-          <option value="REJECTED_RETURNED">REJECTED RETURNED</option>
-          <option value="REJECTED_CLOSED">REJECTED CLOSED</option>
-          <option value="ARCHIVED">ARCHIVED</option>
+          <option value="DRAFT">Draft (In Preparation)</option>
+          <option value="PENDING_COORDINATOR">Pending Coordinator Review</option>
+          <option value="PENDING_DIRECTOR">Pending Director Sign-off</option>
+          <option value="APPROVED">Fully Approved & Sealed</option>
+          <option value="REJECTED_RETURNED">Returned for Revision</option>
+          <option value="REJECTED_CLOSED">Closed & Terminated</option>
+          <option value="ARCHIVED">Archived (Preserved)</option>
         </select>
       </div>
 
       {/* Override Table */}
       <div className="glass-card rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        <DataTableWrapper>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
@@ -303,7 +304,7 @@ export default function AdminDocumentOverrideManagement({
               )}
             </tbody>
           </table>
-        </div>
+        </DataTableWrapper>
       </div>
 
       {/* Modal: Override Status */}

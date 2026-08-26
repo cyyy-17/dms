@@ -239,7 +239,7 @@ export default function AdminUnitManagement({ units }: { units: UnitWithStats[] 
                             : "bg-slate-100 text-slate-600 border border-slate-200"
                         }`}
                       >
-                        {u.isActive ? "ACTIVE" : "INACTIVE"}
+                        {u.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
                     <td className="py-4 px-6 text-right space-x-2">

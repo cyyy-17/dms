@@ -297,7 +297,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
                             : "bg-slate-100 text-slate-600 border border-slate-200"
                         }`}
                       >
-                        {dt.isActive ? "ACTIVE" : "INACTIVE"}
+                        {dt.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
                     <td className="py-4 px-6 text-right space-x-2">
