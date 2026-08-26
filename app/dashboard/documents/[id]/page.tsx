@@ -102,6 +102,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
   };
 
   let doc: DocumentDetail | null = null;
+  let isAccessDenied = false;
 
   try {
     const fetchedDoc = await prisma.document.findUnique({
@@ -138,34 +139,38 @@ export default async function DocumentDetailPage({ params }: PageProps) {
         isInFlow;
 
       if (!isAuthorized) {
-        return (
-          <div className="p-6 lg:p-12 max-w-2xl mx-auto w-full text-center space-y-6 animate-in fade-in duration-200">
-            <div className="w-16 h-16 rounded-3xl bg-rose-100 text-rose-700 flex items-center justify-center mx-auto shadow-inner">
-              <Lock className="w-8 h-8" />
-            </div>
-            <div className="space-y-2">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">Access Restricted • Unit Boundary Isolation</h1>
-              <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-md mx-auto">
-                Under SAS Institutional Data Governance and RA 10173 policy, documents belonging to other departmental units are partitioned. You do not have authorization to view this record.
-              </p>
-            </div>
-            <div className="pt-2">
-              <Link
-                href="/dashboard/documents"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F2962] text-white text-xs font-bold shadow-md hover:bg-[#1E40AF] transition"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Return to My Unit Repository</span>
-              </Link>
-            </div>
-          </div>
-        );
+        isAccessDenied = true;
+      } else {
+        doc = fetchedDoc as unknown as DocumentDetail;
       }
-
-      doc = fetchedDoc as unknown as DocumentDetail;
     }
   } catch {
     doc = null;
+  }
+
+  if (isAccessDenied) {
+    return (
+      <div className="p-6 lg:p-12 max-w-2xl mx-auto w-full text-center space-y-6 animate-in fade-in duration-200">
+        <div className="w-16 h-16 rounded-3xl bg-rose-100 text-rose-700 flex items-center justify-center mx-auto shadow-inner">
+          <Lock className="w-8 h-8" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Access Restricted • Unit Boundary Isolation</h1>
+          <p className="text-xs text-slate-600 font-medium leading-relaxed max-w-md mx-auto">
+            Under SAS Institutional Data Governance and RA 10173 policy, documents belonging to other departmental units are partitioned. You do not have authorization to view this record.
+          </p>
+        </div>
+        <div className="pt-2">
+          <Link
+            href="/dashboard/documents"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F2962] text-white text-xs font-bold shadow-md hover:bg-[#1E40AF] transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Return to My Unit Repository</span>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   if (!doc) {
