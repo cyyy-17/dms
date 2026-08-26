@@ -76,9 +76,9 @@ export default function LandingHeroInteractive({ unitCount = 7 }: LandingHeroInt
             </div>
 
             {/* Main Heading with Animated Shimmer */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.1] text-white">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-[1.15] text-white pb-1">
               Cryptographic Governance &{" "}
-              <span className="bg-linear-to-r from-amber-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent block mt-1 animate-gradient-text">
+              <span className="bg-linear-to-r from-amber-300 via-amber-400 to-yellow-500 bg-clip-text text-transparent inline-block pb-2 pt-1 mt-1 animate-gradient-text">
                 Sequential Workflow Engine
               </span>
             </h1>
