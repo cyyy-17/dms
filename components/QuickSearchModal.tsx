@@ -19,9 +19,10 @@ interface QuickSearchModalProps {
   isOpen: boolean;
   onClose: () => void;
   userRole?: string;
+  units?: Array<{ code: string; name: string }>;
 }
 
-export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSearchModalProps) {
+export default function QuickSearchModal({ isOpen, onClose, userRole, units = [] }: QuickSearchModalProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -90,16 +91,6 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
     },
   ];
 
-  const unitShortcuts = [
-    { code: "CAREER", name: "Career Services & Placement" },
-    { code: "ALUMNI", name: "Alumni Relations & Affairs" },
-    { code: "ACTIVITIES", name: "Student Organizations & Activities" },
-    { code: "DISCIPLINE", name: "Student Discipline & Formation" },
-    { code: "GUIDANCE", name: "Guidance & Psychological Services" },
-    { code: "SCHOLARSHIPS", name: "Scholarships & Financial Assistance" },
-    { code: "EXTENSION", name: "Community Extension & Engagement" },
-  ];
-
   if (userRole === "ADMIN") {
     quickActions.push(
       {
@@ -126,7 +117,7 @@ export default function QuickSearchModal({ isOpen, onClose, userRole }: QuickSea
       query.trim() === ""
   );
 
-  const filteredUnits = unitShortcuts.filter(
+  const filteredUnits = units.filter(
     (u) =>
       u.code.toLowerCase().includes(query.toLowerCase()) ||
       u.name.toLowerCase().includes(query.toLowerCase())

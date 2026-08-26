@@ -34,86 +34,6 @@ interface LandingUnitExplorerProps {
   units?: SasUnitItem[];
 }
 
-const DEFAULT_UNITS: SasUnitItem[] = [
-  {
-    code: "GCO",
-    name: "Guidance & Counseling Office",
-    desc: "Confidential student intake profiles, psychological evaluations, graduation clearances, and counselor endorsement slips.",
-    badge: "Confidentiality High",
-    color: "from-blue-500/20 to-blue-600/5 text-blue-400 border-blue-500/30",
-    category: "counseling",
-    sla: "< 24h SLA",
-    confidentiality: "Maximum",
-    sampleDocs: ["Student Psychological Intake", "Counselor Case Notes", "Graduation Guidance Clearance", "Crisis Intervention Referral"],
-  },
-  {
-    code: "AAPO",
-    name: "Alumni Affairs & Placement Office",
-    desc: "Industry MOA agreements, alumni tracer reports, graduate networking clearances, and institutional partnership charters.",
-    badge: "Partnership MOAs",
-    color: "from-amber-500/20 to-amber-600/5 text-amber-400 border-amber-500/30",
-    category: "career",
-    sla: "< 48h SLA",
-    confidentiality: "High",
-    sampleDocs: ["Corporate MOA Partnership", "Alumni Tracer Verification", "Graduate Placement Release", "Homecoming Charter"],
-  },
-  {
-    code: "SOA",
-    name: "Student Organizations & Activities",
-    desc: "Accreditation charters, campus activity proposals, off-campus event permits, and student council budget requisitions.",
-    badge: "Event Permits",
-    color: "from-purple-500/20 to-purple-600/5 text-purple-400 border-purple-500/30",
-    category: "student_life",
-    sla: "< 24h SLA",
-    confidentiality: "Standard",
-    sampleDocs: ["Student Org Re-Accreditation", "Off-Campus Event Permit", "Council Budget Liquidation", "Activity Safety Protocol"],
-  },
-  {
-    code: "SFA",
-    name: "Scholarship & Financial Assistance",
-    desc: "Academic grant applications, third-party sponsor MOAs, financial aid validation vouchers, and donor audit covenants.",
-    badge: "Grants & Vouchers",
-    color: "from-emerald-500/20 to-emerald-600/5 text-emerald-400 border-emerald-500/30",
-    category: "student_life",
-    sla: "< 24h SLA",
-    confidentiality: "High",
-    sampleDocs: ["Institutional Grant Application", "Third-Party Sponsor MOU", "Tuition Discount Voucher", "Donor Billing Roster"],
-  },
-  {
-    code: "DSW",
-    name: "Discipline & Student Welfare",
-    desc: "Incident resolution logs, behavioral clearances, student handbook notices, and official inquiry proceedings.",
-    badge: "Compliance Logs",
-    color: "from-rose-500/20 to-rose-600/5 text-rose-400 border-rose-500/30",
-    category: "governance",
-    sla: "< 12h SLA",
-    confidentiality: "Maximum",
-    sampleDocs: ["Behavioral Clearance Notice", "Incident Inquiry Minutes", "Student Handbook Violation Log", "Good Moral Endorsement"],
-  },
-  {
-    code: "CSIR",
-    name: "Career Services & Industry Relations",
-    desc: "On-the-Job Training (OJT) memorandums, employer internship endorsements, student placement releases, and company profiles.",
-    badge: "OJT Agreements",
-    color: "from-indigo-500/20 to-indigo-600/5 text-indigo-400 border-indigo-500/30",
-    category: "career",
-    sla: "< 24h SLA",
-    confidentiality: "High",
-    sampleDocs: ["OJT Student-Company Agreement", "Host Training Establishment Endorsement", "Practicum Performance Certificate", "Employer Accreditation"],
-  },
-  {
-    code: "CEE",
-    name: "Community Engagement & Extension",
-    desc: "Community outreach agreements, barangay LGU permits, volunteer service records, and social responsibility accreditations.",
-    badge: "Outreach Charters",
-    color: "from-teal-500/20 to-teal-600/5 text-teal-400 border-teal-500/30",
-    category: "governance",
-    sla: "< 48h SLA",
-    confidentiality: "Standard",
-    sampleDocs: ["Barangay LGU Community MOU", "Institutional Outreach Proposal", "Faculty/Student Volunteer Service Log", "Impact Assessment Report"],
-  },
-];
-
 const ICON_MAP: Record<string, LucideIcon> = {
   GCO: Compass,
   AAPO: GraduationCap,
@@ -124,11 +44,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
   CEE: HeartHandshake,
 };
 
-export default function LandingUnitExplorer({ units = DEFAULT_UNITS }: LandingUnitExplorerProps) {
+export default function LandingUnitExplorer({ units = [] }: LandingUnitExplorerProps) {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [expandedUnit, setExpandedUnit] = useState<string | null>(null);
 
-  const displayUnits = units.length > 0 ? units : DEFAULT_UNITS;
+  const displayUnits = units || [];
 
   const filteredUnits = displayUnits.filter((unit) => {
     if (selectedFilter === "all") return true;
