@@ -202,74 +202,30 @@ export default function DocumentRepositoryConsole({
 
       {/* Control Filter Bar */}
       <div className="glass-panel rounded-3xl p-4 sm:p-5 border border-white/90 shadow-sm space-y-3.5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          {/* Filters Area */}
-          <div className="flex flex-wrap items-center gap-3 flex-1 min-w-0">
-            {/* Search Input */}
-            <div className="relative flex-1 min-w-55 sm:min-w-65">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search tracking #, title, or staff..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
-              />
-            </div>
-
-            {/* Unit Filter */}
-            {isDirectorOrAdmin && (
-              <div className="w-full sm:w-auto min-w-35">
-                <select
-                  value={selectedUnit}
-                  onChange={(e) => setSelectedUnit(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
-                >
-                  <option value="ALL">All Units</option>
-                  {units.map((u) => (
-                    <option key={u.id} value={u.code}>
-                      {u.code} - {u.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+        {/* Tier 1: Search Input (Full Width on left) + View Controls / Actions (on right) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="Search tracking #, title, or staff..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-9 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             )}
-
-            {/* Doc Type Filter */}
-            <div className="w-full sm:w-auto min-w-35">
-              <select
-                value={selectedDocType}
-                onChange={(e) => setSelectedDocType(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
-              >
-                <option value="ALL">All Types</option>
-                {documentTypes.map((dt) => (
-                  <option key={dt.id} value={dt.name}>
-                    {dt.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Status Filter */}
-            <div className="w-full sm:w-auto min-w-35">
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
-              >
-                <option value="ALL">All Statuses</option>
-                <option value="PENDING_COORDINATOR">Pending Coordinator</option>
-                <option value="PENDING_DIRECTOR">Pending Director</option>
-                <option value="APPROVED">Approved</option>
-                <option value="REJECTED_RETURNED">Returned for Rework</option>
-                <option value="ARCHIVED">Archived</option>
-              </select>
-            </div>
           </div>
 
-          {/* View Toggle & Escalated Filter */}
-          <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100 w-full lg:w-auto justify-between lg:justify-end">
+          <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
             <button
               onClick={() => setOnlyEscalated(!onlyEscalated)}
               className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap ${
@@ -302,6 +258,56 @@ export default function DocumentRepositoryConsole({
                 <LayoutGrid className="w-4 h-4" />
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Tier 2: Category Filter Selects (Equal Grid spanning full width) */}
+        <div className={`grid grid-cols-1 sm:grid-cols-2 ${isDirectorOrAdmin ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-3 pt-2.5 border-t border-slate-100/90`}>
+          {isDirectorOrAdmin && (
+            <div className="relative">
+              <select
+                value={selectedUnit}
+                onChange={(e) => setSelectedUnit(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+              >
+                <option value="ALL">All Department Units</option>
+                {units.map((u) => (
+                  <option key={u.id} value={u.code}>
+                    {u.code} - {u.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className="relative">
+            <select
+              value={selectedDocType}
+              onChange={(e) => setSelectedDocType(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+            >
+              <option value="ALL">All Classification Types</option>
+              {documentTypes.map((dt) => (
+                <option key={dt.id} value={dt.name}>
+                  {dt.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative">
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+            >
+              <option value="ALL">All Lifecycle Statuses</option>
+              <option value="PENDING_COORDINATOR">Pending Coordinator</option>
+              <option value="PENDING_DIRECTOR">Pending Director</option>
+              <option value="APPROVED">Approved & Sealed</option>
+              <option value="REJECTED_RETURNED">Returned for Rework</option>
+              <option value="ARCHIVED">Archived Vault</option>
+            </select>
           </div>
         </div>
 
