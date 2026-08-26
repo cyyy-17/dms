@@ -52,6 +52,24 @@ interface DocumentRepositoryConsoleProps {
   isDirectorOrAdmin: boolean;
 }
 
+function getStatusProgress(status: string): { percent: number; label: string; color: string } {
+  switch (status) {
+    case "APPROVED":
+    case "ARCHIVED":
+      return { percent: 100, label: "100% Sealed", color: "bg-emerald-500" };
+    case "PENDING_DIRECTOR":
+      return { percent: 75, label: "75% Stage 2", color: "bg-blue-600" };
+    case "PENDING_COORDINATOR":
+      return { percent: 50, label: "50% Stage 1", color: "bg-blue-500" };
+    case "REJECTED_RETURNED":
+      return { percent: 35, label: "35% Rework", color: "bg-amber-500" };
+    case "REJECTED_CLOSED":
+      return { percent: 100, label: "Closed", color: "bg-rose-500" };
+    default:
+      return { percent: 25, label: "25% Ingestion", color: "bg-slate-400" };
+  }
+}
+
 export default function DocumentRepositoryConsole({
   initialDocuments,
   units,
@@ -376,9 +394,25 @@ export default function DocumentRepositoryConsole({
                       {doc.uploader ? `${doc.uploader.firstName} ${doc.uploader.lastName}` : "Staff Member"}
                     </td>
                     <td className="py-4 px-6">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
-                        {getStatusLabel(doc.status)}
-                      </span>
+                      {(() => {
+                        const prog = getStatusProgress(doc.status);
+                        return (
+                          <div className="space-y-1.5 min-w-28">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
+                              {getStatusLabel(doc.status)}
+                            </span>
+                            <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                              <div
+                                className={`h-full rounded-full ${prog.color} transition-all duration-300`}
+                                style={{ width: `${prog.percent}%` }}
+                              />
+                            </div>
+                            <span className="text-[9px] font-mono text-slate-400 block">
+                              {prog.label}
+                            </span>
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="py-4 px-6 text-slate-500 font-mono text-[11px]">
                       {formatHumanDate(doc.createdAt)}
@@ -400,25 +434,41 @@ export default function DocumentRepositoryConsole({
       ) : (
         /* GRID CARDS VIEW */
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredDocuments.map((doc) => (
-            <div
-              key={doc.id}
-              className={`glass-panel glass-panel-interactive rounded-3xl p-6 border transition flex flex-col justify-between space-y-4 bg-white/85 ${
-                doc.isEscalated ? "border-red-300 bg-red-50/20" : "border-white/90"
-              }`}
-            >
-              <div className="space-y-3.5">
-                <div className="flex items-center justify-between">
-                  <CopyTrackingButton trackingNumber={doc.trackingNumber} />
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
-                    {getStatusLabel(doc.status)}
-                  </span>
-                </div>
+          {filteredDocuments.map((doc) => {
+            const prog = getStatusProgress(doc.status);
+            return (
+              <div
+                key={doc.id}
+                className={`glass-panel glass-panel-interactive rounded-3xl p-6 border transition flex flex-col justify-between space-y-4 bg-white/85 ${
+                  doc.isEscalated ? "border-red-300 bg-red-50/20" : "border-white/90"
+                }`}
+              >
+                <div className="space-y-3.5">
+                  <div className="flex items-center justify-between">
+                    <CopyTrackingButton trackingNumber={doc.trackingNumber} />
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
+                      {getStatusLabel(doc.status)}
+                    </span>
+                  </div>
 
-                <div>
-                  <h3 className="text-sm font-bold text-slate-900 line-clamp-2 leading-snug">{doc.title}</h3>
-                  <p className="text-xs text-slate-500 font-medium mt-1">{doc.documentType?.name || "General"}</p>
-                </div>
+                  {/* Card Pipeline Progress Bar */}
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                      <span>Pipeline Progress</span>
+                      <span className="font-bold">{prog.label}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${prog.color} transition-all duration-300`}
+                        style={{ width: `${prog.percent}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 line-clamp-2 leading-snug">{doc.title}</h3>
+                    <p className="text-xs text-slate-500 font-medium mt-1">{doc.documentType?.name || "General"}</p>
+                  </div>
 
                 {doc.isEscalated && (
                   <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-[11px] font-bold flex items-center gap-1.5">
@@ -445,9 +495,10 @@ export default function DocumentRepositoryConsole({
                 </Link>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
+    )}
     </div>
   );
 }

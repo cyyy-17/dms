@@ -244,8 +244,88 @@ export default function DocumentUploadForm({
     }
   };
 
+  const isStep1Done = title.trim().length > 0 && !!documentTypeId && !!unitId;
+  const isStep2Done = signatoryChain.length > 0;
+  const isStep3Done = !!file && !!fileChecksum;
+  const completedStepsCount = (isStep1Done ? 1 : 0) + (isStep2Done ? 1 : 0) + (isStep3Done ? 1 : 0);
+  const progressPercent = Math.round((completedStepsCount / 3) * 100);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto">
+      {/* 🚀 Multi-Stage Workflow Progress Stepper */}
+      <div className="glass-panel rounded-3xl p-5 sm:p-6 border border-white/90 shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <span className="text-xs font-black uppercase tracking-wider text-slate-500 block">
+              Document Ingestion Pipeline
+            </span>
+            <span className="text-sm sm:text-base font-extrabold text-slate-900">
+              Form Progress: {progressPercent}% Completed ({completedStepsCount} of 3 Stages)
+            </span>
+          </div>
+          <span className="text-xs font-mono font-bold text-[#0F2962] bg-blue-50 border border-blue-200 px-3 py-1 rounded-full w-fit">
+            {progressPercent === 100 ? "Ready for Cryptographic Ingestion" : "Draft In Progress"}
+          </span>
+        </div>
+
+        {/* Visual Progress Bar Track */}
+        <div className="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden p-0.5 shadow-inner">
+          <div
+            className="h-full rounded-full bg-linear-to-r from-[#0F2962] via-blue-600 to-amber-400 transition-all duration-500 shadow-sm"
+            style={{ width: `${Math.max(progressPercent, 5)}%` }}
+          />
+        </div>
+
+        {/* 3 Step Indicator Nodes */}
+        <div className="grid grid-cols-3 gap-2 pt-1 text-xs">
+          <div className={`p-2.5 rounded-xl border transition-all flex items-center gap-2.5 ${
+            isStep1Done ? "bg-emerald-50/80 border-emerald-300 text-emerald-900" : "bg-slate-50 border-slate-200 text-slate-600"
+          }`}>
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+              isStep1Done ? "bg-emerald-600 text-white" : "bg-slate-300 text-slate-700"
+            }`}>
+              {isStep1Done ? "✓" : "1"}
+            </span>
+            <div className="min-w-0">
+              <span className="font-bold block truncate">1. Classification</span>
+              <span className="text-[10px] text-slate-500 truncate block">Title & Unit Metadata</span>
+            </div>
+          </div>
+
+          <div className={`p-2.5 rounded-xl border transition-all flex items-center gap-2.5 ${
+            isStep2Done ? "bg-emerald-50/80 border-emerald-300 text-emerald-900" : "bg-slate-50 border-slate-200 text-slate-600"
+          }`}>
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+              isStep2Done ? "bg-emerald-600 text-white" : "bg-slate-300 text-slate-700"
+            }`}>
+              {isStep2Done ? "✓" : "2"}
+            </span>
+            <div className="min-w-0">
+              <span className="font-bold block truncate">2. Signatory Chain</span>
+              <span className="text-[10px] text-slate-500 truncate block">
+                {signatoryChain.length} Signer(s) Assigned
+              </span>
+            </div>
+          </div>
+
+          <div className={`p-2.5 rounded-xl border transition-all flex items-center gap-2.5 ${
+            isStep3Done ? "bg-emerald-50/80 border-emerald-300 text-emerald-900" : "bg-slate-50 border-slate-200 text-slate-600"
+          }`}>
+            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+              isStep3Done ? "bg-emerald-600 text-white" : "bg-slate-300 text-slate-700"
+            }`}>
+              {isStep3Done ? "✓" : "3"}
+            </span>
+            <div className="min-w-0">
+              <span className="font-bold block truncate">3. PDF & SHA-256</span>
+              <span className="text-[10px] text-slate-500 truncate block">
+                {isStep3Done ? "Checksum Verified" : "Awaiting PDF"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Error Alert */}
       {error && (
         <div className="p-4.5 rounded-2xl bg-rose-50/95 border border-rose-200/90 flex items-center gap-3 text-rose-900 text-xs font-bold shadow-sm animate-in fade-in slide-in-from-top-2">

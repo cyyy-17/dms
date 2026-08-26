@@ -99,6 +99,31 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
         </div>
       </div>
 
+      {(() => {
+        const hasValidEmail = email.trim().endsWith("@firstasia.edu.ph");
+        const hasNames = firstName.trim().length > 0 && lastName.trim().length > 0;
+        const hasUnit = unitId.trim().length > 0;
+        const hasValidPassword = password.length >= 8 && confirmPassword === password && confirmPassword.length > 0;
+        const fields = [hasNames, hasValidEmail, hasUnit, hasValidPassword];
+        const completed = fields.filter(Boolean).length;
+        const percent = Math.round((completed / 4) * 100);
+
+        return (
+          <div className="mb-5 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5 shadow-inner">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-600">
+              <span className="uppercase font-mono">Registration Form Progress</span>
+              <span className="text-[#0F2962] font-mono">{percent}% Completed</span>
+            </div>
+            <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full bg-linear-to-r from-[#0F2962] via-blue-600 to-amber-400 transition-all duration-300"
+                style={{ width: `${Math.max(percent, 10)}%` }}
+              />
+            </div>
+          </div>
+        );
+      })()}
+
       <form onSubmit={handleSubmit} className="space-y-4.5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>

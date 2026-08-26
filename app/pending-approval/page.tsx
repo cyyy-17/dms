@@ -28,6 +28,38 @@ export default function PendingApprovalPage() {
             </p>
           </div>
 
+          {/* 📊 Account Activation Multi-Stage Progress Stepper */}
+          <div className="p-4.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+              <span>Activation Pipeline</span>
+              <span className="font-mono text-amber-800">Stage 2 of 3 (50%)</span>
+            </div>
+
+            {/* Progress Track */}
+            <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden p-0.5 shadow-inner">
+              <div
+                className="h-full rounded-full bg-linear-to-r from-emerald-500 via-amber-400 to-amber-500 animate-pulse transition-all duration-500 shadow-sm"
+                style={{ width: "50%" }}
+              />
+            </div>
+
+            {/* 3 Step Nodes */}
+            <div className="grid grid-cols-3 gap-2 pt-1 text-[11px]">
+              <div className="text-left font-bold text-emerald-800">
+                <span className="block text-[10px] text-emerald-600 font-normal">Step 1</span>
+                <span>✓ Submitted</span>
+              </div>
+              <div className="text-center font-bold text-amber-900">
+                <span className="block text-[10px] text-amber-600 font-normal">Step 2</span>
+                <span>⏳ Admin Review</span>
+              </div>
+              <div className="text-right font-bold text-slate-400">
+                <span className="block text-[10px] text-slate-400 font-normal">Step 3</span>
+                <span>🔒 Unlocked</span>
+              </div>
+            </div>
+          </div>
+
           <div className="p-5 rounded-2xl bg-slate-50/90 border border-slate-200/90 text-left space-y-3.5 text-xs text-slate-600 shadow-inner">
             <div className="flex items-start gap-3">
               <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 font-bold">

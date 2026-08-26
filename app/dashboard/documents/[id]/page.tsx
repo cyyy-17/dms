@@ -260,27 +260,98 @@ export default async function DocumentDetailPage({ params }: PageProps) {
         </Link>
       </div>
 
-      {/* Header Banner */}
-      <div className="glass-card rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <CopyTrackingButton trackingNumber={doc.trackingNumber} />
-            <span
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(
-                doc.status
-              )}`}
-            >
-              {getStatusLabel(doc.status)}
-            </span>
-            {doc.isEscalated && (
-              <span className="badge-escalated px-2.5 py-0.5 rounded-full text-[10px] font-bold">
-                Auto-Escalated (Rejections: {doc.rejectionCount})
+      {/* Header Banner & Live Pipeline Progress Stepper */}
+      <div className="glass-card rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <CopyTrackingButton trackingNumber={doc.trackingNumber} />
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(
+                  doc.status
+                )}`}
+              >
+                {getStatusLabel(doc.status)}
               </span>
-            )}
+              {doc.isEscalated && (
+                <span className="badge-escalated px-2.5 py-0.5 rounded-full text-[10px] font-bold">
+                  Auto-Escalated (Rejections: {doc.rejectionCount})
+                </span>
+              )}
+            </div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+              {doc.title}
+            </h1>
           </div>
-          <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
-            {doc.title}
-          </h1>
+        </div>
+
+        {/* 📊 Visual Sequential Turn Progress Bar */}
+        <div className="p-4.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-extrabold uppercase tracking-wider text-slate-600">
+              Sequential Review Pipeline Progress
+            </span>
+            <span className="font-mono font-bold text-[#0F2962]">
+              {doc.status === "APPROVED" || doc.status === "ARCHIVED"
+                ? "100% • Sealed & Completed"
+                : doc.status === "PENDING_DIRECTOR"
+                ? "75% • Director Review Stage"
+                : doc.status === "PENDING_COORDINATOR"
+                ? "50% • Coordinator Review Stage"
+                : doc.status === "REJECTED_RETURNED"
+                ? "35% • Returned to Originator"
+                : "25% • Draft & Ingestion"}
+            </span>
+          </div>
+
+          <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden p-0.5 shadow-inner">
+            <div
+              className={`h-full rounded-full transition-all duration-500 shadow-sm ${
+                doc.status === "APPROVED" || doc.status === "ARCHIVED"
+                  ? "bg-linear-to-r from-emerald-500 to-teal-400"
+                  : doc.status === "REJECTED_RETURNED"
+                  ? "bg-linear-to-r from-amber-500 to-orange-400"
+                  : "bg-linear-to-r from-[#0F2962] via-blue-600 to-amber-400"
+              }`}
+              style={{
+                width:
+                  doc.status === "APPROVED" || doc.status === "ARCHIVED"
+                    ? "100%"
+                    : doc.status === "PENDING_DIRECTOR"
+                    ? "75%"
+                    : doc.status === "PENDING_COORDINATOR"
+                    ? "50%"
+                    : doc.status === "REJECTED_RETURNED"
+                    ? "35%"
+                    : "25%",
+              }}
+            />
+          </div>
+
+          <div className="grid grid-cols-4 gap-2 pt-1 text-[11px]">
+            <div className="text-left font-bold text-emerald-800">
+              <span>✓ Ingested</span>
+            </div>
+            <div className={`text-center font-bold ${
+              doc.status !== "DRAFT" ? "text-blue-900" : "text-slate-400"
+            }`}>
+              <span>Coordinator</span>
+            </div>
+            <div className={`text-center font-bold ${
+              doc.status === "PENDING_DIRECTOR" || doc.status === "APPROVED" || doc.status === "ARCHIVED"
+                ? "text-blue-900"
+                : "text-slate-400"
+            }`}>
+              <span>Executive Director</span>
+            </div>
+            <div className={`text-right font-bold ${
+              doc.status === "APPROVED" || doc.status === "ARCHIVED"
+                ? "text-emerald-800"
+                : "text-slate-400"
+            }`}>
+              <span>Sealed Vault</span>
+            </div>
+          </div>
         </div>
       </div>
 

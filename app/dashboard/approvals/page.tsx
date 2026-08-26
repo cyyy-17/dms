@@ -237,6 +237,22 @@ export default async function ApprovalQueuePage() {
                   )}
                 </div>
 
+                {/* 📊 Visual Pipeline Turn Progress Bar */}
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5 max-w-xl">
+                  <div className="flex items-center justify-between text-[10px] font-bold text-slate-600">
+                    <span className="uppercase font-mono">Sequential Turn Progress</span>
+                    <span className="text-[#0F2962] font-mono">
+                      {doc.status === "PENDING_DIRECTOR" ? "Level-2 Director Review (75%)" : "Level-1 Coordinator Review (50%)"}
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-linear-to-r from-[#0F2962] via-blue-600 to-amber-400 transition-all duration-300"
+                      style={{ width: doc.status === "PENDING_DIRECTOR" ? "75%" : "50%" }}
+                    />
+                  </div>
+                </div>
+
                 <div>
                   <h3 className="text-base font-bold text-slate-900 leading-snug">{doc.title}</h3>
                   <p className="text-xs text-slate-500 font-medium mt-0.5">{doc.documentType?.name || "General Document"}</p>
