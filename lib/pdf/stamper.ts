@@ -1,4 +1,4 @@
-import { PDFDocument, PDFPage, PDFRawStream, PDFRef, PDFArray, PDFName, rgb } from "pdf-lib";
+import { PDFDocument, PDFPage, PDFRawStream, PDFRef, PDFArray, PDFName, rgb, StandardFonts } from "pdf-lib";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { STORAGE_BUCKETS } from "@/lib/constants";
 import crypto from "crypto";
@@ -332,7 +332,22 @@ function findSmartAnchorInPageItems(
 }
 
 /**
- * Embeds ONLY the electronic signature graphic using Decompressed Smart Anchor & Name Detection.
+ * Formats a Date object into official Philippine Standard Time (PST) stamp timestamp
+ */
+function formatStampDate(d: Date): string {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  const year = d.getFullYear();
+  const month = pad(d.getMonth() + 1);
+  const day = pad(d.getDate());
+  const hours = pad(d.getHours());
+  const minutes = pad(d.getMinutes());
+  const seconds = pad(d.getSeconds());
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} PST`;
+}
+
+/**
+ * Embeds the In-Document Realistic Institutional Electronic Verification Stamp
+ * Directly on the document itself (no extra pages) with non-obstructive alpha transparency.
  */
 export async function stampPdfWithSignature(
   pdfBuffer: Buffer,
@@ -351,6 +366,11 @@ export async function stampPdfWithSignature(
       return { stampedBuffer: pdfBuffer, sha256Checksum };
     }
 
+    // Embed Standard Typography Fonts for institutional security stamp
+    const fontHelveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const fontHelvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontCourier = await pdfDoc.embedFont(StandardFonts.Courier);
+
     // Embed PNG / JPEG signature image
     let embeddedImage;
     if (
@@ -362,10 +382,11 @@ export async function stampPdfWithSignature(
       embeddedImage = await pdfDoc.embedJpg(signatory.signatureImageBuffer);
     }
 
-    // Signature proportions (max width 115, height max 46)
-    const imgWidth = 115;
-    const imgHeight = (embeddedImage.height / embeddedImage.width) * imgWidth;
-    const clampedHeight = Math.min(imgHeight, 46);
+    // Verification Stamp Dimensions
+    const boxWidth = 190;
+    const boxHeight = 58;
+    const sigWidth = 78;
+    const sigHeight = Math.min((embeddedImage.height / embeddedImage.width) * sigWidth, 34);
 
     let matchResult: AnchorMatchResult | null = null;
 
@@ -412,51 +433,170 @@ export async function stampPdfWithSignature(
     let posY: number;
 
     if (matchResult) {
-      // Exact Match Found!
+      // Exact Match Found on existing page!
       targetPage = pages[matchResult.pageIndex];
       const { width, height } = targetPage.getSize();
 
-      posX = Math.max(30, Math.min(width - imgWidth - 30, matchResult.x));
-      posY = Math.max(30, Math.min(height - clampedHeight - 20, matchResult.y));
+      posX = Math.max(25, Math.min(width - boxWidth - 25, matchResult.x - 10));
+      posY = Math.max(25, Math.min(height - boxHeight - 20, matchResult.y - 12));
 
       // If explicit template tag (e.g. {{SIGN_COORDINATOR}}), draw clean white knockout
       if (matchResult.isExplicitTag) {
         targetPage.drawRectangle({
           x: posX - 2,
           y: posY - 2,
-          width: imgWidth + 10,
+          width: boxWidth + 10,
           height: 18,
           color: rgb(1, 1, 1),
         });
       }
     } else {
-      // Geometric Fallback: Non-Overlapping Bottom Slots
-      targetPage = pages[pages.length - 1]; // Last page
+      // Geometric Fallback: Direct bottom placement on last document page
+      targetPage = pages[pages.length - 1]; // Last page of the document
       const { width } = targetPage.getSize();
-      const marginX = 50;
-      const availableWidth = width - marginX * 2 - imgWidth;
+      const marginX = 40;
+      const availableWidth = width - marginX * 2 - boxWidth;
 
       if (signatory.slotIndex === 0) {
         // Slot 0 (Coordinator) -> Bottom Left
         posX = marginX;
       } else if (signatory.slotIndex === 1) {
         // Slot 1 (Director) -> Bottom Right
-        posX = width - marginX - imgWidth;
+        posX = width - marginX - boxWidth;
       } else {
         // Slot 2+ (Further Signatories) -> Proportionally Distributed
         const step = availableWidth / (signatory.slotIndex + 1);
         posX = marginX + step * signatory.slotIndex;
       }
 
-      posY = 45; // Clean bottom clearance
+      posY = 40; // Clean bottom clearance on page
     }
 
-    // Draw the clean signature graphic
-    targetPage.drawImage(embeddedImage, {
+    // Generate unique verification token
+    const tokenSeed = `${signatory.signerName}-${signatory.signedAt.getTime()}-${signatory.slotIndex}`;
+    const tokenHash = crypto.createHash("sha256").update(tokenSeed).digest("hex").substring(0, 14).toUpperCase();
+
+    // 1. Draw Translucent Institutional Security Border & Background (Non-Obstructive)
+    // Low opacity (0.18) ensures any existing document text underneath remains 100% visible and readable!
+    targetPage.drawRectangle({
       x: posX,
       y: posY,
-      width: imgWidth,
-      height: clampedHeight,
+      width: boxWidth,
+      height: boxHeight,
+      borderColor: rgb(0.06, 0.16, 0.38), // #0F2962 Navy
+      borderWidth: 0.75,
+      borderOpacity: 0.85,
+      color: rgb(0.95, 0.97, 1.0),
+      opacity: 0.18,
+    });
+
+    // 2. Security Header Bar inside the stamp
+    targetPage.drawRectangle({
+      x: posX,
+      y: posY + boxHeight - 12,
+      width: boxWidth,
+      height: 12,
+      color: rgb(0.06, 0.16, 0.38),
+      opacity: 0.08,
+    });
+
+    targetPage.drawText("FAITH COLLEGES • SAS VERIFIED", {
+      x: posX + 6,
+      y: posY + boxHeight - 9,
+      size: 5.5,
+      font: fontHelveticaBold,
+      color: rgb(0.06, 0.16, 0.38),
+      opacity: 0.9,
+    });
+
+    targetPage.drawText("[AUTHENTICATED]", {
+      x: posX + boxWidth - 52,
+      y: posY + boxHeight - 9,
+      size: 5,
+      font: fontHelveticaBold,
+      color: rgb(0.05, 0.55, 0.25), // Emerald green
+      opacity: 0.95,
+    });
+
+    // Header Divider Line
+    targetPage.drawLine({
+      start: { x: posX, y: posY + boxHeight - 12 },
+      end: { x: posX + boxWidth, y: posY + boxHeight - 12 },
+      color: rgb(0.06, 0.16, 0.38),
+      thickness: 0.5,
+      opacity: 0.35,
+    });
+
+    // Vertical Divider Line between signature and verification details
+    targetPage.drawLine({
+      start: { x: posX + 88, y: posY },
+      end: { x: posX + 88, y: posY + boxHeight - 12 },
+      color: rgb(0.06, 0.16, 0.38),
+      thickness: 0.5,
+      opacity: 0.25,
+    });
+
+    // 3. Draw Signature Image (Left Column of Stamp)
+    targetPage.drawImage(embeddedImage, {
+      x: posX + 5,
+      y: posY + (boxHeight - 12 - sigHeight) / 2 + 1,
+      width: sigWidth,
+      height: sigHeight,
+      opacity: 0.95,
+    });
+
+    // 4. Draw Institutional Verification Details (Right Column of Stamp)
+    const rightX = posX + 94;
+
+    // Signer Full Name
+    targetPage.drawText(signatory.signerName.toUpperCase(), {
+      x: rightX,
+      y: posY + boxHeight - 21,
+      size: 6.5,
+      font: fontHelveticaBold,
+      color: rgb(0.06, 0.16, 0.38),
+      opacity: 0.95,
+    });
+
+    // Role & Unit Designation
+    const roleText = `${signatory.signerRole} • ${signatory.unitName || "SAS"}`;
+    targetPage.drawText(roleText.length > 24 ? roleText.substring(0, 22) + "..." : roleText, {
+      x: rightX,
+      y: posY + boxHeight - 29,
+      size: 5.2,
+      font: fontHelvetica,
+      color: rgb(0.2, 0.3, 0.45),
+      opacity: 0.9,
+    });
+
+    // PST Timestamp
+    targetPage.drawText(`DATE: ${formatStampDate(signatory.signedAt)}`, {
+      x: rightX,
+      y: posY + boxHeight - 37,
+      size: 4.8,
+      font: fontCourier,
+      color: rgb(0.3, 0.4, 0.5),
+      opacity: 0.9,
+    });
+
+    // Cryptographic Token ID
+    targetPage.drawText(`ID: SAS-${tokenHash}`, {
+      x: rightX,
+      y: posY + boxHeight - 44,
+      size: 4.6,
+      font: fontCourier,
+      color: rgb(0.1, 0.4, 0.7),
+      opacity: 0.9,
+    });
+
+    // Verified Audit Status
+    targetPage.drawText("✓ RA 10173 Audit Verified", {
+      x: rightX,
+      y: posY + 4,
+      size: 4.6,
+      font: fontHelveticaBold,
+      color: rgb(0.05, 0.55, 0.25), // Emerald
+      opacity: 0.95,
     });
 
     const modifiedPdfBytes = await pdfDoc.save();

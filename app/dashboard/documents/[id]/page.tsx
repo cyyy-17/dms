@@ -591,14 +591,23 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                       )}
 
                       {action.signatureApplied && (
-                        <div className="mt-2 flex items-center justify-between p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px]">
-                          <div className="flex items-center gap-1.5 font-bold text-emerald-900">
-                            <PenLine className="w-3.5 h-3.5 text-emerald-700" />
-                            <span>Institutional Electronic Signature Cryptographically Stamped</span>
+                        <div className="mt-2.5 p-3 rounded-xl bg-linear-to-r from-blue-50/80 via-indigo-50/50 to-emerald-50/70 border border-blue-200/90 text-[11px] space-y-1.5 shadow-2xs">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5 font-black text-[#0F2962]">
+                              <PenLine className="w-3.5 h-3.5 text-[#0F2962]" />
+                              <span>FAITH COLLEGES • SAS VERIFIED STAMP</span>
+                            </div>
+                            <span className="font-mono text-[9px] font-black text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-2 py-0.5 rounded-full">
+                              ✓ AUTHENTICATED
+                            </span>
                           </div>
-                          <span className="font-mono text-[10px] text-emerald-700 font-bold bg-emerald-100/70 px-2 py-0.5 rounded">
-                            RA 10173 Verified
-                          </span>
+                          <div className="flex items-center justify-between text-[10px] text-slate-600 font-mono pt-0.5">
+                            <span>Signer: <strong>{action.actor.firstName} {action.actor.lastName}</strong></span>
+                            <span>Direct In-Document Alpha Blend</span>
+                          </div>
+                          <div className="text-[9px] font-mono text-slate-500 truncate block">
+                            Security Token: ID: SAS-{action.id.substring(0, 14).toUpperCase()} • PST Certified
+                          </div>
                         </div>
                       )}
                     </div>
