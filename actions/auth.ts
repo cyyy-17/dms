@@ -152,6 +152,7 @@ export async function registerEmployee(input: RegisterInput): Promise<{
         payload: {
           applicantName: `${newUser.firstName} ${newUser.lastName}`,
           applicantEmail: newUser.email,
+          employeeId: newUser.employeeId,
           unitName: unit.name,
           applicantId: newUser.id,
         },

@@ -266,13 +266,14 @@ export function renderNotificationEmail(params: EmailRenderParams): RenderedEmai
       const applicantName = payload.applicantName ? String(payload.applicantName) : "New User";
       const applicantEmail = payload.applicantEmail ? String(payload.applicantEmail) : "";
       const unitName = payload.unitName ? String(payload.unitName) : "Assigned Unit";
+      const employeeId = payload.employeeId ? String(payload.employeeId) : null;
 
-      badgeText = "New Registration";
+      badgeText = "Admin Review Required • Account Pending Approval";
       badgeBg = "#0F2962";
       badgeColor = "#FFFFFF";
 
       headline = "New Employee Account Pending Approval";
-      leadText = `A new employee registration has been submitted and requires Administrator review and role assignment.`;
+      leadText = `A new employee registration has been submitted and requires Administrator review, role assignment, and institutional activation.`;
 
       bodyHtml = `
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 20px 0; border-collapse: collapse; background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; overflow: hidden;">
@@ -281,9 +282,14 @@ export function renderNotificationEmail(params: EmailRenderParams): RenderedEmai
             <td style="padding: 12px 18px; font-size: 13px; color: #0F172A; border-bottom: 1px solid #E2E8F0; font-weight: 700;">${escapeHtml(applicantName)}</td>
           </tr>
           <tr>
-            <td style="padding: 12px 18px; font-size: 13px; color: #64748B; border-bottom: 1px solid #E2E8F0; font-weight: 600;">FAITH Email</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #64748B; border-bottom: 1px solid #E2E8F0; font-weight: 600;">Institutional Email</td>
             <td style="padding: 12px 18px; font-size: 13px; color: #0F172A; border-bottom: 1px solid #E2E8F0; font-weight: 600; font-family: monospace;">${escapeHtml(applicantEmail)}</td>
           </tr>
+          ${employeeId ? `
+          <tr>
+            <td style="padding: 12px 18px; font-size: 13px; color: #64748B; border-bottom: 1px solid #E2E8F0; font-weight: 600;">Employee ID</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #0F172A; border-bottom: 1px solid #E2E8F0; font-weight: 700; font-family: monospace;">${escapeHtml(employeeId)}</td>
+          </tr>` : ""}
           <tr>
             <td style="padding: 12px 18px; font-size: 13px; color: #64748B; font-weight: 600;">Department Unit</td>
             <td style="padding: 12px 18px; font-size: 13px; color: #0F172A; font-weight: 600;">${escapeHtml(unitName)}</td>
@@ -293,7 +299,7 @@ export function renderNotificationEmail(params: EmailRenderParams): RenderedEmai
 
       ctaText = "Review User in Admin Console";
       ctaUrl = `${baseUrl}/dashboard/admin/users`;
-      plainDetails = `Applicant: ${applicantName}\nEmail: ${applicantEmail}\nUnit: ${unitName}\nAdmin Console URL: ${ctaUrl}`;
+      plainDetails = `Applicant: ${applicantName}\nEmail: ${applicantEmail}\nEmployee ID: ${employeeId || "N/A"}\nUnit: ${unitName}\nAdmin Console URL: ${ctaUrl}`;
       break;
     }
 
