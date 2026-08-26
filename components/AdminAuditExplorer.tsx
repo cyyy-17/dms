@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Download, Search } from "lucide-react";
+import DataTableWrapper from "@/components/DataTableWrapper";
 import { AuditAction } from "@prisma/client";
 import {
   getActionLabel,
@@ -111,7 +112,7 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
 
       {/* Audit Log Table */}
       <div className="glass-panel rounded-3xl border border-white/90 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        <DataTableWrapper>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50/90 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200/80">
@@ -168,7 +169,7 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
               )}
             </tbody>
           </table>
-        </div>
+        </DataTableWrapper>
       </div>
     </div>
   );

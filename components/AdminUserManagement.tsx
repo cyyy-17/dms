@@ -23,6 +23,7 @@ import {
   X,
   Building,
 } from "lucide-react";
+import DataTableWrapper from "@/components/DataTableWrapper";
 import { UserRole, UserStatus } from "@prisma/client";
 import { getRoleLabel } from "@/lib/status-labels";
 
@@ -353,7 +354,7 @@ export default function AdminUserManagement({
 
       {/* Users Table */}
       <div className="glass-card rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        <DataTableWrapper>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
@@ -484,7 +485,7 @@ export default function AdminUserManagement({
               )}
             </tbody>
           </table>
-        </div>
+        </DataTableWrapper>
       </div>
 
       {/* ════════════════════════════════════════════════════════════════════ */}

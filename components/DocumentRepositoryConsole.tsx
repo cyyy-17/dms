@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import { getStatusLabel, getStatusBadgeClass, formatHumanDate } from "@/lib/status-labels";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
+import DataTableWrapper from "@/components/DataTableWrapper";
 import {
   FileText,
   Search,
@@ -345,7 +346,7 @@ export default function DocumentRepositoryConsole({
       ) : viewMode === "table" ? (
         /* TABLE VIEW */
         <div className="glass-panel rounded-3xl border border-white/90 overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
+          <DataTableWrapper>
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50/90 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200/80">
@@ -429,7 +430,7 @@ export default function DocumentRepositoryConsole({
                 ))}
               </tbody>
             </table>
-          </div>
+          </DataTableWrapper>
         </div>
       ) : (
         /* GRID CARDS VIEW */

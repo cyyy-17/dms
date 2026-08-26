@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   Calendar,
 } from "lucide-react";
+import DataTableWrapper from "@/components/DataTableWrapper";
 import { ApprovalLevel } from "@prisma/client";
 
 interface DocTypeItem {
@@ -237,7 +238,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
 
       {/* Document Types Table */}
       <div className="glass-card rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        <DataTableWrapper>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
@@ -260,35 +261,23 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
               ) : (
                 filteredTypes.map((dt) => (
                   <tr key={dt.id} className="hover:bg-slate-50/80 transition">
-                    <td className="py-4 px-6 font-mono font-bold text-slate-900 text-sm">
-                      {dt.code}
+                    <td className="py-4 px-6 font-mono font-bold text-slate-900">{dt.code}</td>
+                    <td className="py-4 px-6">
+                      <span className="font-bold text-slate-900 block">{dt.name}</span>
+                      {dt.description && <span className="text-[11px] text-slate-500 line-clamp-1">{dt.description}</span>}
                     </td>
                     <td className="py-4 px-6">
-                      <span className="font-semibold text-slate-900 block">{dt.name}</span>
-                      {dt.description && (
-                        <span className="text-[11px] text-slate-500 block truncate max-w-xs mt-0.5">
-                          {dt.description}
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-4 px-6">
-                      <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          dt.defaultApprovalLevel === ApprovalLevel.DIRECTOR_REQUIRED
-                            ? "bg-purple-100 text-purple-900 border border-purple-200"
-                            : "bg-blue-100 text-blue-900 border border-blue-200"
-                        }`}
-                      >
-                        <ShieldCheck className="w-3 h-3" />
-                        <span>
-                          {dt.defaultApprovalLevel === ApprovalLevel.DIRECTOR_REQUIRED
-                            ? "Coordinator + Director"
-                            : "Coordinator Only"}
-                        </span>
+                      <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-900 font-bold text-[10px] border border-blue-200">
+                        {dt.defaultApprovalLevel === ApprovalLevel.DIRECTOR_REQUIRED
+                          ? "Director Approval Required"
+                          : "Coordinator Level Only"}
                       </span>
                     </td>
-                    <td className="py-4 px-6 font-semibold text-slate-800">
-                      {dt.defaultRetentionDays} days ({(dt.defaultRetentionDays / 365).toFixed(1)} yrs)
+                    <td className="py-4 px-6 font-mono text-slate-700">
+                      <span className="inline-flex items-center gap-1 font-bold text-[11px]">
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>{dt.defaultRetentionDays} days ({Math.round(dt.defaultRetentionDays / 365)} yr)</span>
+                      </span>
                     </td>
                     <td className="py-4 px-6">
                       {dt.requiresExpiryTracking ? (
@@ -348,7 +337,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
               )}
             </tbody>
           </table>
-        </div>
+        </DataTableWrapper>
       </div>
 
       {/* Modal: Create or Edit Document Type */}
