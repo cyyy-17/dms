@@ -3,6 +3,8 @@ import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
 import { NotificationStatus } from "@prisma/client";
 
+import { renderNotificationEmail } from "@/lib/email-templates";
+
 const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
 export async function GET(req: NextRequest) {
@@ -36,11 +38,24 @@ export async function GET(req: NextRequest) {
   for (const job of pendingJobs) {
     try {
       if (process.env.RESEND_API_KEY) {
+        const payload = (typeof job.payload === "object" && job.payload !== null)
+          ? (job.payload as Record<string, unknown>)
+          : {};
+
+        const rendered = renderNotificationEmail({
+          type: job.type,
+          templateName: job.templateName,
+          subject: job.subject,
+          payload,
+          recipientEmail: job.recipientEmail,
+        });
+
         await resend.emails.send({
           from: sender,
           to: job.recipientEmail,
-          subject: job.subject,
-          text: `SASDMS Notification\n\nSubject: ${job.subject}\n\nPlease log in to the SAS Document Management System portal to view details and take any necessary action.\n\nFirst Asia Institute of Technology and Humanities (FAITH Colleges)`,
+          subject: rendered.subject,
+          html: rendered.html,
+          text: rendered.text,
         });
       }
 

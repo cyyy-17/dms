@@ -6,7 +6,7 @@ import { logAuditEvent } from "@/lib/audit";
 import { queueNotification } from "@/lib/notifications";
 import { AUTO_ESCALATION_REJECTION_THRESHOLD } from "@/lib/constants";
 import { applyElectronicSignatureToStorageDocument } from "@/lib/pdf/stamper";
-import { DocumentStatus, ApprovalActionType, ApprovalLevel } from "@prisma/client";
+import { DocumentStatus, ApprovalActionType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export interface ApprovalInput {
@@ -275,6 +275,7 @@ export async function rejectReturnAction(input: RejectionInput): Promise<{
         payload: {
           documentId: doc.id,
           trackingNumber: doc.trackingNumber,
+          title: doc.title,
           comments: input.comments.trim(),
           rejectionCount: newRejectionCount,
           isEscalated: isEscalatedNow,
@@ -383,6 +384,7 @@ export async function rejectCloseAction(input: RejectionInput): Promise<{
         payload: {
           documentId: doc.id,
           trackingNumber: doc.trackingNumber,
+          title: doc.title,
           comments: input.comments.trim(),
         },
       });

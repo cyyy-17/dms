@@ -56,6 +56,7 @@ export async function GET(req: NextRequest) {
       subject: `SASDMS Reminder: Document Expiry in ${daysLeft} Days (${doc.trackingNumber})`,
       templateName: "document-expiry-alert",
       payload: {
+        documentId: doc.id,
         trackingNumber: doc.trackingNumber,
         title: doc.title,
         expiryDate: doc.expiryDate,
@@ -72,6 +73,7 @@ export async function GET(req: NextRequest) {
         subject: `SASDMS Unit Alert: Document Expiry in ${daysLeft} Days (${doc.trackingNumber})`,
         templateName: "document-expiry-alert",
         payload: {
+          documentId: doc.id,
           trackingNumber: doc.trackingNumber,
           title: doc.title,
           expiryDate: doc.expiryDate,

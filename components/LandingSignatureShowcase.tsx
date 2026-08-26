@@ -6,10 +6,8 @@ import {
   Lock,
   Cpu,
   Layers,
-  CheckCircle2,
   KeyRound,
   FileLock2,
-  FileCheck,
 } from "lucide-react";
 
 export default function LandingSignatureShowcase() {
