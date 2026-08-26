@@ -66,11 +66,6 @@ export default function LandingFooter() {
                 </a>
               </li>
               <li>
-                <a href="#tracker" className="hover:text-amber-400 transition">
-                  Public Document Verification
-                </a>
-              </li>
-              <li>
                 <a href="#faq" className="hover:text-amber-400 transition">
                   Institutional FAQ
                 </a>

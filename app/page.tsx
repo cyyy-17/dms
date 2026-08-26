@@ -1,7 +1,6 @@
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import LandingNavbar from "@/components/LandingNavbar";
 import LandingHeroInteractive from "@/components/LandingHeroInteractive";
-import LandingDocumentTracker from "@/components/LandingDocumentTracker";
 import LandingUnitExplorer, { SasUnitItem } from "@/components/LandingUnitExplorer";
 import LandingSignatureShowcase from "@/components/LandingSignatureShowcase";
 import LandingWorkflowRoadmap from "@/components/LandingWorkflowRoadmap";
@@ -278,10 +277,7 @@ export default async function HomePage() {
         {/* 2. Main Hero with Interactive Live Workflow Simulator */}
         <LandingHeroInteractive unitCount={sasUnits.length} />
 
-        {/* 3. Live Public Document Verification & Tracking Console */}
-        <LandingDocumentTracker />
-
-        {/* 4. Filterable SAS Department Units Matrix */}
+        {/* 3. Filterable SAS Department Units Matrix */}
         <LandingUnitExplorer units={sasUnits} />
 
         {/* 5. Smart Anchor Vector E-Signature Showcase & Comparison */}

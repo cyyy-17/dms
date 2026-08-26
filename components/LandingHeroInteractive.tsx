@@ -13,7 +13,7 @@ import {
   Play,
   Pause,
   RotateCcw,
-  Search,
+  Compass,
   Check,
 } from "lucide-react";
 
@@ -159,11 +159,11 @@ export default function LandingHeroInteractive({ unitCount = 7 }: LandingHeroInt
               </Link>
 
               <a
-                href="#tracker"
+                href="#units"
                 className="px-6 py-4 rounded-2xl bg-slate-900/90 hover:bg-slate-800/90 border border-slate-700/80 hover:border-amber-400/50 text-slate-200 hover:text-amber-300 font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 backdrop-blur-md active:scale-95 flex items-center gap-2 whitespace-nowrap shrink-0"
               >
-                <Search className="w-4 h-4 text-amber-400" />
-                <span>Verify Document</span>
+                <Compass className="w-4 h-4 text-amber-400" />
+                <span>Explore SAS Units</span>
               </a>
 
               <Link

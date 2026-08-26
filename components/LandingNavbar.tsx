@@ -21,7 +21,6 @@ export default function LandingNavbar() {
     { label: "SAS Units", href: "#units" },
     { label: "E-Signatures", href: "#signatures" },
     { label: "Architecture", href: "#architecture" },
-    { label: "Verification", href: "#tracker" },
     { label: "FAQ", href: "#faq" },
   ];
 
