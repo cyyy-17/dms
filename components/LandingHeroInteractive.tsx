@@ -1,20 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
-  FileText,
   ShieldCheck,
   ArrowRight,
   Lock,
   Building2,
   CheckCircle2,
-  FileSignature,
-  Play,
-  Pause,
-  RotateCcw,
   Compass,
-  Check,
+  KeyRound,
+  Server,
+  Layers,
+  FileLock2,
+  Scale,
 } from "lucide-react";
 
 interface LandingHeroInteractiveProps {
@@ -22,93 +20,36 @@ interface LandingHeroInteractiveProps {
 }
 
 export default function LandingHeroInteractive({ unitCount = 7 }: LandingHeroInteractiveProps) {
-  const [activeStep, setActiveStep] = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState<boolean>(true);
-  const [copiedHash, setCopiedHash] = useState<boolean>(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const simulationSteps = [
+  const securityPillars = [
     {
-      id: 0,
-      title: "1. Intake & Checksum",
-      subtitle: "Originating Staff Ingestion",
-      badge: "SHA-256 Anchored",
-      badgeColor: "bg-cyan-950/80 text-cyan-300 border-cyan-500/30",
-      description:
-        "Uploader selects PDF covenant. Client generates SHA-256 digest to register immutable binary integrity prior to private cloud storage.",
-      actor: "Authorized Originator [UID: AAPO-***402]",
-      status: "Ingested & Checksum Verified",
-      timestamp: "Audit Block #2026-0842-1",
-      hashSnippet: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-      actionPreview: "SHA-256 Digest Computed",
-      version: "v1.0 (Initial Ingestion)",
+      icon: Lock,
+      title: "Zero-Trust Access Perimeter",
+      desc: "All document ingestion, approvals, and reviews require verified @firstasia.edu.ph institutional SSO credentials.",
+      status: "STRICT ENFORCEMENT",
+      statusColor: "text-emerald-400 border-emerald-500/30 bg-emerald-950/40",
     },
     {
-      id: 1,
-      title: "2. Coordinator Review",
-      subtitle: "Unit-Level Verification",
-      badge: "Turn-Based Lock",
-      badgeColor: "bg-blue-950/80 text-blue-300 border-blue-500/30",
-      description:
-        "Sequential routing enforces strict turn progression. The Unit Coordinator inspects line-item covenants and endorses forward with no margin drift.",
-      actor: "Unit Review Coordinator [UID: SAS-***104]",
-      status: "Endorsed & Transferred",
-      timestamp: "Audit Block #2026-0842-2",
-      hashSnippet: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-      actionPreview: "Endorsement Remark Attached",
-      version: "v1.0 (Endorsed)",
+      icon: Layers,
+      title: "Unit-Scoped RBAC Tenancy",
+      desc: "Cross-unit visibility is strictly isolated. Staff and Coordinators operate solely within their authorized departmental unit.",
+      status: "ISOLATED BOUNDARY",
+      statusColor: "text-blue-400 border-blue-500/30 bg-blue-950/40",
     },
     {
-      id: 2,
-      title: "3. Smart Anchor E-Sign",
-      subtitle: "Cryptographic Vector Stamping",
-      badge: "Vector Signature",
-      badgeColor: "bg-amber-950/80 text-amber-300 border-amber-500/30",
-      description:
-        "Dynamic anchor parser detects signatory line and renders cryptographic vector stroke with reviewer identity, IP verification, and timestamp.",
-      actor: "Institutional Legal Officer [UID: ADM-***328]",
-      status: "Digitally Signed",
-      timestamp: "Audit Block #2026-0842-3",
-      hashSnippet: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-      actionPreview: "Vector Signature Applied",
-      version: "v1.0 (Signed)",
+      icon: KeyRound,
+      title: "Sequential Turn-Based Governance",
+      desc: "Documents advance one signatory at a time with cryptographic checksum validation at each handover stage.",
+      status: "TURN-BASED LOCK",
+      statusColor: "text-amber-400 border-amber-500/30 bg-amber-950/40",
     },
     {
-      id: 3,
-      title: "4. Director Final Seal",
-      subtitle: "Executive Approval & Archive",
-      badge: "Sealed & Locked",
-      badgeColor: "bg-emerald-950/80 text-emerald-300 border-emerald-500/30",
-      description:
-        "SAS Department Director grants final executive approval. Status transitions to APPROVED with immutable preservation lock and searchable audit trail.",
-      actor: "Office of the SAS Director [Executive Seal]",
-      status: "APPROVED • Full Institutional Seal",
-      timestamp: "Audit Block #2026-0842-4",
-      hashSnippet: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-      actionPreview: "Preserved in Private Vault",
-      version: "v1.0 (Approved Immutable)",
+      icon: FileLock2,
+      title: "Private Cloud Vault Preservation",
+      desc: "Zero public endpoints. Document binaries are encrypted with AES-256 and accessible only via time-limited signed session tokens.",
+      status: "PRIVATE VAULT",
+      statusColor: "text-purple-400 border-purple-500/30 bg-purple-950/40",
     },
   ];
-
-  // Auto-play simulation loop
-  useEffect(() => {
-    if (isPlaying) {
-      timerRef.current = setInterval(() => {
-        setActiveStep((prev) => (prev + 1) % simulationSteps.length);
-      }, 4200);
-    }
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isPlaying, simulationSteps.length]);
-
-  const handleCopyHash = () => {
-    navigator.clipboard.writeText(simulationSteps[activeStep].hashSnippet);
-    setCopiedHash(true);
-    setTimeout(() => setCopiedHash(false), 2000);
-  };
-
-  const current = simulationSteps[activeStep];
 
   return (
     <section className="relative pt-12 sm:pt-20 pb-20 sm:pb-28 overflow-hidden">
@@ -197,157 +138,67 @@ export default function LandingHeroInteractive({ unitCount = 7 }: LandingHeroInt
             </div>
           </div>
 
-          {/* Right Column: Live Interactive Document Workflow Simulator */}
+          {/* Right Column: Institutional Security & Governance Overview Console */}
           <div className="lg:col-span-5">
-            <div className="glass-panel-dark rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-700/80 relative overflow-hidden backdrop-blur-2xl transition-all">
+            <div className="glass-panel-dark rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-700/80 relative overflow-hidden backdrop-blur-2xl transition-all space-y-6">
               <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
 
-              {/* Simulation Header & Controls */}
-              <div className="flex items-center justify-between border-b border-slate-800/90 pb-4 mb-5">
+              {/* Console Header */}
+              <div className="flex items-center justify-between border-b border-slate-800/90 pb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-blue-950 border border-blue-500/40 flex items-center justify-center text-amber-400 shadow-md">
-                    <FileText className="w-4 h-4" />
+                  <div className="w-9 h-9 rounded-xl bg-blue-950 border border-blue-500/40 flex items-center justify-center text-amber-400 shadow-md">
+                    <ShieldCheck className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="font-mono text-xs font-black text-blue-300 block">
-                      DOC-SAS-2026-0842
+                    <span className="text-xs font-black text-white block">
+                      Institutional Governance Matrix
                     </span>
                     <span className="text-[11px] text-slate-400 font-medium">
-                      AAPO • Industry MOA Partnership
+                      Zero-Trust Access Perimeter • v2.6
                     </span>
                   </div>
                 </div>
 
-                {/* Play / Pause / Step Controls */}
-                <div className="flex items-center gap-1.5 bg-slate-900/90 border border-slate-800 p-1 rounded-xl">
-                  <button
-                    type="button"
-                    onClick={() => setIsPlaying(!isPlaying)}
-                    className="p-1.5 rounded-lg text-slate-300 hover:text-amber-400 hover:bg-slate-800 transition"
-                    title={isPlaying ? "Pause Auto-Simulation" : "Play Auto-Simulation"}
-                  >
-                    {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 text-amber-400" />}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveStep(0)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
-                    title="Reset to Step 1"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                <span className="px-2.5 py-1 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Vault Locked
+                </span>
               </div>
 
-              {/* Interactive Step Switcher Bar */}
-              <div className="grid grid-cols-4 gap-1.5 mb-5 p-1 bg-slate-900/80 rounded-2xl border border-slate-800">
-                {simulationSteps.map((step, idx) => (
-                  <button
-                    key={step.id}
-                    type="button"
-                    onClick={() => {
-                      setActiveStep(idx);
-                      setIsPlaying(false);
-                    }}
-                    className={`py-2 px-1 text-[11px] font-bold rounded-xl transition-all duration-200 text-center cursor-pointer ${
-                      activeStep === idx
-                        ? "bg-linear-to-r from-[#1E40AF] to-[#0F2962] text-amber-300 shadow-md border border-blue-400/40"
-                        : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-                    }`}
-                  >
-                    <span>Stage {idx + 1}</span>
-                  </button>
-                ))}
-              </div>
-
-              {/* Active Step Visual Showcase Card */}
-              <div className="p-5 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-4 relative overflow-hidden transition-all duration-300">
-                {/* Step Progress Line */}
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-white flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-blue-600/30 border border-blue-400 text-blue-300 flex items-center justify-center text-[10px] font-mono">
-                      0{activeStep + 1}
-                    </span>
-                    <span>{current.title}</span>
-                  </span>
-
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border uppercase tracking-wider ${current.badgeColor}`}>
-                    {current.badge}
-                  </span>
-                </div>
-
-                <p className="text-xs text-slate-300 leading-relaxed font-normal">
-                  {current.description}
-                </p>
-
-                {/* Actor & Action Pill */}
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/90 space-y-2">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-slate-400 font-medium">Signatory Turn:</span>
-                    <span className="text-white font-semibold">{current.actor}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-slate-400 font-medium">Workflow Status:</span>
-                    <span className="text-emerald-400 font-bold flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      {current.status}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-slate-900">
-                    <span>{current.version}</span>
-                    <span>{current.timestamp}</span>
-                  </div>
-                </div>
-
-                {/* Interactive Dynamic Stamp Visualization for Steps 3 & 4 */}
-                {(activeStep === 2 || activeStep === 3) && (
-                  <div className="p-3 rounded-xl bg-amber-950/20 border border-amber-500/30 flex items-center justify-between animate-in fade-in zoom-in-95 duration-200">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/40">
-                        <FileSignature className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <span className="text-[11px] font-bold text-amber-300 block">
-                          Smart Anchor Vector Stamp Active
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          Preserves 0px margin dislocation
+              {/* Security Pillars Cards */}
+              <div className="space-y-3">
+                {securityPillars.map((pillar, idx) => {
+                  const Icon = pillar.icon;
+                  return (
+                    <div
+                      key={idx}
+                      className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800/80 hover:border-slate-700 transition space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Icon className="w-3.5 h-3.5 text-amber-400" />
+                          <h3 className="text-xs font-bold text-white">{pillar.title}</h3>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold border ${pillar.statusColor}`}>
+                          {pillar.status}
                         </span>
                       </div>
+                      <p className="text-[11px] text-slate-400 leading-relaxed pl-5.5">
+                        {pillar.desc}
+                      </p>
                     </div>
-                    <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-mono font-bold">
-                      VERIFIED
-                    </span>
-                  </div>
-                )}
+                  );
+                })}
               </div>
 
-              {/* Bottom Cryptographic Fingerprint Box */}
-              <div className="mt-4 p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-1.5">
-                <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  <span className="flex items-center gap-1.5">
-                    <ShieldCheck className="w-3 h-3 text-emerald-400" />
-                    <span>Cryptographic Lineage Lock</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleCopyHash}
-                    className="text-amber-400 hover:text-amber-300 text-[10px] font-semibold flex items-center gap-1 transition"
-                  >
-                    {copiedHash ? (
-                      <>
-                        <Check className="w-3 h-3 text-emerald-400" />
-                        <span className="text-emerald-400">Copied!</span>
-                      </>
-                    ) : (
-                      <span>Copy SHA-256</span>
-                    )}
-                  </button>
+              {/* Bottom Telemetry Card */}
+              <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-[11px] text-slate-300 font-mono">
+                <div className="flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Public Access: Fully Prohibited</span>
                 </div>
-                <code className="text-[10px] font-mono text-slate-300 break-all block bg-black/50 p-2 rounded-xl border border-slate-800/80 select-all">
-                  SHA-256: {current.hashSnippet}
-                </code>
+                <span className="text-amber-400 font-bold">Authenticated SSO Only</span>
               </div>
             </div>
           </div>
