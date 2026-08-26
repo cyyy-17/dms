@@ -190,7 +190,7 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 selection:bg-amber-400 selection:text-slate-950 relative overflow-x-hidden">
       {/* 1. Floating Frosted Glass Navbar */}
-      <LandingNavbar />
+      <LandingNavbar unitCount={sasUnits.length} />
 
       {/* Main Content Sections */}
       <main className="flex-1">

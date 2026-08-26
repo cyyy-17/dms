@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, Menu, X, ShieldCheck, Activity } from "lucide-react";
 
-export default function LandingNavbar() {
+interface LandingNavbarProps {
+  unitCount?: number;
+}
+
+export default function LandingNavbar({ unitCount = 0 }: LandingNavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -79,7 +83,7 @@ export default function LandingNavbar() {
           {/* Live Status Telemetry Pill */}
           <div className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-900/90 border border-slate-800/80 text-[11px] text-emerald-400 font-mono font-medium whitespace-nowrap">
             <Activity className="w-3 h-3 animate-pulse text-emerald-400 shrink-0" />
-            <span>7 Units Live</span>
+            <span>{unitCount} {unitCount === 1 ? "Unit" : "Units"} Live</span>
           </div>
 
           {/* Sign In Link */}
