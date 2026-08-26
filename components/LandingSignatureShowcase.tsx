@@ -189,10 +189,10 @@ export default function LandingSignatureShowcase() {
                 {/* Signatory Text Baseline */}
                 <div className="pt-6">
                   <div className="text-xs font-black text-slate-950 uppercase tracking-wide">
-                    DR. MARIA HELENA TORRES
+                    OFFICE OF THE SAS DIRECTOR
                   </div>
                   <div className="text-[10px] text-slate-500 font-medium">
-                    Director, Student & Alumni Services (SAS)
+                    Executive Approval Authority • Student & Alumni Services (SAS)
                   </div>
                 </div>
               </div>

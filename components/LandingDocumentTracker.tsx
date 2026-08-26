@@ -43,14 +43,14 @@ const SAMPLE_DATABASE: Record<string, SampleRecord> = {
     version: "v1.0 (Final)",
     sha256: "7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
     signatories: [
-      { name: "Engr. Rafael Gomez", role: "Originator (AAPO)", signed: true, signedAt: "Aug 20, 09:15" },
-      { name: "Prof. Carmela Santos", role: "Unit Coordinator", signed: true, signedAt: "Aug 21, 10:30" },
-      { name: "Dr. Maria Helena Torres", role: "SAS Department Director", signed: true, signedAt: "Aug 21, 14:45" },
+      { name: "Authorized Originator [UID: AAPO-***402]", role: "Originating Staff", signed: true, signedAt: "Aug 20, 09:15" },
+      { name: "Unit Review Coordinator [UID: SAS-***104]", role: "Unit Coordinator", signed: true, signedAt: "Aug 21, 10:30" },
+      { name: "Office of the SAS Director [Executive Seal]", role: "Department Director", signed: true, signedAt: "Aug 21, 14:45" },
     ],
   },
   "DOC-GCO-2026-0114": {
     trackingNumber: "DOC-GCO-2026-0114",
-    title: "Confidential Student Psychological Intake Assessment",
+    title: "Student Welfare Protocol & Academic Case Assessment [REDACTED PROFILE]",
     unit: "GCO",
     unitName: "Guidance & Counseling Office",
     status: "PENDING_REVIEW",
@@ -62,9 +62,9 @@ const SAMPLE_DATABASE: Record<string, SampleRecord> = {
     version: "v1.0 (Under Review)",
     sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     signatories: [
-      { name: "Ms. Patricia Mendoza", role: "Counselor (GCO)", signed: true, signedAt: "Aug 24, 14:02" },
-      { name: "Dr. Alicia Valenzuela", role: "Guidance Coordinator", signed: false },
-      { name: "Dr. Maria Helena Torres", role: "SAS Department Director", signed: false },
+      { name: "Licensed Counselor [UID: GCO-***218]", role: "Counselor Signatory", signed: true, signedAt: "Aug 24, 14:02" },
+      { name: "Guidance Head Reviewer [UID: GCO-***091]", role: "Guidance Coordinator", signed: false },
+      { name: "Office of the SAS Director [Executive Seal]", role: "Department Director", signed: false },
     ],
   },
   "DOC-SOA-2026-0309": {
@@ -81,9 +81,9 @@ const SAMPLE_DATABASE: Record<string, SampleRecord> = {
     version: "v2.0 (Revised per remarks)",
     sha256: "a1b2c3d4e5f67890123456789abcdef0123456789abcdef0123456789abcdef0",
     signatories: [
-      { name: "Kyle Alcantara", role: "Student Org President", signed: true, signedAt: "Aug 18, 11:20" },
-      { name: "Prof. Kenneth Diaz", role: "SOA Coordinator", signed: true, signedAt: "Aug 19, 08:45" },
-      { name: "Dr. Maria Helena Torres", role: "SAS Department Director", signed: true, signedAt: "Aug 19, 13:10" },
+      { name: "Student Council Representative [UID: SOA-***512]", role: "Student Org Officer", signed: true, signedAt: "Aug 18, 11:20" },
+      { name: "SOA Faculty Moderator [UID: SOA-***741]", role: "SOA Coordinator", signed: true, signedAt: "Aug 19, 08:45" },
+      { name: "Office of the SAS Director [Executive Seal]", role: "Department Director", signed: true, signedAt: "Aug 19, 13:10" },
     ],
   },
 };
