@@ -16,7 +16,7 @@ interface LandingHeroInteractiveProps {
   unitCount: number;
 }
 
-export default function LandingHeroInteractive({ unitCount = 7 }: LandingHeroInteractiveProps) {
+export default function LandingHeroInteractive({ unitCount = 0 }: LandingHeroInteractiveProps) {
   const securityPillars = [
     {
       icon: Lock,

@@ -47,6 +47,7 @@ export default async function DashboardPage() {
     awaitingMySignature: 0,
   };
 
+  let activeUnitCount = 0;
   let unitCounts: Array<{ code: string; name: string; count: number }> = [];
 
   let recentDocs: Array<{
@@ -87,6 +88,7 @@ export default async function DashboardPage() {
         docs,
         allUnits,
         myItems,
+        totalActiveUnits,
       ] = await Promise.all([
         prisma.document.count({ where: unitFilter }),
         prisma.document.count({ where: { ...unitFilter, status: DocumentStatus.PENDING_COORDINATOR } }),
@@ -113,10 +115,12 @@ export default async function DashboardPage() {
           take: 5,
           include: { unit: true, uploader: true },
         }),
+        prisma.unit.count({ where: { isActive: true } }),
       ]);
 
       stats = { total, pendingCoordinator, pendingDirector, approved, returned, escalated, awaitingMySignature };
       recentDocs = docs;
+      activeUnitCount = totalActiveUnits;
 
       if (allUnits.length > 0) {
         unitCounts = allUnits
@@ -217,7 +221,9 @@ export default async function DashboardPage() {
             <div className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
             <div>
               <span className="text-[10px] text-slate-400 uppercase font-black block">Department Units</span>
-              <span className="font-bold text-slate-900">7 Active Tenancies</span>
+              <span className="font-bold text-slate-900">
+                {activeUnitCount} Active {activeUnitCount === 1 ? "Tenancy" : "Tenancies"}
+              </span>
             </div>
           </div>
         </div>
@@ -348,23 +354,31 @@ export default async function DashboardPage() {
           </div>
 
           <div className="space-y-4">
-            {unitCounts.map((unit) => {
-              const pct = stats.total > 0 ? Math.round((unit.count / stats.total) * 100) : 0;
-              return (
-                <div key={unit.code} className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-slate-800">{unit.name} ({unit.code})</span>
-                    <span className="font-mono text-slate-500 font-bold">{unit.count} docs ({pct}%)</span>
+            {unitCounts.length === 0 ? (
+              <div className="py-8 text-center text-slate-400 space-y-1.5">
+                <Building2 className="w-8 h-8 mx-auto text-slate-300" />
+                <p className="font-bold text-slate-600 text-xs">No active departmental documents</p>
+                <p className="text-[11px] text-slate-400">Department distribution metrics will appear as units upload records.</p>
+              </div>
+            ) : (
+              unitCounts.map((unit) => {
+                const pct = stats.total > 0 ? Math.round((unit.count / stats.total) * 100) : 0;
+                return (
+                  <div key={unit.code} className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-800">{unit.name} ({unit.code})</span>
+                      <span className="font-mono text-slate-500 font-bold">{unit.count} docs ({pct}%)</span>
+                    </div>
+                    <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                      <div
+                        className="h-full bg-linear-to-r from-[#0F2962] to-blue-600 rounded-full transition-all duration-500"
+                        style={{ width: `${Math.max(pct, 4)}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                    <div
-                      className="h-full bg-linear-to-r from-[#0F2962] to-blue-600 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.max(pct, 4)}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </div>
 
