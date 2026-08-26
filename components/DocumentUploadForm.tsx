@@ -273,10 +273,10 @@ export default function DocumentUploadForm({
             <select
               value={documentTypeId}
               onChange={(e) => setDocumentTypeId(e.target.value)}
-              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
+              className="block w-full px-3.5 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
             >
               {docTypes.map((dt) => (
-                <option key={dt.id} value={dt.id}>
+                <option key={dt.id} value={dt.id} className="text-slate-900 bg-white">
                   {dt.name} ({dt.code})
                 </option>
               ))}
@@ -292,10 +292,10 @@ export default function DocumentUploadForm({
               value={unitId}
               disabled={!isCrossUnit}
               onChange={(e) => setUnitId(e.target.value)}
-              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner disabled:bg-slate-100 disabled:text-slate-500"
+              className="block w-full px-3.5 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner disabled:bg-slate-100 disabled:text-slate-500"
             >
               {units.map((u) => (
-                <option key={u.id} value={u.id}>
+                <option key={u.id} value={u.id} className="text-slate-900 bg-white">
                   {u.name} ({u.code})
                 </option>
               ))}
@@ -314,7 +314,7 @@ export default function DocumentUploadForm({
             placeholder="e.g. MOA Partnership Agreement - Industry Partner Inc."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="block w-full px-4 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
+            className="block w-full px-4 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner placeholder:text-slate-400"
           />
         </div>
 
@@ -328,7 +328,7 @@ export default function DocumentUploadForm({
             placeholder="Provide context, parties involved, or key objectives for reviewer reference..."
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="block w-full px-4 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
+            className="block w-full px-4 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner placeholder:text-slate-400"
           />
         </div>
 
@@ -346,7 +346,7 @@ export default function DocumentUploadForm({
                 type="date"
                 value={effectiveDate}
                 onChange={(e) => setEffectiveDate(e.target.value)}
-                className="block w-full pl-10 pr-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
+                className="block w-full pl-10 pr-3.5 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
               />
             </div>
           </div>
@@ -363,7 +363,7 @@ export default function DocumentUploadForm({
                 type="date"
                 value={expiryDate}
                 onChange={(e) => setExpiryDate(e.target.value)}
-                className="block w-full pl-10 pr-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
+                className="block w-full pl-10 pr-3.5 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
               />
             </div>
           </div>
@@ -468,11 +468,11 @@ export default function DocumentUploadForm({
               <select
                 value={selectedUserToAdd}
                 onChange={(e) => setSelectedUserToAdd(e.target.value)}
-                className="block w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                className="block w-full px-3.5 py-2.5 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
               >
-                <option value="">-- Choose Signer --</option>
+                <option value="" className="text-slate-900 bg-white">-- Choose Signer --</option>
                 {availableUsers.map((u) => (
-                  <option key={u.id} value={u.id}>
+                  <option key={u.id} value={u.id} className="text-slate-900 bg-white">
                     {u.fullName} ({u.role} {u.unitCode ? `• ${u.unitCode}` : ""})
                   </option>
                 ))}
@@ -489,7 +489,7 @@ export default function DocumentUploadForm({
                   placeholder="e.g. Approved by, Reviewed"
                   value={selectedTitleToAdd}
                   onChange={(e) => setSelectedTitleToAdd(e.target.value)}
-                  className="block w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                  className="block w-full px-3.5 py-2.5 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner placeholder:text-slate-400"
                 />
                 <button
                   type="button"

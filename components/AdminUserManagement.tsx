@@ -300,14 +300,14 @@ export default function AdminUserManagement({
               placeholder="Search by Name, Email, or Employee ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs border border-slate-300 rounded-lg bg-white"
+              className="w-full pl-9 pr-3 py-2 text-xs font-medium text-slate-900 border border-slate-300 rounded-lg bg-white placeholder:text-slate-400"
             />
           </div>
 
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
+            className="text-xs font-medium text-slate-900 py-2 px-3 border border-slate-300 rounded-lg bg-white"
           >
             <option value="ALL">All Roles</option>
             <option value="STAFF">Department Staff</option>
@@ -319,7 +319,7 @@ export default function AdminUserManagement({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
+            className="text-xs font-medium text-slate-900 py-2 px-3 border border-slate-300 rounded-lg bg-white"
           >
             <option value="ALL">All Account Statuses</option>
             <option value="ACTIVE">Verified Active</option>
@@ -331,7 +331,7 @@ export default function AdminUserManagement({
           <select
             value={unitFilter}
             onChange={(e) => setUnitFilter(e.target.value)}
-            className="text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
+            className="text-xs font-medium text-slate-900 py-2 px-3 border border-slate-300 rounded-lg bg-white"
           >
             <option value="ALL">All Units</option>
             {units.map((u) => (

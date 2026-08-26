@@ -35,6 +35,20 @@
   code, pre, .font-mono {
     font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
   }
+
+  /* Form Elements Text Color & Contrast Hardening */
+  select, input, textarea {
+    color: #0f172a !important;
+  }
+
+  select option {
+    color: #0f172a !important;
+    background-color: #ffffff !important;
+  }
+
+  input::placeholder, textarea::placeholder {
+    color: #94a3b8 !important;
+  }
 }
 
 /* ==========================================================================
