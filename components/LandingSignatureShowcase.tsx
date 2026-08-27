@@ -12,20 +12,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-interface LandingSignatureShowcaseProps {
-  liveStats?: {
-    totalDocuments: number;
-    totalVersions: number;
-    totalApproved: number;
-    totalUsers: number;
-    totalAuditLogs: number;
-    totalUnits: number;
-  };
-}
-
-export default function LandingSignatureShowcase({
-  liveStats,
-}: LandingSignatureShowcaseProps) {
+export default function LandingSignatureShowcase() {
   const architecturalFeatures = [
     {
       icon: Crosshair,
@@ -134,35 +121,25 @@ export default function LandingSignatureShowcase({
                 {/* Stamped Signature Box (Solid White Knockout) */}
                 <div className="p-2.5 bg-white rounded-lg border border-blue-400 shadow-md ring-2 ring-blue-500/20 space-y-1">
                   <div className="font-serif italic font-black text-blue-950 text-base tracking-wide flex items-center justify-between">
-                    <span>Aljon M. Tolentino</span>
+                    <span>Authorized Signatory</span>
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   </div>
                   <div className="border-t border-slate-200 pt-1 flex items-center justify-between text-[10px]">
-                    <span className="font-bold text-slate-800">ALJON M. TOLENTINO, PhD</span>
+                    <span className="font-bold text-slate-800">OFFICIAL SIGNATORY, PhD</span>
                     <span className="font-mono text-slate-400">Page 1 • (X: 380, Y: 520)</span>
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-1">
-                <span>SHA-256: d0dcb785767...</span>
-                <span className="text-emerald-700 font-bold">Verified Lock</span>
+                <span>SHA-256: 7f83b1657ff...</span>
+                <span className="text-emerald-700 font-bold">Encrypted Lock</span>
               </div>
             </div>
 
-            {/* Live Metrics Pill */}
-            {liveStats && liveStats.totalApproved > 0 && (
-              <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-300">
-                <span className="font-medium">Total Vaulted Documents:</span>
-                <span className="font-mono font-black text-emerald-400">
-                  {liveStats.totalApproved} / {liveStats.totalDocuments} Sealed
-                </span>
-              </div>
-            )}
-
             <div className="p-3.5 rounded-2xl bg-blue-950/40 border border-blue-500/30 flex items-center gap-2.5 text-xs text-blue-300">
               <Lock className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>All signing pads and visual stamp placement modals run exclusively inside authenticated sessions.</span>
+              <span>Zero-Trust Architecture: Document binaries and signatory pads are restricted exclusively behind authenticated sessions.</span>
             </div>
           </div>
         </div>

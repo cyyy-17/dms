@@ -14,16 +14,10 @@ import {
 
 interface LandingHeroInteractiveProps {
   unitCount: number;
-  liveStats?: {
-    totalDocuments: number;
-    totalVersions: number;
-    totalApproved: number;
-  };
 }
 
 export default function LandingHeroInteractive({
   unitCount = 0,
-  liveStats,
 }: LandingHeroInteractiveProps) {
   const securityPillars = [
     {
@@ -134,22 +128,22 @@ export default function LandingHeroInteractive({
                 <span className="text-2xl sm:text-3xl font-black text-white font-mono block">
                   {unitCount || 7}
                 </span>
-                <span className="text-[11px] text-slate-400 font-medium">SAS Units Integrated</span>
+                <span className="text-[11px] text-slate-400 font-medium">Department Units</span>
               </div>
               <div className="stat-kpi-card p-3 rounded-2xl bg-slate-900/50 border border-slate-800/60">
                 <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono block">
-                  {liveStats && liveStats.totalDocuments > 0 ? liveStats.totalDocuments : "100%"}
+                  100%
                 </span>
                 <span className="text-[11px] text-slate-400 font-medium">
-                  {liveStats && liveStats.totalDocuments > 0 ? "Documents Vaulted" : "SHA-256 Audited"}
+                  SHA-256 Validated
                 </span>
               </div>
               <div className="stat-kpi-card p-3 rounded-2xl bg-slate-900/50 border border-slate-800/60">
                 <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono block">
-                  {liveStats && liveStats.totalApproved > 0 ? liveStats.totalApproved : "RA 10173"}
+                  RA 10173
                 </span>
                 <span className="text-[11px] text-slate-400 font-medium">
-                  {liveStats && liveStats.totalApproved > 0 ? "Approved Sign-Offs" : "Privacy Compliant"}
+                  Privacy Certified
                 </span>
               </div>
               <div className="stat-kpi-card p-3 rounded-2xl bg-slate-900/50 border border-slate-800/60">

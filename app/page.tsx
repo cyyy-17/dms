@@ -154,37 +154,13 @@ const UNIT_METADATA_MAP: Record<
 
 export default async function HomePage() {
   let sasUnits: SasUnitItem[] = [];
-  let liveStats = {
-    totalDocuments: 0,
-    totalVersions: 0,
-    totalApproved: 0,
-    totalUsers: 0,
-    totalAuditLogs: 0,
-    totalUnits: 0,
-  };
 
   if (isDatabaseConfigured) {
     try {
-      const [dbUnits, totalDocs, totalVersions, approvedDocs, activeUsers, totalAuditEvents] = await Promise.all([
-        prisma.unit.findMany({
-          where: { isActive: true },
-          orderBy: { name: "asc" },
-        }),
-        prisma.document.count(),
-        prisma.documentVersion.count(),
-        prisma.document.count({ where: { status: "APPROVED" } }),
-        prisma.user.count({ where: { status: "ACTIVE" } }),
-        prisma.auditLog.count(),
-      ]);
-
-      liveStats = {
-        totalDocuments: totalDocs,
-        totalVersions: totalVersions,
-        totalApproved: approvedDocs,
-        totalUsers: activeUsers,
-        totalAuditLogs: totalAuditEvents,
-        totalUnits: dbUnits.length,
-      };
+      const dbUnits = await prisma.unit.findMany({
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+      });
 
       if (dbUnits && dbUnits.length > 0) {
         sasUnits = dbUnits.map((u) => {
@@ -219,8 +195,8 @@ export default async function HomePage() {
 
       {/* Main Content Sections */}
       <main className="flex-1">
-        {/* 2. Main Hero with Interactive Live Workflow Simulator & Live Telemetry */}
-        <LandingHeroInteractive unitCount={sasUnits.length} liveStats={liveStats} />
+        {/* 2. Main Hero with Zero-Trust Security Posture */}
+        <LandingHeroInteractive unitCount={sasUnits.length} />
 
         {/* 3. Institutional Heritage & Batangas Campus Showcase */}
         <LandingCampusShowcase />
@@ -229,13 +205,13 @@ export default async function HomePage() {
         <LandingUnitExplorer units={sasUnits} />
 
         {/* 5. Precision Visual Placer & Solid Knockout E-Signature Architecture */}
-        <LandingSignatureShowcase liveStats={liveStats} />
+        <LandingSignatureShowcase />
 
         {/* 6. Sequential Turn-Based Life Cycle & 2-Rejection Escalation Engine */}
         <LandingWorkflowRoadmap />
 
         {/* 7. Enterprise Rigor Bento Architecture Grid */}
-        <LandingBentoArchitecture liveStats={liveStats} />
+        <LandingBentoArchitecture />
 
         {/* 8. Categorized Interactive FAQs Accordion */}
         <LandingFaqAccordion />
@@ -245,12 +221,7 @@ export default async function HomePage() {
       </main>
 
       {/* 10. Comprehensive Institutional Telemetry Footer */}
-      <LandingFooter
-        unitCount={sasUnits.length}
-        documentCount={liveStats.totalDocuments}
-        versionCount={liveStats.totalVersions}
-        auditCount={liveStats.totalAuditLogs}
-      />
+      <LandingFooter unitCount={sasUnits.length} />
     </div>
   );
 }

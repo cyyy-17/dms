@@ -6,17 +6,9 @@ import { ExternalLink, MapPin } from "lucide-react";
 
 interface LandingFooterProps {
   unitCount?: number;
-  documentCount?: number;
-  versionCount?: number;
-  auditCount?: number;
 }
 
-export default function LandingFooter({
-  unitCount,
-  documentCount,
-  versionCount,
-  auditCount,
-}: LandingFooterProps) {
+export default function LandingFooter({ unitCount }: LandingFooterProps) {
   return (
     <footer className="bg-slate-950 text-slate-400 py-16 text-xs border-t border-slate-800/80 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -55,11 +47,7 @@ export default function LandingFooter({
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
               <span>
-                {unitCount ? `${unitCount} SAS Units Online` : "7 Units Online"}
-                {documentCount && documentCount > 0 ? ` • ${documentCount} Documents Vaulted` : ""}
-                {versionCount && versionCount > 0 ? ` • ${versionCount} Version Trees` : ""}
-                {auditCount && auditCount > 0 ? ` • ${auditCount} Audit Logs` : ""}
-                {" • Zero-Trust Active"}
+                {unitCount ? `${unitCount} SAS Units Online` : "7 Department Units"} • Zero-Trust Perimeter Active • RA 10173 Certified
               </span>
             </div>
           </div>
