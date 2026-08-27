@@ -22,7 +22,7 @@ import {
   Shield,
   Fingerprint,
 } from "lucide-react";
-import { DocumentStatus, ApprovalActionType, UserRole } from "@prisma/client";
+import { DocumentStatus, ApprovalActionType, UserRole, UserStatus } from "@prisma/client";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -87,14 +87,14 @@ export const dynamic = "force-dynamic";
 export default async function DocumentDetailPage({ params }: PageProps) {
   const { id } = await params;
   const currentUser: AuthenticatedUser = (await getAuthenticatedUser()) || {
-    id: "demo-staff-user",
-    email: "demo.staff@firstasia.edu.ph",
+    id: "demo-coordinator-user",
+    email: "coordinator.career@firstasia.edu.ph",
     firstName: "Maria",
     lastName: "Santos",
     fullName: "Maria Santos",
-    employeeId: "EMP-2026-042",
+    employeeId: "EMP-COORD-001",
     role: UserRole.COORDINATOR,
-    status: "ACTIVE",
+    status: UserStatus.ACTIVE,
     unitId: "demo-unit-career",
     unitCode: "CAREER",
     unitName: "Career Services & Placement",

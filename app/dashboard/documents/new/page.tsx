@@ -21,12 +21,12 @@ export const dynamic = "force-dynamic";
 export default async function NewDocumentPage() {
   const user: AuthenticatedUser = (await getAuthenticatedUser()) || {
     id: "demo-staff-user",
-    email: "demo.staff@firstasia.edu.ph",
-    firstName: "Maria",
-    lastName: "Santos",
-    fullName: "Maria Santos",
-    employeeId: "EMP-2026-042",
-    role: "COORDINATOR",
+    email: "staff.career@firstasia.edu.ph",
+    firstName: "Juan",
+    lastName: "Dela Cruz",
+    fullName: "Juan Dela Cruz",
+    employeeId: "EMP-STAFF-001",
+    role: "STAFF",
     status: "ACTIVE",
     unitId: "demo-unit-career",
     unitCode: "CAREER",

@@ -90,14 +90,23 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
             <option value="USER_REGISTER">User Account Registered</option>
             <option value="USER_APPROVE">Account Verified & Approved</option>
             <option value="USER_REJECT">Registration Request Denied</option>
+            <option value="USER_SUSPEND">Account Suspended</option>
             <option value="USER_ROLE_CHANGE">Role / Unit Reassigned</option>
             <option value="DOCUMENT_CREATE">Document Ingested into Vault</option>
+            <option value="DOCUMENT_VERSION_UPLOAD">New Version Attached</option>
+            <option value="DOCUMENT_VIEW">Document Inspected (View)</option>
+            <option value="DOCUMENT_DOWNLOAD">Document PDF Exported (Download)</option>
             <option value="DOCUMENT_SUBMIT">Submitted for Sequential Review</option>
             <option value="DOCUMENT_APPROVE_COORDINATOR">Approved by Unit Coordinator</option>
             <option value="DOCUMENT_APPROVE_DIRECTOR">Executive Approval by Director</option>
             <option value="DOCUMENT_REJECT_RETURN">Returned for Author Revision</option>
-            <option value="DOCUMENT_ADMIN_OVERRIDE">Administrative Governance Override</option>
-            <option value="DOCUMENT_ARCHIVE_RA10173">RA 10173 Compliance Archival</option>
+            <option value="DOCUMENT_REJECT_CLOSE">Permanently Terminated / Closed</option>
+            <option value="DOCUMENT_AUTO_ESCALATE">Auto-Escalated to Director</option>
+            <option value="DOCUMENT_ARCHIVE">RA 10173 Compliance Archival</option>
+            <option value="DOCUMENT_EXPIRY_ALERT">Document Expiry Alert Dispatched</option>
+            <option value="DOCUMENT_PURGE">Automated Retention Cleanup</option>
+            <option value="DELEGATION_ASSIGNED">Acting Signatory Delegated</option>
+            <option value="DELEGATION_REVOKED">Acting Signatory Revoked</option>
           </select>
         </div>
 

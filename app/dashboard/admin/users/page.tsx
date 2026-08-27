@@ -30,9 +30,9 @@ export default async function AdminUsersPage() {
   const currentUser: AuthenticatedUser = (await getAuthenticatedUser()) || {
     id: "demo-admin-user",
     email: "admin@firstasia.edu.ph",
-    firstName: "Admin",
-    lastName: "System",
-    fullName: "Admin System",
+    firstName: "System",
+    lastName: "Administrator",
+    fullName: "System Administrator",
     employeeId: "EMP-ADMIN-001",
     role: UserRole.ADMIN,
     status: UserStatus.ACTIVE,

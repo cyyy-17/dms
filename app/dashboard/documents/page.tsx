@@ -18,12 +18,12 @@ export const dynamic = "force-dynamic";
 export default async function DocumentsPage({ searchParams }: PageProps) {
   const resolvedParams = await searchParams;
   const user: AuthenticatedUser = (await getAuthenticatedUser()) || {
-    id: "demo-staff-user",
-    email: "demo.staff@firstasia.edu.ph",
+    id: "demo-coordinator-user",
+    email: "coordinator.career@firstasia.edu.ph",
     firstName: "Maria",
     lastName: "Santos",
     fullName: "Maria Santos",
-    employeeId: "EMP-2026-042",
+    employeeId: "EMP-COORD-001",
     role: "COORDINATOR",
     status: "ACTIVE",
     unitId: "demo-unit-career",

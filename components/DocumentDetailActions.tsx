@@ -299,6 +299,23 @@ export default function DocumentDetailActions({
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const MAX_SIZE = 25 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      setError("File exceeds the maximum allowable size of 25MB.");
+      setNewVersionFile(null);
+      setNewVersionChecksum(null);
+      e.target.value = "";
+      return;
+    }
+
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      setError("Only official PDF documents (*.pdf) are supported for version uploads.");
+      setNewVersionFile(null);
+      setNewVersionChecksum(null);
+      e.target.value = "";
+      return;
+    }
+
     setNewVersionFile(file);
     try {
       const arrayBuffer = await file.arrayBuffer();
@@ -306,6 +323,7 @@ export default function DocumentDetailActions({
       const hashArray = Array.from(new Uint8Array(hashBuffer));
       const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
       setNewVersionChecksum(hashHex);
+      setError(null);
     } catch {
       setError("Failed to compute SHA-256 for revised version.");
     }
@@ -755,12 +773,12 @@ export default function DocumentDetailActions({
 
               <div>
                 <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
-                  New Document File (PDF / Word / Excel) *
+                  New Document File (Official PDF Document, Max 25 MB) *
                 </label>
                 <input
                   type="file"
                   required
-                  accept=".pdf,.docx,.xlsx"
+                  accept=".pdf,application/pdf"
                   onChange={handleNewVersionFileChange}
                   className="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-[#0F2962] hover:file:bg-blue-100 cursor-pointer"
                 />

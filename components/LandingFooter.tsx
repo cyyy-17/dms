@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 
-export default function LandingFooter() {
+interface LandingFooterProps {
+  unitCount?: number;
+  documentCount?: number;
+}
+
+export default function LandingFooter({ unitCount, documentCount }: LandingFooterProps) {
   return (
     <footer className="bg-slate-950 text-slate-400 py-16 text-xs border-t border-slate-800/80 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -35,7 +40,10 @@ export default function LandingFooter() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
-              <span>System Operational • Zero-Trust Perimeter Active • Latency &lt; 15ms</span>
+              <span>
+                {unitCount ? `${unitCount} SAS Units Online` : "System Operational"} • Zero-Trust Perimeter Active
+                {documentCount && documentCount > 0 ? ` • ${documentCount} Documents Audited` : " • Latency < 15ms"}
+              </span>
             </div>
           </div>
 

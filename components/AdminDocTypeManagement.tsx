@@ -58,7 +58,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
     description: "",
     defaultApprovalLevel: ApprovalLevel.COORDINATOR_ONLY,
     requiresExpiryTracking: false,
-    defaultRetentionDays: 365,
+    defaultRetentionDays: 1825,
     isActive: true,
   });
 
@@ -102,7 +102,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
         description: "",
         defaultApprovalLevel: ApprovalLevel.COORDINATOR_ONLY,
         requiresExpiryTracking: false,
-        defaultRetentionDays: 365,
+        defaultRetentionDays: 1825,
         isActive: true,
       });
       router.refresh();

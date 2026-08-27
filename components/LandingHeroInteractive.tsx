@@ -14,9 +14,17 @@ import {
 
 interface LandingHeroInteractiveProps {
   unitCount: number;
+  liveStats?: {
+    totalDocuments: number;
+    totalVersions: number;
+    totalApproved: number;
+  };
 }
 
-export default function LandingHeroInteractive({ unitCount = 0 }: LandingHeroInteractiveProps) {
+export default function LandingHeroInteractive({
+  unitCount = 0,
+  liveStats,
+}: LandingHeroInteractiveProps) {
   const securityPillars = [
     {
       icon: Lock,
@@ -121,12 +129,20 @@ export default function LandingHeroInteractive({ unitCount = 0 }: LandingHeroInt
                 <span className="text-[11px] text-slate-400 font-medium">SAS Units Integrated</span>
               </div>
               <div className="stat-kpi-card p-3 rounded-2xl bg-slate-900/50 border border-slate-800/60">
-                <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono block">100%</span>
-                <span className="text-[11px] text-slate-400 font-medium">SHA-256 Audited</span>
+                <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono block">
+                  {liveStats && liveStats.totalDocuments > 0 ? `${liveStats.totalDocuments}` : "100%"}
+                </span>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {liveStats && liveStats.totalDocuments > 0 ? "Documents Sealed" : "SHA-256 Audited"}
+                </span>
               </div>
               <div className="stat-kpi-card p-3 rounded-2xl bg-slate-900/50 border border-slate-800/60">
-                <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono block">RA 10173</span>
-                <span className="text-[11px] text-slate-400 font-medium">Data Privacy Certified</span>
+                <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono block">
+                  {liveStats && liveStats.totalVersions > 0 ? `${liveStats.totalVersions}` : "RA 10173"}
+                </span>
+                <span className="text-[11px] text-slate-400 font-medium">
+                  {liveStats && liveStats.totalVersions > 0 ? "Lineage Versions" : "Data Privacy Certified"}
+                </span>
               </div>
               <div className="stat-kpi-card p-3 rounded-2xl bg-slate-900/50 border border-slate-800/60">
                 <span className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono block">&lt;24h</span>

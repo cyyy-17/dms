@@ -153,13 +153,29 @@ const UNIT_METADATA_MAP: Record<
 
 export default async function HomePage() {
   let sasUnits: SasUnitItem[] = [];
+  let liveStats = {
+    totalDocuments: 0,
+    totalVersions: 0,
+    totalApproved: 0,
+  };
 
   if (isDatabaseConfigured) {
     try {
-      const dbUnits = await prisma.unit.findMany({
-        where: { isActive: true },
-        orderBy: { name: "asc" },
-      });
+      const [dbUnits, totalDocs, totalVersions, approvedDocs] = await Promise.all([
+        prisma.unit.findMany({
+          where: { isActive: true },
+          orderBy: { name: "asc" },
+        }),
+        prisma.document.count(),
+        prisma.documentVersion.count(),
+        prisma.document.count({ where: { status: "APPROVED" } }),
+      ]);
+
+      liveStats = {
+        totalDocuments: totalDocs,
+        totalVersions: totalVersions,
+        totalApproved: approvedDocs,
+      };
 
       if (dbUnits && dbUnits.length > 0) {
         sasUnits = dbUnits.map((u) => {
@@ -195,7 +211,7 @@ export default async function HomePage() {
       {/* Main Content Sections */}
       <main className="flex-1">
         {/* 2. Main Hero with Interactive Live Workflow Simulator */}
-        <LandingHeroInteractive unitCount={sasUnits.length} />
+        <LandingHeroInteractive unitCount={sasUnits.length} liveStats={liveStats} />
 
         {/* 3. Filterable SAS Department Units Matrix */}
         <LandingUnitExplorer units={sasUnits} />
@@ -217,7 +233,7 @@ export default async function HomePage() {
       </main>
 
       {/* 10. Comprehensive Institutional Telemetry Footer */}
-      <LandingFooter />
+      <LandingFooter unitCount={sasUnits.length} documentCount={liveStats.totalDocuments} />
     </div>
   );
 }

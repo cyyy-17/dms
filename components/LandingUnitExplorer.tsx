@@ -35,6 +35,14 @@ interface LandingUnitExplorerProps {
 }
 
 const ICON_MAP: Record<string, LucideIcon> = {
+  CAREER: Briefcase,
+  ALUMNI: GraduationCap,
+  ACTIVITIES: Users,
+  DISCIPLINE: Scale,
+  GUIDANCE: Compass,
+  SCHOLARSHIPS: Award,
+  EXTENSION: HeartHandshake,
+  // Legacy Aliases
   GCO: Compass,
   AAPO: GraduationCap,
   SOA: Users,

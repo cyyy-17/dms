@@ -97,7 +97,7 @@ export default function LandingBentoArchitecture() {
               Unit-Scoped RBAC Zero-Trust Tenancy
             </h3>
             <p className="text-xs text-slate-300 leading-relaxed">
-              Staff and Coordinators are strictly partitioned within their own Department Unit (GCO, AAPO, SOA, etc.), preventing cross-unit visibility leaks while granting the Director unified oversight.
+              Staff and Coordinators are strictly partitioned within their own Department Unit (CAREER, ALUMNI, GUIDANCE, etc.), preventing cross-unit visibility leaks while granting the Director unified oversight.
             </p>
           </div>
           <span className="text-[11px] font-mono font-bold text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 px-3 py-1 rounded-full w-fit mt-4">

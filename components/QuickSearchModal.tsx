@@ -13,7 +13,12 @@ import {
   Building2,
   ArrowRight,
   X,
+  Loader2,
+  FileCheck,
 } from "lucide-react";
+import { quickSearchLiveAction } from "@/actions/documents";
+import { getStatusLabel, getStatusBadgeClass } from "@/lib/status-labels";
+import { DocumentStatus } from "@prisma/client";
 
 interface QuickSearchModalProps {
   isOpen: boolean;
@@ -22,13 +27,35 @@ interface QuickSearchModalProps {
   units?: Array<{ code: string; name: string }>;
 }
 
+interface LiveDocumentResult {
+  id: string;
+  trackingNumber: string;
+  title: string;
+  status: DocumentStatus;
+  unitCode: string;
+  documentTypeName: string;
+  uploaderName: string;
+}
+
+interface LiveUnitResult {
+  id: string;
+  code: string;
+  name: string;
+}
+
 export default function QuickSearchModal({ isOpen, onClose, userRole, units = [] }: QuickSearchModalProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const [isSearching, setIsSearching] = useState(false);
+  const [liveDocs, setLiveDocs] = useState<LiveDocumentResult[]>([]);
+  const [liveUnits, setLiveUnits] = useState<LiveUnitResult[]>([]);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleClose = useCallback(() => {
     setQuery("");
+    setLiveDocs([]);
+    setLiveUnits([]);
+    setIsSearching(false);
     onClose();
   }, [onClose]);
 
@@ -40,6 +67,62 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
       return () => clearTimeout(timer);
     }
   }, [isOpen]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setQuery(val);
+    if (val.trim().length < 2) {
+      setLiveDocs([]);
+      setLiveUnits([]);
+      setIsSearching(false);
+    }
+  };
+
+  const handleClear = () => {
+    setQuery("");
+    setLiveDocs([]);
+    setLiveUnits([]);
+    setIsSearching(false);
+    inputRef.current?.focus();
+  };
+
+  // Debounced real-time asynchronous search
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (trimmed.length < 2) {
+      return;
+    }
+
+    let isMounted = true;
+    const debounceTimer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await quickSearchLiveAction(trimmed);
+        if (!isMounted) return;
+        if (res.success) {
+          setLiveDocs(res.documents);
+          setLiveUnits(res.units);
+        } else {
+          setLiveDocs([]);
+          setLiveUnits([]);
+        }
+      } catch {
+        if (isMounted) {
+          setLiveDocs([]);
+          setLiveUnits([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsSearching(false);
+        }
+      }
+    }, 200);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(debounceTimer);
+    };
+  }, [query]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -117,11 +200,13 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
       query.trim() === ""
   );
 
-  const filteredUnits = units.filter(
+  const fallbackUnits = units.filter(
     (u) =>
       u.code.toLowerCase().includes(query.toLowerCase()) ||
       u.name.toLowerCase().includes(query.toLowerCase())
   );
+
+  const displayedUnits = liveUnits.length > 0 ? liveUnits : fallbackUnits;
 
   const handleNavigate = (href: string) => {
     handleClose();
@@ -136,25 +221,32 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
     router.push(`/dashboard/documents?search=${encodeURIComponent(query.trim())}`);
   };
 
+  const hasLiveResults = liveDocs.length > 0 || displayedUnits.length > 0;
+  const isQueryActive = query.trim().length >= 2;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-10 sm:pt-24 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="glass-panel rounded-3xl max-w-2xl w-full bg-white shadow-2xl border border-white/90 overflow-hidden space-y-0">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-10 sm:pt-20 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-150">
+      <div className="glass-panel rounded-3xl max-w-2xl w-full bg-white shadow-2xl border border-white/90 overflow-hidden space-y-0 flex flex-col max-h-[85vh]">
         {/* Search Input Bar */}
-        <form onSubmit={handleSearchSubmit} className="p-3.5 sm:p-5 border-b border-slate-200/80 flex items-center gap-2.5 sm:gap-3">
-          <Search className="w-5 h-5 text-slate-400 shrink-0" />
+        <form onSubmit={handleSearchSubmit} className="p-3.5 sm:p-5 border-b border-slate-200/80 flex items-center gap-2.5 sm:gap-3 shrink-0">
+          {isSearching ? (
+            <Loader2 className="w-5 h-5 text-blue-600 animate-spin shrink-0" />
+          ) : (
+            <Search className="w-5 h-5 text-slate-400 shrink-0" />
+          )}
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search tracking number, document title, or module..."
+            placeholder="Search tracking number, document title, or unit..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={handleInputChange}
             className="w-full text-sm font-medium text-slate-900 placeholder:text-slate-400 bg-transparent focus:outline-none"
           />
           {query && (
             <button
               type="button"
-              onClick={() => setQuery("")}
-              className="p-1 text-slate-400 hover:text-slate-600 rounded-lg shrink-0"
+              onClick={handleClear}
+              className="p-1 text-slate-400 hover:text-slate-600 rounded-lg shrink-0 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -165,64 +257,79 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
         </form>
 
         {/* Search Recommendations / Quick Jump list */}
-        <div className="p-3.5 sm:p-5 max-h-[65vh] sm:max-h-96 overflow-y-auto space-y-2">
+        <div className="p-3.5 sm:p-5 overflow-y-auto space-y-4 flex-1">
+          {/* Quick Repository Search Link */}
           {query.trim() !== "" && (
             <button
               type="button"
               onClick={handleSearchSubmit}
-              className="w-full text-left p-3.5 rounded-2xl bg-blue-50/80 hover:bg-blue-100 border border-blue-200 text-xs font-bold text-[#0F2962] flex items-center justify-between transition cursor-pointer"
+              className="w-full text-left p-3 rounded-2xl bg-blue-50/80 hover:bg-blue-100 border border-blue-200 text-xs font-bold text-[#0F2962] flex items-center justify-between transition cursor-pointer shadow-2xs"
             >
               <div className="flex items-center gap-2.5">
                 <Search className="w-4 h-4 text-blue-700" />
-                <span>Search Repository Archive for &ldquo;{query}&rdquo;</span>
+                <span>Search Full Repository for &ldquo;{query}&rdquo;</span>
               </div>
               <ArrowRight className="w-4 h-4" />
             </button>
           )}
 
-          <div className="pt-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-2 px-2">
-              System Shortcuts & Modules
-            </span>
-
-            <div className="space-y-1.5">
-              {filteredActions.map((action) => {
-                const Icon = action.icon;
-                return (
+          {/* 1. Live Matching Documents (Async Results) */}
+          {liveDocs.length > 0 && (
+            <div className="space-y-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block px-2">
+                Matching Documents ({liveDocs.length})
+              </span>
+              <div className="space-y-1.5">
+                {liveDocs.map((doc) => (
                   <button
-                    key={action.href}
-                    onClick={() => handleNavigate(action.href)}
-                    className="w-full text-left p-3.5 rounded-2xl hover:bg-slate-100/80 transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-slate-200"
+                    key={doc.id}
+                    type="button"
+                    onClick={() => handleNavigate(`/dashboard/documents/${doc.id}`)}
+                    className="w-full text-left p-3 rounded-2xl hover:bg-blue-50/60 border border-slate-200/80 hover:border-blue-300 transition-all flex items-center justify-between group cursor-pointer"
                   >
-                    <div className="flex items-center gap-3.5 min-w-0">
-                      <div className={`w-9 h-9 rounded-xl ${action.color} flex items-center justify-center shrink-0 shadow-xs`}>
-                        <Icon className="w-4.5 h-4.5" />
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-blue-100/70 text-[#0F2962] flex items-center justify-center shrink-0">
+                        <FileCheck className="w-4.5 h-4.5" />
                       </div>
                       <div className="min-w-0">
-                        <span className="font-bold text-xs sm:text-sm text-slate-900 block truncate group-hover:text-[#0F2962] transition-colors">
-                          {action.title}
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[11px] font-black text-[#0F2962]">
+                            {doc.trackingNumber}
+                          </span>
+                          <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border ${getStatusBadgeClass(doc.status)}`}>
+                            {getStatusLabel(doc.status)}
+                          </span>
+                        </div>
+                        <span className="font-bold text-xs sm:text-sm text-slate-900 block truncate group-hover:text-blue-900">
+                          {doc.title}
                         </span>
-                        <span className="text-[11px] text-slate-500 font-medium truncate block">
-                          {action.desc}
-                        </span>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-500 mt-0.5">
+                          <span>{doc.unitCode}</span>
+                          <span>•</span>
+                          <span>{doc.documentTypeName}</span>
+                          <span>•</span>
+                          <span>By {doc.uploaderName}</span>
+                        </div>
                       </div>
                     </div>
                     <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#0F2962] group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
                   </button>
-                );
-              })}
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
-          {filteredUnits.length > 0 && (
-            <div className="pt-3 border-t border-slate-100">
-              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-2 px-2">
-                SAS Department Units (Direct Filter)
+          {/* 2. Live Matching Units */}
+          {displayedUnits.length > 0 && (
+            <div className="space-y-2">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block px-2">
+                SAS Department Units ({displayedUnits.length})
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                {filteredUnits.map((u) => (
+                {displayedUnits.map((u) => (
                   <button
                     key={u.code}
+                    type="button"
                     onClick={() => handleNavigate(`/dashboard/documents?unit=${u.code}`)}
                     className="p-2.5 rounded-xl hover:bg-amber-50/80 border border-slate-200/80 hover:border-amber-300 text-left flex items-center gap-2.5 transition group cursor-pointer"
                   >
@@ -242,11 +349,55 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
               </div>
             </div>
           )}
+
+          {/* No results indicator when actively querying */}
+          {isQueryActive && !isSearching && !hasLiveResults && (
+            <div className="p-6 text-center text-slate-500 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-1">
+              <p className="font-bold text-xs text-slate-700">No records found matching &ldquo;{query}&rdquo;</p>
+              <p className="text-[11px] text-slate-400">Try searching for another tracking number, title, or department unit.</p>
+            </div>
+          )}
+
+          {/* 3. System Shortcuts & Navigation Modules */}
+          <div className="pt-2 border-t border-slate-100">
+            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-2 px-2">
+              System Shortcuts & Modules
+            </span>
+
+            <div className="space-y-1">
+              {filteredActions.map((action) => {
+                const Icon = action.icon;
+                return (
+                  <button
+                    key={action.href}
+                    type="button"
+                    onClick={() => handleNavigate(action.href)}
+                    className="w-full text-left p-3 rounded-2xl hover:bg-slate-100/80 transition-all flex items-center justify-between group cursor-pointer border border-transparent hover:border-slate-200"
+                  >
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className={`w-8 h-8 rounded-xl ${action.color} flex items-center justify-center shrink-0 shadow-2xs`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-bold text-xs sm:text-sm text-slate-900 block truncate group-hover:text-[#0F2962] transition-colors">
+                          {action.title}
+                        </span>
+                        <span className="text-[11px] text-slate-500 font-medium truncate block">
+                          {action.desc}
+                        </span>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#0F2962] group-hover:translate-x-0.5 transition-all shrink-0 ml-2" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Footer Hint */}
-        <div className="p-3.5 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500 px-5">
-          <span>Navigate instantly across SASDMS with keyboard shortcuts</span>
+        <div className="p-3 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500 px-5 shrink-0">
+          <span>Navigate instantly across SASDMS with real-time async search</span>
           <div className="flex items-center gap-2">
             <span>Press <kbd className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-200">Enter</kbd> to execute</span>
           </div>

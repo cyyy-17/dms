@@ -69,12 +69,24 @@ export default function AdminDelegationManagement({
   );
   const allEligibleStaff = users.filter((u) => u.role === "STAFF" || u.role === "COORDINATOR");
 
+  const getInitialDates = () => {
+    const today = new Date();
+    const plus14 = new Date();
+    plus14.setDate(today.getDate() + 14);
+    return {
+      startDate: today.toISOString().split("T")[0],
+      endDate: plus14.toISOString().split("T")[0],
+    };
+  };
+
+  const initialDates = getInitialDates();
+
   const [form, setForm] = useState({
     delegatorId: coordinatorsAndDirectors[0]?.id || "",
     delegateId: allEligibleStaff[0]?.id || "",
     unitId: units[0]?.id || "",
-    startDate: "2026-08-24",
-    endDate: "2026-09-07",
+    startDate: initialDates.startDate,
+    endDate: initialDates.endDate,
     reason: "",
   });
 

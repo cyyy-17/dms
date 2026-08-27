@@ -8,7 +8,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
 import { queueNotification } from "@/lib/notifications";
 import { generateTrackingNumber, STORAGE_BUCKETS } from "@/lib/constants";
-import { DocumentStatus } from "@prisma/client";
+import { DocumentStatus, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
 export interface AssignedSignatoryStep {
@@ -717,3 +717,111 @@ export async function getSignedDocumentUrlAction(
     return { success: false, error: "Storage signing error." };
   }
 }
+
+/**
+ * Asynchronously searches documents and units for the quick command palette.
+ * Scoped strictly to the user's RBAC permissions and unit tenancy.
+ */
+export async function quickSearchLiveAction(query: string): Promise<{
+  success: boolean;
+  documents: Array<{
+    id: string;
+    trackingNumber: string;
+    title: string;
+    status: DocumentStatus;
+    unitCode: string;
+    documentTypeName: string;
+    uploaderName: string;
+  }>;
+  units: Array<{
+    id: string;
+    code: string;
+    name: string;
+  }>;
+  error?: string;
+}> {
+  try {
+    const currentUser = await getAuthenticatedUser();
+    if (!currentUser) {
+      return { success: false, documents: [], units: [], error: "Unauthenticated." };
+    }
+
+    const trimmed = query.trim();
+    if (!trimmed || trimmed.length < 2) {
+      return { success: true, documents: [], units: [] };
+    }
+
+    if (!isDatabaseConfigured) {
+      return { success: true, documents: [], units: [] };
+    }
+
+    const isDirectorOrAdmin = currentUser.role === "DIRECTOR" || currentUser.role === "ADMIN";
+
+    // Build permission-aware WHERE clause
+    const docWhereClause: Prisma.DocumentWhereInput = {
+      OR: [
+        { trackingNumber: { contains: trimmed, mode: "insensitive" } },
+        { title: { contains: trimmed, mode: "insensitive" } },
+      ],
+    };
+
+    if (!isDirectorOrAdmin && currentUser.unitId) {
+      docWhereClause.AND = [
+        {
+          OR: [
+            { unitId: currentUser.unitId },
+            { uploaderId: currentUser.id },
+            { currentSignatoryId: currentUser.id },
+          ],
+        },
+      ];
+    }
+
+    const [matchingDocs, matchingUnits] = await Promise.all([
+      prisma.document.findMany({
+        where: docWhereClause,
+        take: 6,
+        orderBy: { updatedAt: "desc" },
+        select: {
+          id: true,
+          trackingNumber: true,
+          title: true,
+          status: true,
+          unit: { select: { code: true } },
+          documentType: { select: { name: true } },
+          uploader: { select: { firstName: true, lastName: true } },
+        },
+      }),
+      prisma.unit.findMany({
+        where: {
+          isActive: true,
+          OR: [
+            { code: { contains: trimmed, mode: "insensitive" } },
+            { name: { contains: trimmed, mode: "insensitive" } },
+          ],
+        },
+        take: 4,
+        orderBy: { code: "asc" },
+        select: { id: true, code: true, name: true },
+      }),
+    ]);
+
+    return {
+      success: true,
+      documents: matchingDocs.map((d) => ({
+        id: d.id,
+        trackingNumber: d.trackingNumber,
+        title: d.title,
+        status: d.status,
+        unitCode: d.unit?.code || "UNASSIGNED",
+        documentTypeName: d.documentType?.name || "Document",
+        uploaderName: d.uploader ? `${d.uploader.firstName} ${d.uploader.lastName}` : "Unknown",
+      })),
+      units: matchingUnits,
+    };
+  } catch (error) {
+    console.error("[QUICK_SEARCH_ERROR]", error);
+    return { success: false, documents: [], units: [], error: "Search failed." };
+  }
+}
+

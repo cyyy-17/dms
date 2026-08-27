@@ -566,7 +566,7 @@ export default function DocumentUploadForm({
           <input
             type="file"
             id="docFile"
-            accept=".pdf,.docx,.xlsx"
+            accept=".pdf,application/pdf"
             onChange={handleFileChange}
             className="hidden"
           />
@@ -582,7 +582,7 @@ export default function DocumentUploadForm({
               )}
             </div>
             <p className="text-xs text-slate-500 font-medium">
-              Supported formats: PDF, Word (.docx), Excel (.xlsx) • Max 50 MB
+              Supported format: Official PDF Documents (*.pdf) • Max 25 MB
             </p>
           </label>
         </div>

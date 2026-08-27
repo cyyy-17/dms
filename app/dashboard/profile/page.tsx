@@ -16,11 +16,11 @@ export default async function ProfilePage() {
   if (!user) {
     user = {
       id: "demo-admin-user",
-      email: "mclemente08@firstasia.edu.ph",
-      firstName: "Aljon",
-      lastName: "Tolentino",
-      fullName: "Aljon Tolentino",
-      employeeId: "EMP-2026-001",
+      email: "admin@firstasia.edu.ph",
+      firstName: "System",
+      lastName: "Administrator",
+      fullName: "System Administrator",
+      employeeId: "EMP-ADMIN-001",
       role: "ADMIN",
       status: "ACTIVE",
       unitId: null,

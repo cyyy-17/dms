@@ -56,7 +56,7 @@ const FAQS: FaqItem[] = [
     category: "access",
     question: "Can coordinators view confidential documents from other SAS department units?",
     answer:
-      "No. Standard Staff and Unit Coordinators operate within a Zero-Trust unit-scoped boundary and can only access records belonging to their assigned unit (e.g. GCO staff only see GCO documents). Cross-unit visibility is restricted exclusively to the Department Director and Super Admins.",
+      "No. Standard Staff and Unit Coordinators operate within a Zero-Trust unit-scoped boundary and can only access records belonging to their assigned unit (e.g. Guidance staff only see Guidance documents). Cross-unit visibility is restricted exclusively to the Department Director and Super Admins.",
   },
   {
     id: "faq-7",
