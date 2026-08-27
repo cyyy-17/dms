@@ -35,6 +35,9 @@ import {
   Undo2,
   Fingerprint,
   Crosshair,
+  FileText,
+  Copy,
+  Check,
 } from "lucide-react";
 import { DocumentStatus, UserRole } from "@prisma/client";
 
@@ -107,6 +110,21 @@ export default function DocumentDetailActions({
     isValid: boolean;
     calculated: string;
   } | null>(null);
+  const [copiedHash, setCopiedHash] = useState(false);
+
+  const handleCopyChecksum = () => {
+    if (!document.currentVersion?.sha256Checksum) return;
+    navigator.clipboard.writeText(document.currentVersion.sha256Checksum);
+    setCopiedHash(true);
+    if (showToast) {
+      showToast({
+        title: "SHA-256 Hash Copied",
+        message: "Cryptographic hash copied to clipboard.",
+        type: "info",
+      });
+    }
+    setTimeout(() => setCopiedHash(false), 2000);
+  };
 
   const flow: AssignedSignatoryStep[] = Array.isArray(document.signatoryFlow)
     ? (document.signatoryFlow as AssignedSignatoryStep[])
@@ -620,64 +638,124 @@ export default function DocumentDetailActions({
         </div>
       )}
 
-      {/* Download & Integrity Action Bar */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-white/90 space-y-4 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-500 block">
-              Active Binary File (v{document.currentVersion?.versionNumber || 1})
-            </span>
-            <span className="font-extrabold text-slate-900 text-sm block mt-1">
-              {document.currentVersion?.fileName || "document.pdf"}
-            </span>
-            {document.currentVersion?.sha256Checksum && (
-              <span className="text-[11px] font-mono text-slate-400 block mt-0.5 truncate max-w-md">
-                SHA-256: {document.currentVersion.sha256Checksum}
+      {/* Cryptographic Binary File & Hash Verification Card */}
+      <div className="glass-panel rounded-3xl p-5 sm:p-6 border border-white/90 space-y-4 shadow-sm bg-white/90">
+        {/* Top: File Identity & Release Tags */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-200/80 text-[#0F2962] flex items-center justify-center shrink-0 shadow-2xs font-bold mt-0.5">
+              <FileText className="w-5 h-5" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                Active Document Binary
               </span>
-            )}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              onClick={handleVerifyChecksum}
-              disabled={isVerifyingChecksum}
-              className="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              <Fingerprint className="w-4 h-4 text-emerald-600" />
-              <span>{isVerifyingChecksum ? "Calculating SHA-256..." : "Verify Hash Integrity"}</span>
-            </button>
-
-            <button
-              onClick={handleDownload}
-              disabled={downloadLoading}
-              className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
-            >
-              <Download className="w-4 h-4 text-amber-400" />
-              <span>{downloadLoading ? "Generating Signed URL..." : "Download File"}</span>
-            </button>
+              <h3 className="font-black text-slate-900 text-sm truncate mt-0.5" title={document.currentVersion?.fileName || "document.pdf"}>
+                {document.currentVersion?.fileName || "document.pdf"}
+              </h3>
+              <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                <span className="px-2 py-0.5 rounded-full text-[9.5px] font-black font-mono bg-blue-50 text-[#0F2962] border border-blue-200 shadow-2xs">
+                  v{document.currentVersion?.versionNumber || 1}.0 Release
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs">
+                  PDF
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                  Current Active
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
+        {/* Middle: Cryptographic SHA-256 Vault */}
+        {document.currentVersion?.sha256Checksum && (
+          <div className="p-3 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-1.5 shadow-2xs">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 text-slate-600">
+                <Fingerprint className="w-3.5 h-3.5 text-[#0F2962] shrink-0" />
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500">
+                  Cryptographic SHA-256 Checksum
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleCopyChecksum}
+                className="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 hover:text-[#0F2962] bg-white px-2 py-0.5 rounded-md border border-slate-200 hover:border-slate-300 shadow-2xs transition cursor-pointer"
+                title="Copy full SHA-256 hash"
+              >
+                {copiedHash ? (
+                  <>
+                    <Check className="w-3 h-3 text-emerald-600" />
+                    <span className="text-emerald-700">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3 h-3 text-slate-400" />
+                    <span>Copy</span>
+                  </>
+                )}
+              </button>
+            </div>
+
+            <div className="bg-white px-3 py-2 rounded-xl border border-slate-200/90 shadow-inner">
+              <p className="font-mono text-[10px] text-slate-700 break-all select-all leading-relaxed">
+                {document.currentVersion.sha256Checksum}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Bottom: Action Command Deck */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+          <button
+            onClick={handleDownload}
+            disabled={downloadLoading}
+            className="py-2.5 px-4 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
+          >
+            <Download className="w-4 h-4 text-amber-400" />
+            <span>{downloadLoading ? "Generating Link..." : "Download Signed File"}</span>
+          </button>
+
+          <button
+            onClick={handleVerifyChecksum}
+            disabled={isVerifyingChecksum}
+            className="py-2.5 px-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold shadow-2xs hover:shadow-xs transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
+          >
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+            <span>{isVerifyingChecksum ? "Hashing Binary..." : "Verify Hash Integrity"}</span>
+          </button>
+        </div>
+
+        {/* Checksum Verification Result Alert */}
         {checksumResult && (
           <div
-            className={`p-3.5 rounded-2xl text-xs font-medium border flex items-center gap-2.5 ${
+            className={`p-3.5 rounded-2xl text-xs font-medium border flex items-start gap-2.5 animate-in fade-in duration-200 ${
               checksumResult.isValid
-                ? "bg-emerald-50 text-emerald-900 border-emerald-300"
+                ? "bg-emerald-50/90 text-emerald-950 border-emerald-300 shadow-2xs"
                 : "bg-red-50 text-red-900 border-red-300"
             }`}
           >
             {checksumResult.isValid ? (
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             ) : (
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
             )}
-            <div className="overflow-hidden">
-              <span className="font-bold">
+            <div className="overflow-hidden min-w-0">
+              <span className="font-black block">
                 {checksumResult.isValid
-                  ? "Binary Integrity Verified (Match): "
-                  : "Integrity Warning (Mismatch): "}
+                  ? "✓ Cryptographic SHA-256 Match Verified"
+                  : "⚠️ Integrity Warning (Checksum Mismatch)"}
               </span>
-              <span className="font-mono text-[10px] break-all">{checksumResult.calculated}</span>
+              <span className="text-[10px] text-slate-600 block mt-0.5">
+                {checksumResult.isValid
+                  ? "Binary in private vault matches the registered blockchain/audit record."
+                  : "Storage binary does not match registered checksum."}
+              </span>
+              <span className="font-mono text-[9.5px] break-all block mt-1 text-slate-500 bg-white/80 p-1.5 rounded-lg border border-slate-200">
+                {checksumResult.calculated}
+              </span>
             </div>
           </div>
         )}
