@@ -9,7 +9,7 @@ export default function PendingApprovalPage() {
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-162.5 h-100 bg-linear-to-tr from-amber-500/20 via-blue-900/30 to-indigo-900/20 blur-[130px] pointer-events-none rounded-full" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-lg px-4 sm:px-0 relative z-10">
-        <div className="glass-panel rounded-3xl py-8 px-5 sm:py-10 sm:px-11 shadow-2xl border border-white/80 backdrop-blur-2xl text-center space-y-7 transition-all duration-300">
+        <div className="rounded-3xl py-8 px-5 sm:py-10 sm:px-11 shadow-2xl bg-slate-900/85 border border-slate-800/90 backdrop-blur-2xl text-center space-y-7 transition-all duration-300">
           <div className="flex items-center justify-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-white/95 p-1 flex items-center justify-center border border-amber-400/50 shadow-md">
               <Image
@@ -21,8 +21,8 @@ export default function PendingApprovalPage() {
               />
             </div>
             <div className="text-left">
-              <span className="text-xs font-black text-slate-900 block">FAITH Colleges</span>
-              <span className="text-[11px] text-slate-500 font-medium">Student & Alumni Services</span>
+              <span className="text-xs font-black text-white block">FAITH Colleges</span>
+              <span className="text-[11px] text-amber-300 font-medium">Student &amp; Alumni Services</span>
             </div>
           </div>
 
@@ -34,26 +34,26 @@ export default function PendingApprovalPage() {
           </div>
 
           <div className="space-y-2.5">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300/60 text-xs font-bold">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-400/30 text-xs font-bold">
               <span>Status: Pending Administrator Review</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               Registration Under Review
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-sm mx-auto">
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm mx-auto">
               Your staff registration has been submitted and is currently awaiting administrator review and role assignment by FAITH SAS Administration.
             </p>
           </div>
 
           {/* 📊 Account Activation Multi-Stage Progress Stepper */}
-          <div className="p-4.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
-            <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+          <div className="p-4.5 rounded-2xl bg-slate-950/80 border border-slate-800/90 space-y-3 shadow-inner">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-300">
               <span>Activation Pipeline</span>
-              <span className="font-mono text-amber-800">Stage 2 of 3 (50%)</span>
+              <span className="font-mono text-amber-400">Stage 2 of 3 (50%)</span>
             </div>
 
             {/* Progress Track */}
-            <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden p-0.5 shadow-inner">
+            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden p-0.5 shadow-inner">
               <div
                 className="h-full rounded-full bg-linear-to-r from-emerald-500 via-amber-400 to-amber-500 animate-pulse transition-all duration-500 shadow-sm"
                 style={{ width: "50%" }}
@@ -62,38 +62,38 @@ export default function PendingApprovalPage() {
 
             {/* 3 Step Nodes */}
             <div className="grid grid-cols-3 gap-2 pt-1 text-[11px]">
-              <div className="text-left font-bold text-emerald-800">
-                <span className="block text-[10px] text-emerald-600 font-normal">Step 1</span>
+              <div className="text-left font-bold text-emerald-400">
+                <span className="block text-[10px] text-emerald-500 font-normal">Step 1</span>
                 <span>✓ Submitted</span>
               </div>
-              <div className="text-center font-bold text-amber-900">
-                <span className="block text-[10px] text-amber-600 font-normal">Step 2</span>
+              <div className="text-center font-bold text-amber-400">
+                <span className="block text-[10px] text-amber-500 font-normal">Step 2</span>
                 <span>⏳ Admin Review</span>
               </div>
-              <div className="text-right font-bold text-slate-400">
-                <span className="block text-[10px] text-slate-400 font-normal">Step 3</span>
+              <div className="text-right font-bold text-slate-500">
+                <span className="block text-[10px] text-slate-500 font-normal">Step 3</span>
                 <span>🔒 Unlocked</span>
               </div>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-50/90 border border-slate-200/90 text-left space-y-3.5 text-xs text-slate-600 shadow-inner">
+          <div className="p-5 rounded-2xl bg-slate-950/80 border border-slate-800/90 text-left space-y-3.5 text-xs text-slate-400 shadow-inner">
             <div className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5 font-bold">
+              <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-400/30 flex items-center justify-center shrink-0 mt-0.5 font-bold">
                 <ShieldCheck className="w-4 h-4" />
               </div>
               <div className="leading-relaxed">
-                <span className="font-bold text-slate-900 block mb-0.5">Admin Activation Required</span>
+                <span className="font-bold text-white block mb-0.5">Admin Activation Required</span>
                 Internal compliance mandates explicit administrator verification before document portal access is unlocked.
               </div>
             </div>
 
             <div className="flex items-start gap-3">
-              <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5 font-bold">
+              <div className="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-400/30 flex items-center justify-center shrink-0 mt-0.5 font-bold">
                 <Mail className="w-4 h-4" />
               </div>
               <div className="leading-relaxed">
-                <span className="font-bold text-slate-900 block mb-0.5">Automated Notification</span>
+                <span className="font-bold text-white block mb-0.5">Automated Notification</span>
                 You will receive an official confirmation email once your account has been reviewed and activated.
               </div>
             </div>
@@ -102,7 +102,7 @@ export default function PendingApprovalPage() {
           <div className="pt-2">
             <Link
               href="/login"
-              className="w-full py-3 px-4 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white font-bold text-sm shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2.5 hover:-translate-y-0.5 active:scale-98"
+              className="w-full py-3.5 px-4 rounded-xl bg-linear-to-r from-blue-700 via-[#0F2962] to-blue-800 hover:from-blue-600 hover:to-blue-700 text-white font-black text-xs shadow-lg shadow-blue-950/40 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2.5 hover:-translate-y-0.5 active:scale-98 ring-1 ring-blue-400/40"
             >
               <ArrowLeft className="w-4 h-4 text-amber-400" />
               <span>Return to Sign In</span>

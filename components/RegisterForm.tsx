@@ -90,39 +90,38 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
   };
 
   return (
-    <div className="glass-panel rounded-3xl py-7 px-5 sm:py-9 sm:px-11 shadow-2xl border border-white/80 backdrop-blur-2xl transition-all duration-300">
+    <div className="rounded-3xl py-7 px-5 sm:py-8 sm:px-9 shadow-2xl bg-slate-900/85 border border-slate-800/90 backdrop-blur-2xl transition-all duration-300">
       {error && (
-        <div className="mb-6 p-4 rounded-2xl bg-red-50/90 border border-red-200/90 flex items-start gap-3 text-red-900 text-xs font-semibold shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
-          <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+        <div className="mb-6 p-4 rounded-2xl bg-red-950/60 border border-red-500/40 flex items-start gap-3 text-red-300 text-xs font-semibold shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
+          <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
           <span className="leading-relaxed">{error}</span>
         </div>
       )}
 
-      <div className="mb-6 p-3.5 rounded-2xl bg-amber-50/80 border border-amber-200/80 flex items-start gap-3 text-amber-950 text-xs shadow-xs">
-        <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+      <div className="mb-6 p-3.5 rounded-2xl bg-amber-950/50 border border-amber-500/30 flex items-start gap-3 text-amber-200 text-xs shadow-xs">
+        <CheckCircle2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
         <div className="leading-relaxed">
-          <span className="font-bold text-amber-900">Two-Stage Registration:</span> Accounts require subsequent Admin review and approval before activation. You will receive an email once activated.
+          <span className="font-bold text-white">Two-Stage Registration:</span> Accounts require subsequent Admin review and approval before activation. You will receive an email once activated.
         </div>
       </div>
 
       {(() => {
         const hasValidEmail = email.trim().endsWith("@firstasia.edu.ph");
         const hasNames = firstName.trim().length > 0 && lastName.trim().length > 0;
-        const hasUnit = unitId.trim().length > 0;
         const hasValidPassword = password.length >= 8 && confirmPassword === password && confirmPassword.length > 0;
-        const fields = [hasNames, hasValidEmail, hasUnit, hasValidPassword];
+        const fields = [hasNames, hasValidEmail, hasValidPassword];
         const completed = fields.filter(Boolean).length;
-        const percent = Math.round((completed / 4) * 100);
+        const percent = Math.round((completed / 3) * 100);
 
         return (
-          <div className="mb-5 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1.5 shadow-inner">
-            <div className="flex items-center justify-between text-[11px] font-bold text-slate-600">
-              <span className="uppercase font-mono">Registration Form Progress</span>
-              <span className="text-[#0F2962] font-mono">{percent}% Completed</span>
+          <div className="mb-5 p-3 rounded-2xl bg-slate-950/80 border border-slate-800/90 space-y-1.5 shadow-inner">
+            <div className="flex items-center justify-between text-[11px] font-bold text-slate-400">
+              <span className="uppercase font-mono tracking-wider">Registration Form Progress</span>
+              <span className="text-amber-400 font-mono">{percent}% Completed</span>
             </div>
-            <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
               <div
-                className="h-full rounded-full bg-linear-to-r from-[#0F2962] via-blue-600 to-amber-400 transition-all duration-300"
+                className="h-full rounded-full bg-linear-to-r from-blue-600 via-[#0F2962] to-amber-400 transition-all duration-300"
                 style={{ width: `${Math.max(percent, 10)}%` }}
               />
             </div>
@@ -134,7 +133,7 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
         {/* Name Fields Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">
               Title (Optional)
             </label>
             <input
@@ -142,11 +141,11 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
               placeholder="Ms. / Dr. / Engr."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+              className="block w-full px-3.5 py-2.5 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">
               First Name
             </label>
             <div className="relative rounded-xl shadow-xs">
@@ -159,7 +158,7 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
                 placeholder="Juan"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
-                className="block w-full pl-9.5 pr-3 py-2.5 text-base sm:text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+                className="block w-full pl-9.5 pr-3 py-2.5 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
               />
             </div>
           </div>
@@ -167,7 +166,7 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">
               M.I. / Middle
             </label>
             <input
@@ -175,11 +174,11 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
               placeholder="R. / Mae"
               value={middleName}
               onChange={(e) => setMiddleName(e.target.value)}
-              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+              className="block w-full px-3.5 py-2.5 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
             />
           </div>
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">
               Last Name
             </label>
             <input
@@ -188,11 +187,11 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
               placeholder="Dela Cruz"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
-              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+              className="block w-full px-3.5 py-2.5 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
             />
           </div>
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">
               Suffix (Optional)
             </label>
             <input
@@ -200,13 +199,13 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
               placeholder="Jr. / PhD / III"
               value={suffix}
               onChange={(e) => setSuffix(e.target.value)}
-              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+              className="block w-full px-3.5 py-2.5 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">
             Institutional Email (@firstasia.edu.ph)
           </label>
           <div className="relative rounded-xl shadow-xs">
@@ -219,17 +218,17 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
               placeholder="jdelacruz@firstasia.edu.ph"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="block w-full pl-9.5 pr-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+              className="block w-full pl-9.5 pr-3.5 py-2.5 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
             />
           </div>
-          <span className="text-[11px] text-slate-500 font-medium mt-1.5 block">
+          <span className="text-[11px] text-slate-400 font-medium mt-1.5 block">
             Domain is strictly enforced at application level before auth record creation.
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">
               Employee ID (Optional)
             </label>
             <div className="relative rounded-xl shadow-xs">
@@ -241,12 +240,12 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
                 placeholder="EMP-2026-081"
                 value={employeeId}
                 onChange={(e) => setEmployeeId(e.target.value)}
-                className="block w-full pl-9.5 pr-3 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+                className="block w-full pl-9.5 pr-3 py-2.5 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
               />
             </div>
           </div>
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">
               Department Unit
             </label>
             <div className="relative rounded-xl shadow-xs">
@@ -254,16 +253,21 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
                 <Building className="w-3.5 h-3.5" />
               </div>
               <select
-                required
                 value={unitId}
                 onChange={(e) => setUnitId(e.target.value)}
-                className="block w-full pl-9.5 pr-3 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+                className="block w-full pl-9.5 pr-3 py-2.5 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
               >
-                {units.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.name} ({u.code})
+                {units.length > 0 ? (
+                  units.map((u) => (
+                    <option key={u.id} value={u.id} className="bg-slate-900 text-white">
+                      {u.name} ({u.code})
+                    </option>
+                  ))
+                ) : (
+                  <option value="" className="bg-slate-900 text-white">
+                    General / Unassigned (Will be designated by Admin)
                   </option>
-                ))}
+                )}
               </select>
             </div>
           </div>
@@ -271,7 +275,7 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">
               Password
             </label>
             <div className="relative rounded-xl shadow-xs">
@@ -284,12 +288,12 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
                 placeholder="Min. 8 chars"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="block w-full pl-9.5 pr-9 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+                className="block w-full pl-9.5 pr-9 py-2.5 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-200 transition cursor-pointer"
                 tabIndex={-1}
               >
                 {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
@@ -297,7 +301,7 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">
               Confirm Password
             </label>
             <input
@@ -306,7 +310,7 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
               placeholder="Confirm password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+              className="block w-full px-3.5 py-2.5 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
             />
           </div>
         </div>
@@ -315,12 +319,12 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3 px-4 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white font-bold text-sm shadow-lg shadow-blue-950/20 hover:shadow-xl hover:shadow-blue-950/30 transition-all duration-200 flex items-center justify-center gap-2.5 disabled:opacity-60 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
+            className="w-full py-3.5 px-4 rounded-xl bg-linear-to-r from-blue-700 via-[#0F2962] to-blue-800 hover:from-blue-600 hover:to-blue-700 text-white font-black text-xs shadow-lg shadow-blue-950/40 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2.5 disabled:opacity-60 hover:-translate-y-0.5 active:scale-98 cursor-pointer ring-1 ring-blue-400/40"
           >
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-                <span>Validating & Submitting...</span>
+                <span>Validating &amp; Submitting...</span>
               </>
             ) : (
               <>
@@ -332,10 +336,10 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
         </div>
       </form>
 
-      <div className="mt-7 pt-5 border-t border-slate-200/80 text-center">
-        <p className="text-xs text-slate-600 font-medium">
+      <div className="mt-7 pt-5 border-t border-slate-800/80 text-center">
+        <p className="text-xs text-slate-400 font-medium">
           Already registered?{" "}
-          <Link href="/login" className="font-bold text-[#0F2962] hover:text-[#1E40AF] hover:underline transition ml-1">
+          <Link href="/login" className="font-bold text-amber-400 hover:text-amber-300 hover:underline transition ml-1">
             Sign In to Portal
           </Link>
         </p>

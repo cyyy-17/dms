@@ -30,11 +30,11 @@ export default function LoginPage() {
       </div>
 
       {/* Main Dual-Column Showcase Container */}
-      <div className="max-w-6xl mx-auto w-full grid lg:grid-cols-12 gap-8 items-center relative z-10">
+      <div className="max-w-6xl mx-auto w-full grid lg:grid-cols-12 gap-8 lg:gap-10 items-stretch relative z-10">
         {/* Left Column: Campus Heritage & Values Banner (Visible on lg screens) */}
-        <div className="lg:col-span-6 flex flex-col justify-between h-full space-y-6">
+        <div className="lg:col-span-6 flex flex-col justify-between space-y-5">
           {/* Panoramic Campus Hero Card */}
-          <div className="relative rounded-3xl overflow-hidden border border-slate-700/80 shadow-2xl bg-slate-900 min-h-75 sm:min-h-90 flex flex-col justify-between p-6 sm:p-8 group">
+          <div className="relative rounded-3xl overflow-hidden border border-slate-800/90 shadow-2xl bg-slate-900 flex-1 min-h-85 flex flex-col justify-between p-6 sm:p-8 group">
             {/* Campus Background Image */}
             <Image
               src="/images/faith-campus.jpg"
@@ -43,41 +43,41 @@ export default function LoginPage() {
               className="object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
               priority
             />
-            <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/60 to-slate-950/30" />
+            <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/70 to-slate-950/30" />
 
             {/* Top Tag on Campus Card */}
             <div className="relative z-10 flex items-center justify-between">
-              <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-slate-950/85 backdrop-blur-md border border-slate-700 text-white text-[11px] font-semibold">
-                <MapPin className="w-3 h-3 text-amber-400" />
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-950/85 backdrop-blur-md border border-slate-700/80 text-white text-[11px] font-semibold shadow-xs">
+                <MapPin className="w-3.5 h-3.5 text-amber-400" />
                 <span>Tanauan City, Batangas</span>
               </div>
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 text-[10px] font-mono font-bold">
+              <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30 text-[10px] font-mono font-bold shadow-xs">
                 FAITH Colleges
               </span>
             </div>
 
             {/* Bottom Inset on Campus Card */}
-            <div className="relative z-10 space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-white/95 p-1.5 flex items-center justify-center border border-amber-400/50 shadow-lg shrink-0">
+            <div className="relative z-10 space-y-3">
+              <div className="flex items-center gap-3.5">
+                <div className="w-13 h-13 rounded-2xl bg-white/95 p-1.5 flex items-center justify-center border border-amber-400/50 shadow-xl shrink-0">
                   <Image
                     src="/images/faith-crest.png"
                     alt="FAITH Emblem"
-                    width={40}
-                    height={40}
+                    width={44}
+                    height={44}
                     className="w-auto h-full object-contain"
                   />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-white leading-tight">
-                    Student & Alumni Services
+                  <h2 className="text-xl font-black text-white leading-tight">
+                    Student &amp; Alumni Services
                   </h2>
-                  <p className="text-xs text-amber-300 font-medium">
+                  <p className="text-xs text-amber-300 font-semibold tracking-wide">
                     First Asia Institute of Technology and Humanities
                   </p>
                 </div>
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed font-normal pt-1">
+              <p className="text-xs text-slate-300 leading-relaxed font-normal">
                 Empowering institutional governance with cryptographic document security, unit-scoped tenancy, and sequential multi-signatory approval workflows.
               </p>
             </div>
@@ -85,24 +85,28 @@ export default function LoginPage() {
 
           {/* Institutional Core Values Strip */}
           <div className="grid grid-cols-3 gap-3">
-            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 text-center space-y-1 backdrop-blur-md">
-              <span className="text-xs font-black text-blue-400 block">Competence</span>
+            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800/90 text-center space-y-1 backdrop-blur-md shadow-xs">
+              <span className="text-xs font-black text-blue-400 block tracking-wide">Competence</span>
               <span className="text-[10px] text-slate-400 font-medium block">Academic Rigor</span>
             </div>
-            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 text-center space-y-1 backdrop-blur-md">
-              <span className="text-xs font-black text-amber-400 block">Commitment</span>
+            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800/90 text-center space-y-1 backdrop-blur-md shadow-xs">
+              <span className="text-xs font-black text-amber-400 block tracking-wide">Commitment</span>
               <span className="text-[10px] text-slate-400 font-medium block">Institutional Trust</span>
             </div>
-            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 text-center space-y-1 backdrop-blur-md">
-              <span className="text-xs font-black text-emerald-400 block">Compassion</span>
+            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800/90 text-center space-y-1 backdrop-blur-md shadow-xs">
+              <span className="text-xs font-black text-emerald-400 block tracking-wide">Compassion</span>
               <span className="text-[10px] text-slate-400 font-medium block">Student-First</span>
             </div>
           </div>
         </div>
 
         {/* Right Column: Secure Employee Login Form */}
-        <div className="lg:col-span-6 w-full max-w-md mx-auto lg:max-w-none">
+        <div className="lg:col-span-6 w-full max-w-md mx-auto lg:max-w-none flex flex-col justify-center">
           <div className="text-center lg:text-left mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/15 border border-blue-400/30 text-blue-300 text-xs font-bold mb-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              <span>Institutional Single Sign-On</span>
+            </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
               Employee Portal Sign In
             </h1>
@@ -111,7 +115,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <Suspense fallback={<div className="glass-panel rounded-3xl p-10 text-center text-slate-400 text-xs font-bold">Loading secure login portal...</div>}>
+          <Suspense fallback={<div className="rounded-3xl p-10 bg-slate-900/85 border border-slate-800 text-center text-slate-400 text-xs font-bold">Loading secure login portal...</div>}>
             <LoginForm />
           </Suspense>
         </div>
