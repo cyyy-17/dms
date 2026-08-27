@@ -43,6 +43,13 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
   }
 
   try {
+    if (input.signatureApplied && !input.customCoordinates) {
+      return {
+        success: false,
+        error: "Stamp position on document is strictly required. Please set the stamp location on the document before approving.",
+      };
+    }
+
     const doc = await prisma.document.findUnique({
       where: { id: input.documentId },
       include: { currentVersion: true, uploader: true, unit: true },

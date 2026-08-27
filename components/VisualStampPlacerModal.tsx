@@ -5,7 +5,6 @@ import {
   X,
   CheckCircle2,
   Crosshair,
-  Sparkles,
   Layers,
   ShieldCheck,
   PenLine,
@@ -50,9 +49,7 @@ export default function VisualStampPlacerModal({
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [analyzingSmartAnchor, setAnalyzingSmartAnchor] = useState<boolean>(true);
   const [isRenderingCanvas, setIsRenderingCanvas] = useState<boolean>(true);
-  const [matchedLabel, setMatchedLabel] = useState<string | null>(null);
   const [zoomScale, setZoomScale] = useState<number>(1);
 
   // PDF Document Native Dimensions in points (Letter default 612 x 792)
@@ -69,8 +66,6 @@ export default function VisualStampPlacerModal({
     isCustom: false,
   });
 
-  const [autoDetectedCoords, setAutoDetectedCoords] = useState<StampCoordinates | null>(null);
-
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -78,7 +73,7 @@ export default function VisualStampPlacerModal({
   const STAMP_WIDTH = 190;
   const STAMP_HEIGHT = 58;
 
-  // Load document preview URL and auto-detect smart position
+  // Load document preview URL and set initial position
   useEffect(() => {
     if (!isOpen) return;
 
@@ -95,7 +90,7 @@ export default function VisualStampPlacerModal({
         .catch(() => {});
     }
 
-    // Call server action to detect smart anchor on PDF
+    // Call server action to detect initial page dimensions and placement
     detectSignatoryPlacementAction(documentId)
       .then((res) => {
         if (!isMounted) return;
@@ -113,10 +108,7 @@ export default function VisualStampPlacerModal({
             y: det.y,
             isCustom: false,
           };
-          setAutoDetectedCoords(detected);
-          setMatchedLabel(det.matchedText || null);
 
-          // If initial coordinates were provided by user, use them; otherwise use auto-detected
           if (initialCoordinates) {
             setCoords(initialCoordinates);
             setCurrentPage(initialCoordinates.page);
@@ -126,12 +118,7 @@ export default function VisualStampPlacerModal({
           }
         }
       })
-      .catch(() => {})
-      .finally(() => {
-        if (isMounted) {
-          setAnalyzingSmartAnchor(false);
-        }
-      });
+      .catch(() => {});
 
     return () => {
       isMounted = false;
@@ -242,13 +229,7 @@ export default function VisualStampPlacerModal({
   const heightPercent = (STAMP_HEIGHT / pageDimensions.height) * 100;
 
   // Presets for quick 1-click positioning
-  const applyPreset = (type: "auto" | "recommending" | "prepared" | "approved" | "bottom-right") => {
-    if (type === "auto" && autoDetectedCoords) {
-      setCoords(autoDetectedCoords);
-      setCurrentPage(autoDetectedCoords.page);
-      return;
-    }
-
+  const applyPreset = (type: "recommending" | "prepared" | "approved" | "bottom-right") => {
     let targetX = 35;
     let targetY = 50;
 
@@ -301,14 +282,14 @@ export default function VisualStampPlacerModal({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-sm sm:text-base font-black text-slate-900">
-                  Precision E-Signature Stamp Placement
+                  Set Signature & Stamp Location
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-black border border-blue-200">
-                  1:1 Pixel Canvas
+                  1:1 Pixel Placement
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                Click directly on your signature line in the high-resolution canvas below to position your stamp with 100% millimeter accuracy.
+                Click directly on your signature line in the canvas below to position your official stamp.
               </p>
             </div>
           </div>
@@ -323,23 +304,12 @@ export default function VisualStampPlacerModal({
 
         {/* Toolbar & Presets Bar */}
         <div className="px-6 py-2.5 bg-slate-100/90 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
-          {/* Smart Match Status Badge */}
+          {/* Status Badge */}
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#0F2962]" />
-            {analyzingSmartAnchor ? (
-              <span className="text-[11px] font-semibold text-slate-600 flex items-center gap-1.5">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" />
-                Scanning document text for your name...
-              </span>
-            ) : matchedLabel ? (
-              <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100/90 px-2.5 py-0.5 rounded-full border border-emerald-300">
-                ✓ Smart Matched: &ldquo;{matchedLabel.length > 25 ? matchedLabel.substring(0, 23) + "..." : matchedLabel}&rdquo;
-              </span>
-            ) : (
-              <span className="text-[11px] font-semibold text-slate-500">
-                Click directly on your signature line below
-              </span>
-            )}
+            <Crosshair className="w-4 h-4 text-[#0F2962]" />
+            <span className="text-[11px] font-bold text-slate-700">
+              Selected: <strong className="font-mono text-[#0F2962]">Page {coords.page + 1} (X: {coords.x}pt, Y: {coords.y}pt)</strong>
+            </span>
           </div>
 
           {/* Quick Presets & Zoom Controls */}
@@ -375,30 +345,22 @@ export default function VisualStampPlacerModal({
               </button>
             </div>
 
-            {/* Presets */}
+            {/* Quick Jumps */}
             <div className="flex items-center gap-1.5 pl-1 border-l border-slate-200">
-              {autoDetectedCoords && (
-                <button
-                  type="button"
-                  onClick={() => applyPreset("auto")}
-                  className="px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-300 text-[#0F2962] font-black text-[11px] hover:bg-blue-100 transition shadow-2xs cursor-pointer"
-                >
-                  🎯 Auto-Detect
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={() => applyPreset("recommending")}
-                className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-[11px] hover:bg-slate-50 transition shadow-2xs cursor-pointer"
-              >
-                Recommending
-              </button>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quick:</span>
               <button
                 type="button"
                 onClick={() => applyPreset("prepared")}
                 className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-[11px] hover:bg-slate-50 transition shadow-2xs cursor-pointer"
               >
                 Prepared by
+              </button>
+              <button
+                type="button"
+                onClick={() => applyPreset("recommending")}
+                className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-[11px] hover:bg-slate-50 transition shadow-2xs cursor-pointer"
+              >
+                Recommending
               </button>
               <button
                 type="button"
