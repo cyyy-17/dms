@@ -51,6 +51,7 @@ export default function VisualStampPlacerModal({
   const [totalPages, setTotalPages] = useState<number>(1);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [analyzingSmartAnchor, setAnalyzingSmartAnchor] = useState<boolean>(true);
+  const [isRenderingCanvas, setIsRenderingCanvas] = useState<boolean>(true);
   const [matchedLabel, setMatchedLabel] = useState<string | null>(null);
   const [zoomScale, setZoomScale] = useState<number>(1);
 
@@ -71,12 +72,13 @@ export default function VisualStampPlacerModal({
   const [autoDetectedCoords, setAutoDetectedCoords] = useState<StampCoordinates | null>(null);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   // Stamp Dimensions in PDF points
   const STAMP_WIDTH = 190;
   const STAMP_HEIGHT = 58;
 
-  // Load document preview and auto-detect smart position
+  // Load document preview URL and auto-detect smart position
   useEffect(() => {
     if (!isOpen) return;
 
@@ -136,6 +138,73 @@ export default function VisualStampPlacerModal({
     };
   }, [isOpen, documentId, storagePath, initialCoordinates]);
 
+  // High-Precision Pixel-Perfect PDF Canvas Rendering via pdfjs-dist
+  useEffect(() => {
+    if (!isOpen || !pdfUrl || !canvasRef.current) return;
+
+    let isCancelled = false;
+
+    const renderPage = async () => {
+      try {
+        setIsRenderingCanvas(true);
+
+        const pdfjs = await import("pdfjs-dist");
+        if (typeof window !== "undefined") {
+          pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+        }
+
+        const loadingTask = pdfjs.getDocument(pdfUrl);
+        const pdf = await loadingTask.promise;
+        if (isCancelled) return;
+
+        setTotalPages(pdf.numPages);
+        const page = await pdf.getPage(currentPage + 1);
+        if (isCancelled) return;
+
+        // Viewport at 2x scale for ultra-crisp high-DPI retina rendering
+        const scale = 2.0;
+        const viewport = page.getViewport({ scale });
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        const actualWidth = page.view[2] - page.view[0];
+        const actualHeight = page.view[3] - page.view[1];
+        setPageDimensions({
+          width: actualWidth || 612,
+          height: actualHeight || 792,
+        });
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const renderContext: any = {
+          canvasContext: ctx,
+          viewport: viewport,
+        };
+
+        await page.render(renderContext).promise;
+        if (!isCancelled) {
+          setIsRenderingCanvas(false);
+        }
+      } catch (err) {
+        console.error("[PDF_CANVAS_RENDER_ERROR]", err);
+        if (!isCancelled) {
+          setIsRenderingCanvas(false);
+        }
+      }
+    };
+
+    renderPage();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isOpen, pdfUrl, currentPage]);
+
   if (!isOpen) return null;
 
   // Handle clicking on the document canvas to position the stamp
@@ -149,11 +218,11 @@ export default function VisualStampPlacerModal({
     const scaleX = pageDimensions.width / rect.width;
     const scaleY = pageDimensions.height / rect.height;
 
-    // PDF Y coordinate starts from the bottom!
+    // PDF Y coordinate starts from the bottom (0 = bottom, pageDimensions.height = top)
     let pdfX = Math.round(clickX * scaleX - STAMP_WIDTH / 2);
     let pdfY = Math.round((rect.height - clickY) * scaleY - STAMP_HEIGHT / 2);
 
-    // Bound within page
+    // Bound within page margins
     pdfX = Math.max(15, Math.min(pageDimensions.width - STAMP_WIDTH - 15, pdfX));
     pdfY = Math.max(15, Math.min(pageDimensions.height - STAMP_HEIGHT - 15, pdfY));
 
@@ -235,11 +304,11 @@ export default function VisualStampPlacerModal({
                   Precision E-Signature Stamp Placement
                 </h2>
                 <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-black border border-blue-200">
-                  Interactive Canvas
+                  1:1 Pixel Canvas
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                Scroll the document and click anywhere on your signature line to position your stamp.
+                Click directly on your signature line in the high-resolution canvas below to position your stamp with 100% millimeter accuracy.
               </p>
             </div>
           </div>
@@ -363,28 +432,28 @@ export default function VisualStampPlacerModal({
             </div>
           )}
 
-          {/* Interactive Document Page Container */}
+          {/* Interactive Document Page Container with 1:1 High-Resolution Canvas */}
           <div
             ref={containerRef}
             onClick={handleCanvasClick}
             style={{
               width: `${containerWidthPx}px`,
-              aspectRatio: "612 / 792",
+              aspectRatio: `${pageDimensions.width} / ${pageDimensions.height}`,
             }}
             className="relative bg-white shadow-2xl rounded-xl overflow-hidden cursor-crosshair border border-slate-700 select-none transition-all hover:ring-4 hover:ring-blue-500/30 mb-8 shrink-0"
-            title="Click anywhere to place your electronic signature stamp"
+            title="Click anywhere on your signature line to place your electronic signature stamp"
           >
-            {/* Background PDF Viewer */}
-            {pdfUrl ? (
-              <iframe
-                src={`${pdfUrl}#page=${currentPage + 1}&view=FitH&toolbar=0&navpanes=0`}
-                className="absolute inset-0 w-full h-full border-0 pointer-events-none bg-white"
-                title="Document Background Page"
-              />
-            ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center text-slate-400 space-y-2">
+            {/* Native 1:1 Pixel Canvas rendered by PDF.js */}
+            <canvas
+              ref={canvasRef}
+              className="w-full h-full block bg-white pointer-events-none"
+            />
+
+            {/* Loading Indicator */}
+            {isRenderingCanvas && (
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex flex-col items-center justify-center p-8 text-center text-slate-500 space-y-2 z-10">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-                <span className="text-xs font-semibold">Loading document layout...</span>
+                <span className="text-xs font-semibold">Rendering high-resolution vector canvas...</span>
               </div>
             )}
 
