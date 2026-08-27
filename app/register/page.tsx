@@ -28,7 +28,7 @@ export default async function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-between py-4 sm:py-6 px-4 sm:px-6 lg:px-8 relative overflow-x-hidden selection:bg-amber-400 selection:text-slate-950">
+    <div className="h-screen max-h-screen min-h-screen bg-slate-950 flex flex-col justify-between py-4 sm:py-6 px-4 sm:px-6 lg:px-8 relative overflow-hidden selection:bg-amber-400 selection:text-slate-950">
       {/* Background Ambient Glows */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-125 bg-linear-to-tr from-blue-900/40 via-indigo-900/30 to-amber-500/15 blur-[130px] pointer-events-none rounded-full" />
       <div className="absolute bottom-0 right-10 w-96 h-96 bg-blue-950/40 blur-[130px] pointer-events-none rounded-full" />
