@@ -26,8 +26,11 @@ interface UnitOption {
 
 export default function RegisterForm({ units }: { units: UnitOption[] }) {
   const router = useRouter();
+  const [title, setTitle] = useState("");
   const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [suffix, setSuffix] = useState("");
   const [email, setEmail] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const [unitId, setUnitId] = useState(units[0]?.id || "");
@@ -62,8 +65,11 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
 
     try {
       const res = await registerEmployee({
-        firstName,
-        lastName,
+        title: title.trim() || undefined,
+        firstName: firstName.trim(),
+        middleName: middleName.trim() || undefined,
+        lastName: lastName.trim(),
+        suffix: suffix.trim() || undefined,
         email,
         employeeId,
         unitId,
@@ -124,9 +130,22 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
         );
       })()}
 
-      <form onSubmit={handleSubmit} className="space-y-4.5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Name Fields Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+              Title (Optional)
+            </label>
+            <input
+              type="text"
+              placeholder="Ms. / Dr. / Engr."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+            />
+          </div>
+          <div className="sm:col-span-2">
             <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
               First Name
             </label>
@@ -144,6 +163,21 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
               />
             </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+              M.I. / Middle
+            </label>
+            <input
+              type="text"
+              placeholder="R. / Mae"
+              value={middleName}
+              onChange={(e) => setMiddleName(e.target.value)}
+              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+            />
+          </div>
           <div>
             <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
               Last Name
@@ -154,6 +188,18 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
               placeholder="Dela Cruz"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
+              className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+              Suffix (Optional)
+            </label>
+            <input
+              type="text"
+              placeholder="Jr. / PhD / III"
+              value={suffix}
+              onChange={(e) => setSuffix(e.target.value)}
               className="block w-full px-3.5 py-2.5 text-sm bg-white/90 border border-slate-300/90 rounded-xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] focus:bg-white transition-all shadow-inner"
             />
           </div>

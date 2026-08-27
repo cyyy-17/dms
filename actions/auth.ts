@@ -14,7 +14,10 @@ export interface RegisterInput {
   email: string;
   password?: string;
   firstName: string;
+  middleName?: string;
   lastName: string;
+  suffix?: string;
+  title?: string;
   employeeId?: string;
   unitId: string;
 }
@@ -129,7 +132,10 @@ export async function registerEmployee(input: RegisterInput): Promise<{
         id: userId,
         email: normalizedEmail,
         firstName: input.firstName.trim(),
+        middleName: input.middleName?.trim() || null,
         lastName: input.lastName.trim(),
+        suffix: input.suffix?.trim() || null,
+        title: input.title?.trim() || null,
         employeeId: input.employeeId?.trim() || null,
         unitId: unit.id,
         role: "STAFF", // Defaults to STAFF pending Admin review

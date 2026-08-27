@@ -31,7 +31,10 @@ interface UserItem {
   id: string;
   email: string;
   firstName: string;
+  middleName?: string | null;
   lastName: string;
+  suffix?: string | null;
+  title?: string | null;
   employeeId: string | null;
   role: UserRole;
   status: UserStatus;
@@ -71,7 +74,10 @@ export default function AdminUserManagement({
   // Form states
   const [createForm, setCreateForm] = useState<{
     firstName: string;
+    middleName: string;
     lastName: string;
+    suffix: string;
+    title: string;
     email: string;
     employeeId: string;
     role: UserRole;
@@ -79,7 +85,10 @@ export default function AdminUserManagement({
     password: string;
   }>({
     firstName: "",
+    middleName: "",
     lastName: "",
+    suffix: "",
+    title: "",
     email: "",
     employeeId: "",
     role: UserRole.STAFF,
@@ -89,14 +98,20 @@ export default function AdminUserManagement({
 
   const [editForm, setEditForm] = useState<{
     firstName: string;
+    middleName: string;
     lastName: string;
+    suffix: string;
+    title: string;
     employeeId: string;
     role: UserRole;
     unitId: string;
     status: UserStatus;
   }>({
     firstName: "",
+    middleName: "",
     lastName: "",
+    suffix: "",
+    title: "",
     employeeId: "",
     role: UserRole.STAFF,
     unitId: "",
@@ -130,7 +145,10 @@ export default function AdminUserManagement({
 
     const res = await createUserDirectAction({
       firstName: createForm.firstName,
+      middleName: createForm.middleName || undefined,
       lastName: createForm.lastName,
+      suffix: createForm.suffix || undefined,
+      title: createForm.title || undefined,
       email: createForm.email,
       employeeId: createForm.employeeId,
       role: createForm.role,
@@ -144,7 +162,10 @@ export default function AdminUserManagement({
       setIsCreateModalOpen(false);
       setCreateForm({
         firstName: "",
+        middleName: "",
         lastName: "",
+        suffix: "",
+        title: "",
         email: "",
         employeeId: "",
         role: UserRole.STAFF,
@@ -167,7 +188,10 @@ export default function AdminUserManagement({
     const res = await updateUserRoleUnitAction({
       userId: editUser.id,
       firstName: editForm.firstName,
+      middleName: editForm.middleName,
       lastName: editForm.lastName,
+      suffix: editForm.suffix,
+      title: editForm.title,
       employeeId: editForm.employeeId,
       role: editForm.role,
       unitId: editForm.unitId || null,
@@ -381,7 +405,10 @@ export default function AdminUserManagement({
                   <tr key={u.id} className="hover:bg-slate-50/80 transition">
                     <td className="py-4 px-6">
                       <span className="font-bold text-slate-900 block">
-                        {u.firstName} {u.lastName}
+                        {u.title ? `${u.title} ` : ""}
+                        {u.firstName}
+                        {u.middleName ? ` ${u.middleName}` : ""} {u.lastName}
+                        {u.suffix ? ` ${u.suffix}` : ""}
                       </span>
                       <span className="font-mono text-[11px] text-slate-400 block">{u.email}</span>
                     </td>
@@ -443,7 +470,10 @@ export default function AdminUserManagement({
                               setEditUser(u);
                               setEditForm({
                                 firstName: u.firstName,
+                                middleName: u.middleName || "",
                                 lastName: u.lastName,
+                                suffix: u.suffix || "",
+                                title: u.title || "",
                                 employeeId: u.employeeId || "",
                                 role: u.role,
                                 unitId: u.unitId || "",
@@ -511,14 +541,38 @@ export default function AdminUserManagement({
             </div>
 
             <form onSubmit={handleCreateUser} className="space-y-3.5 text-xs">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block">Title</label>
+                  <input
+                    type="text"
+                    placeholder="Ms. / Dr. / Engr."
+                    value={createForm.title}
+                    onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div className="sm:col-span-2">
                   <label className="font-bold text-slate-700 uppercase mb-1 block">First Name</label>
                   <input
                     type="text"
                     required
+                    placeholder="First Name"
                     value={createForm.firstName}
                     onChange={(e) => setCreateForm({ ...createForm, firstName: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block">M.I. / Middle</label>
+                  <input
+                    type="text"
+                    placeholder="R. / Mae"
+                    value={createForm.middleName}
+                    onChange={(e) => setCreateForm({ ...createForm, middleName: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>
@@ -527,8 +581,19 @@ export default function AdminUserManagement({
                   <input
                     type="text"
                     required
+                    placeholder="Last Name"
                     value={createForm.lastName}
                     onChange={(e) => setCreateForm({ ...createForm, lastName: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block">Suffix</label>
+                  <input
+                    type="text"
+                    placeholder="Jr. / PhD / III"
+                    value={createForm.suffix}
+                    onChange={(e) => setCreateForm({ ...createForm, suffix: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>
@@ -631,7 +696,7 @@ export default function AdminUserManagement({
       {/* ════════════════════════════════════════════════════════════════════ */}
       {editUser && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-slate-200 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-200 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
                 <Edit2 className="w-5 h-5 text-blue-600" />
@@ -643,14 +708,37 @@ export default function AdminUserManagement({
             </div>
 
             <form onSubmit={handleUpdateUser} className="space-y-3.5 text-xs">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                 <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block">Title</label>
+                  <input
+                    type="text"
+                    placeholder="Ms. / Dr. / Engr."
+                    value={editForm.title}
+                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div className="sm:col-span-2">
                   <label className="font-bold text-slate-700 uppercase mb-1 block">First Name</label>
                   <input
                     type="text"
                     required
                     value={editForm.firstName}
                     onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block">M.I. / Middle</label>
+                  <input
+                    type="text"
+                    placeholder="R. / Mae"
+                    value={editForm.middleName}
+                    onChange={(e) => setEditForm({ ...editForm, middleName: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>
@@ -661,6 +749,16 @@ export default function AdminUserManagement({
                     required
                     value={editForm.lastName}
                     onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block">Suffix</label>
+                  <input
+                    type="text"
+                    placeholder="Jr. / PhD / III"
+                    value={editForm.suffix}
+                    onChange={(e) => setEditForm({ ...editForm, suffix: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg"
                   />
                 </div>

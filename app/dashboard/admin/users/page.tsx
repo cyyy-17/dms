@@ -9,7 +9,10 @@ interface UserWithRelations {
   id: string;
   email: string;
   firstName: string;
+  middleName?: string | null;
   lastName: string;
+  suffix?: string | null;
+  title?: string | null;
   employeeId: string | null;
   role: UserRole;
   status: UserStatus;

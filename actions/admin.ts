@@ -24,7 +24,10 @@ export interface CreateUserDirectInput {
   email: string;
   password?: string;
   firstName: string;
+  middleName?: string;
   lastName: string;
+  suffix?: string;
+  title?: string;
   employeeId?: string;
   role: UserRole;
   unitId?: string;
@@ -82,7 +85,10 @@ export async function createUserDirectAction(input: CreateUserDirectInput): Prom
         id: authUser.user.id,
         email: normalizedEmail,
         firstName: input.firstName.trim(),
+        middleName: input.middleName?.trim() || null,
         lastName: input.lastName.trim(),
+        suffix: input.suffix?.trim() || null,
+        title: input.title?.trim() || null,
         employeeId: input.employeeId?.trim() || null,
         role: input.role,
         unitId: input.unitId || null,
@@ -237,7 +243,10 @@ export async function rejectUserAction(params: {
 export async function updateUserRoleUnitAction(params: {
   userId: string;
   firstName?: string;
+  middleName?: string;
   lastName?: string;
+  suffix?: string;
+  title?: string;
   employeeId?: string;
   role: UserRole;
   unitId: string | null;
@@ -256,8 +265,11 @@ export async function updateUserRoleUnitAction(params: {
     const updated = await prisma.user.update({
       where: { id: params.userId },
       data: {
-        ...(params.firstName ? { firstName: params.firstName.trim() } : {}),
-        ...(params.lastName ? { lastName: params.lastName.trim() } : {}),
+        ...(params.firstName !== undefined ? { firstName: params.firstName.trim() } : {}),
+        ...(params.middleName !== undefined ? { middleName: params.middleName.trim() || null } : {}),
+        ...(params.lastName !== undefined ? { lastName: params.lastName.trim() } : {}),
+        ...(params.suffix !== undefined ? { suffix: params.suffix.trim() || null } : {}),
+        ...(params.title !== undefined ? { title: params.title.trim() || null } : {}),
         ...(params.employeeId !== undefined ? { employeeId: params.employeeId?.trim() || null } : {}),
         role: params.role,
         unitId: params.unitId || null,

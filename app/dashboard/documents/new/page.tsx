@@ -71,7 +71,10 @@ export default async function NewDocumentPage() {
           select: {
             id: true,
             firstName: true,
+            middleName: true,
             lastName: true,
+            suffix: true,
+            title: true,
             email: true,
             role: true,
             unit: { select: { code: true, name: true } },
@@ -81,16 +84,23 @@ export default async function NewDocumentPage() {
       ]);
       docTypes = fetchedDocTypes;
       units = fetchedUnits;
-      availableUsers = fetchedUsers.map((u) => ({
-        id: u.id,
-        firstName: u.firstName,
-        lastName: u.lastName,
-        fullName: `${u.firstName} ${u.lastName}`,
-        email: u.email,
-        role: u.role,
-        unitCode: u.unit?.code || null,
-        unitName: u.unit?.name || null,
-      }));
+      availableUsers = fetchedUsers.map((u) => {
+        const titlePrefix = u.title ? `${u.title} ` : "";
+        const middle = u.middleName ? ` ${u.middleName}` : "";
+        const suffixStr = u.suffix ? ` ${u.suffix}` : "";
+        const computedName = `${titlePrefix}${u.firstName}${middle} ${u.lastName}${suffixStr}`.trim();
+
+        return {
+          id: u.id,
+          firstName: u.firstName,
+          lastName: u.lastName,
+          fullName: computedName || `${u.firstName} ${u.lastName}`,
+          email: u.email,
+          role: u.role,
+          unitCode: u.unit?.code || null,
+          unitName: u.unit?.name || null,
+        };
+      });
     } catch {
       docTypes = [];
       units = [];
