@@ -600,6 +600,10 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                 isEscalated: doc.isEscalated,
                 rejectionCount: doc.rejectionCount,
                 currentVersion: doc.currentVersion,
+                signatoryFlow: doc.signatoryFlow,
+                currentSignatoryId: doc.currentSignatoryId,
+                currentSignatoryIndex: doc.currentSignatoryIndex,
+                currentSignatory: doc.currentSignatory,
               }}
               currentUser={currentUser}
             />
