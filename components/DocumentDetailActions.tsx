@@ -103,6 +103,7 @@ export default function DocumentDetailActions({
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
+  const [showReturnModal, setShowReturnModal] = useState(false);
 
   // Checksum verification state
   const [isVerifyingChecksum, setIsVerifyingChecksum] = useState(false);
@@ -325,9 +326,21 @@ export default function DocumentDetailActions({
     }
   };
 
-  const handleRejectReturn = async () => {
+  const handleRejectReturn = () => {
+    setError(null);
+    setShowReturnModal(true);
+  };
+
+  const handleExecuteReturn = async () => {
     if (!comments.trim()) {
-      setError("Comments are strictly mandatory when returning a document for revision.");
+      setError("Revision remarks are strictly mandatory when returning a document.");
+      if (showToast) {
+        showToast({
+          title: "Remarks Required",
+          message: "Please enter specific remarks explaining what needs revision.",
+          type: "warning",
+        });
+      }
       return;
     }
 
@@ -342,12 +355,20 @@ export default function DocumentDetailActions({
 
       if (!res.success) {
         setError(res.error || "Failed to return document.");
+        if (showToast) {
+          showToast({
+            title: "Return Failed",
+            message: res.error || "Failed to return document.",
+            type: "error",
+          });
+        }
       } else {
+        setShowReturnModal(false);
         setSuccessMessage("Document returned to uploader for revision.");
         if (showToast) {
           showToast({
             title: "Returned for Revision",
-            message: "Uploader notified with rework remarks.",
+            message: "Uploader notified with rework remarks to submit version v2+.",
             type: "warning",
           });
         }
@@ -360,16 +381,24 @@ export default function DocumentDetailActions({
     }
   };
 
-  const handleRejectClose = async () => {
-    if (!comments.trim()) {
-      setError("Reason for terminal cancellation is mandatory.");
-      return;
-    }
+  const handleRejectClose = () => {
+    setError(null);
     setShowCloseConfirm(true);
   };
 
   const handleConfirmedClose = async () => {
-    setShowCloseConfirm(false);
+    if (!comments.trim()) {
+      setError("A stated reason is strictly mandatory for permanent cancellation.");
+      if (showToast) {
+        showToast({
+          title: "Reason Required",
+          message: "Please provide a reason before permanently closing this document.",
+          type: "warning",
+        });
+      }
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -381,8 +410,16 @@ export default function DocumentDetailActions({
 
       if (!res.success) {
         setError(res.error || "Failed to close document.");
+        if (showToast) {
+          showToast({
+            title: "Rejection Failed",
+            message: res.error || "Failed to close document.",
+            type: "error",
+          });
+        }
       } else {
-        setSuccessMessage("Document closed and rejected.");
+        setShowCloseConfirm(false);
+        setSuccessMessage("Document terminally closed and rejected.");
         if (showToast) {
           showToast({
             title: "Document Rejected",
@@ -1157,43 +1194,127 @@ export default function DocumentDetailActions({
         </div>
       )}
 
-      {/* Confirmation Modal */}
-      {showCloseConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md">
-          <div className="glass-panel rounded-3xl p-7 max-w-md w-full bg-white shadow-2xl space-y-5 border border-red-200 animate-in fade-in zoom-in-95">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center shrink-0 shadow-sm">
-                <XCircle className="w-6 h-6" />
+      {/* Return for Revision Modal */}
+      {showReturnModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="glass-panel rounded-3xl p-6 sm:p-7 max-w-lg w-full bg-white shadow-2xl space-y-5 border border-amber-200 animate-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+              <div className="flex items-start gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 shadow-xs font-bold mt-0.5">
+                  <RotateCcw className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 text-base">Return Document for Revision</h3>
+                  <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                    The document will be returned to the uploader. An immutable version tree will record your remarks and request a revised version (v2+).
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-black text-slate-900 text-base">Terminally Close & Reject</h3>
-                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
-                  This action is <strong>irreversible</strong>. The document will be permanently rejected.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-red-50 border border-red-200">
-              <span className="text-[11px] font-bold text-red-800 block uppercase tracking-wider mb-1">
-                Stated Reason
-              </span>
-              <p className="text-xs text-red-900 italic font-medium">&ldquo;{comments}&rdquo;</p>
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2">
               <button
-                onClick={() => setShowCloseConfirm(false)}
+                type="button"
+                onClick={() => setShowReturnModal(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                Mandatory Revision Remarks & Feedback *
+              </label>
+              <textarea
+                rows={4}
+                required
+                placeholder="Explain the required revisions, corrections, or adjustments for the uploader..."
+                value={comments}
+                onChange={(e) => setComments(e.target.value)}
+                className="block w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-2xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all shadow-inner placeholder:text-slate-400"
+                autoFocus
+              />
+              <p className="text-[11px] text-slate-500 font-medium">
+                The uploader will receive these remarks directly in their notifications and document dashboard.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowReturnModal(false)}
                 className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer"
               >
                 Cancel
               </button>
               <button
+                type="button"
+                onClick={handleExecuteReturn}
+                disabled={isLoading || !comments.trim()}
+                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>{isLoading ? "Returning..." : "Confirm Return for Revision"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Terminally Close & Reject Modal */}
+      {showCloseConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="glass-panel rounded-3xl p-6 sm:p-7 max-w-lg w-full bg-white shadow-2xl space-y-5 border border-red-200 animate-in zoom-in-95 duration-150">
+            <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
+              <div className="flex items-start gap-3.5">
+                <div className="w-11 h-11 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center shrink-0 shadow-xs font-bold mt-0.5">
+                  <XCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-black text-slate-900 text-base">Terminally Close & Reject</h3>
+                  <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+                    This action is <strong>irreversible</strong>. The document will be permanently marked as rejected and removed from active signatory pipelines.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCloseConfirm(false)}
+                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-extrabold text-slate-800 uppercase tracking-wider">
+                Mandatory Reason for Cancellation *
+              </label>
+              <textarea
+                rows={4}
+                required
+                placeholder="State the institutional reason for permanently closing and rejecting this document..."
+                value={comments}
+                onChange={(e) => setComments(e.target.value)}
+                className="block w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-2xl focus:bg-white focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all shadow-inner placeholder:text-slate-400"
+                autoFocus
+              />
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowCloseConfirm(false)}
+                className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer"
+              >
+                Keep Active / Cancel
+              </button>
+              <button
+                type="button"
                 onClick={handleConfirmedClose}
-                disabled={isLoading}
+                disabled={isLoading || !comments.trim()}
                 className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
               >
                 <XCircle className="w-3.5 h-3.5" />
-                <span>Confirm Closure</span>
+                <span>{isLoading ? "Rejecting..." : "Confirm Terminal Rejection"}</span>
               </button>
             </div>
           </div>
