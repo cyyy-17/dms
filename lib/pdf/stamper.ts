@@ -23,13 +23,21 @@ interface TextItemPosition {
   fontSize: number;
 }
 
+interface TextLineCluster {
+  y: number;
+  minX: number;
+  maxX: number;
+  text: string;
+  items: TextItemPosition[];
+}
+
 interface AnchorMatchResult {
   pageIndex: number;
   x: number;
   y: number;
   isExplicitTag: boolean;
   matchedText: string;
-  matchType: "NAME" | "ROLE" | "TAG" | "PHRASE";
+  matchType: "NAME" | "ROLE" | "TAG" | "PHRASE" | "CUSTOM";
 }
 
 /**
@@ -89,6 +97,56 @@ function extractDecompressedPageStream(page: PDFPage): string {
 }
 
 /**
+ * Decodes PDF string literal e.g. "(Hello World)", octal escapes "\101", or hex strings "<414C4A4F4E>"
+ */
+function decodePdfString(str: string): string {
+  if (!str) return "";
+  let clean = str.trim();
+
+  // Hex string representation: <414C4A4F4E>
+  if (clean.startsWith("<") && clean.endsWith(">")) {
+    const hex = clean.substring(1, clean.length - 1).replace(/\s+/g, "");
+    if (/^[0-9a-fA-F]+$/.test(hex)) {
+      try {
+        return Buffer.from(hex, "hex").toString("latin1");
+      } catch {
+        return "";
+      }
+    }
+    return "";
+  }
+
+  if (clean.startsWith("(") && clean.endsWith(")")) {
+    clean = clean.substring(1, clean.length - 1);
+  }
+
+  // Unescape octal escapes e.g. \101 -> A
+  clean = clean.replace(/\\([0-7]{1,3})/g, (_, oct) => {
+    return String.fromCharCode(parseInt(oct, 8));
+  });
+
+  // Unescape standard PDF escapes
+  return clean
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "\r")
+    .replace(/\\t/g, "\t")
+    .replace(/\\b/g, "\b")
+    .replace(/\\f/g, "\f")
+    .replace(/\\\(/g, "(")
+    .replace(/\\\)/g, ")")
+    .replace(/\\\\/g, "\\");
+}
+
+/**
+ * Concatenates strings within a TJ array e.g. "[(ALJON) 20 (M.) 20 (TOLENTINO)]" -> "ALJON M. TOLENTINO"
+ */
+function parseTjArray(arrayStr: string): string {
+  const matches = arrayStr.match(/\((?:[^\\)]|\\.)*\)|<[0-9a-fA-F]+>/g);
+  if (!matches) return "";
+  return matches.map((m) => decodePdfString(m)).join(" ");
+}
+
+/**
  * Parses decompressed PDF content stream operators to extract every text snippet with exact (x, y) coordinates.
  */
 function parseTextPositionsFromStream(streamText: string): TextItemPosition[] {
@@ -102,8 +160,7 @@ function parseTextPositionsFromStream(streamText: string): TextItemPosition[] {
   let currentFontSize = 10;
 
   // Regex to match PDF operators: BT, ET, Tm, Td, TD, T*, Tf, Tj, TJ, ', "
-  // Matches arguments + operator
-  const tokenRegex = /(\[[^\]]*\]|\([^)]*\)|-?\d+\.?\d*|\/[a-zA-Z0-9_-]+|[a-zA-Z*'"\\]+)/g;
+  const tokenRegex = /(\[[^\]]*\]|\((?:[^\\)]|\\.)*\)|<[0-9a-fA-F]+>|-?\d+\.?\d*|\/[a-zA-Z0-9_-]+|[a-zA-Z*'"\\]+)/g;
   const tokens = streamText.match(tokenRegex);
   if (!tokens) return items;
 
@@ -203,35 +260,81 @@ function parseTextPositionsFromStream(streamText: string): TextItemPosition[] {
 }
 
 /**
- * Decodes PDF string literal e.g. "(Hello World)" or octal escapes "\101"
+ * Clusters individual fragmented text items into horizontal line units (Y ± 7pt tolerance)
+ * Sorted left to right, reconstructing complete lines like "ALJON M. TOLENTINO. PhD" or "DENNIS R. RAMOS"
  */
-function decodePdfString(str: string): string {
-  if (!str) return "";
-  let clean = str;
-  if (clean.startsWith("(") && clean.endsWith(")")) {
-    clean = clean.substring(1, clean.length - 1);
+function groupItemsIntoLines(items: TextItemPosition[]): TextLineCluster[] {
+  if (!items || items.length === 0) return [];
+
+  // Sort items vertically (top to bottom), then horizontally (left to right)
+  const sorted = [...items].sort((a, b) => {
+    if (Math.abs(a.y - b.y) <= 4) {
+      return a.x - b.x;
+    }
+    return b.y - a.y;
+  });
+
+  const lines: TextLineCluster[] = [];
+
+  for (const item of sorted) {
+    if (!item.text || item.text.trim().length === 0) continue;
+
+    // Find if an existing line matches within Y tolerance of 7 points
+    let matchingLine = lines.find((l) => Math.abs(l.y - item.y) <= 7);
+
+    if (!matchingLine) {
+      matchingLine = {
+        y: item.y,
+        minX: item.x,
+        maxX: item.x + (item.text.length * (item.fontSize || 10) * 0.5),
+        text: item.text.trim(),
+        items: [item],
+      };
+      lines.push(matchingLine);
+    } else {
+      matchingLine.items.push(item);
+      matchingLine.items.sort((a, b) => a.x - b.x);
+      matchingLine.minX = Math.min(matchingLine.minX, item.x);
+      matchingLine.maxX = Math.max(matchingLine.maxX, item.x + (item.text.length * (item.fontSize || 10) * 0.5));
+      matchingLine.text = matchingLine.items.map((it) => it.text.trim()).filter(Boolean).join(" ");
+    }
   }
-  // Unescape standard PDF escapes
-  return clean
-    .replace(/\\n/g, "\n")
-    .replace(/\\r/g, "\r")
-    .replace(/\\t/g, "\t")
-    .replace(/\\\(/g, "(")
-    .replace(/\\\)/g, ")")
-    .replace(/\\\\/g, "\\");
+
+  return lines;
 }
 
 /**
- * Concatenates strings within a TJ array e.g. "[(ALJON) 20 (M.) 20 (TOLENTINO)]" -> "ALJON M. TOLENTINO"
+ * Normalizes a signatory's name into distinct searchable name tokens
+ * Strips honorifics (Dr., Engr., Ms., Mr., Atty., Prof., SVP, VP),
+ * academic/professional degrees (PhD, CPA, MBA, MD, etc.),
+ * single-character middle initials (M., S., A., R.), and punctuation.
  */
-function parseTjArray(arrayStr: string): string {
-  const matches = arrayStr.match(/\(([^)]*)\)/g);
-  if (!matches) return "";
-  return matches.map((m) => decodePdfString(m)).join(" ");
+function extractCoreNameTokens(name: string): string[] {
+  if (!name) return [];
+
+  // Remove honorifics and suffixes
+  let cleaned = name.toLowerCase();
+
+  // Strip prefixes
+  cleaned = cleaned.replace(/\b(dr|prof|engr|atty|ms|mr|mrs|dir|dean|vp|svp|hon|rev)\b\.?/gi, " ");
+
+  // Strip suffixes
+  cleaned = cleaned.replace(/\b(phd|ph\.d|cpa|mba|edd|md|jd|llb|rn|ms|bs|ma|pece|ece|dpa)\b\.?/gi, " ");
+
+  // Strip punctuation
+  cleaned = cleaned.replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, " ");
+
+  // Split into tokens
+  const tokens = cleaned
+    .split(/\s+/)
+    .map((t) => t.trim())
+    .filter((t) => t.length > 1); // Discards single-letter middle initials like 'm', 's', 'r'
+
+  return tokens;
 }
 
 /**
- * Smart Name and Anchor Matcher
+ * Smart Name and Anchor Matcher with Enhanced Line Grouping and Middle Initial Tolerance
  */
 function findSmartAnchorInPageItems(
   items: TextItemPosition[],
@@ -243,40 +346,45 @@ function findSmartAnchorInPageItems(
   const isCoordinator = role === "COORDINATOR" || slotIndex === 0;
   const isDirector = role === "DIRECTOR" || slotIndex === 1;
 
-  // Split signer name into core name tokens (e.g. "Aljon Tolentino" -> ["aljon", "tolentino"])
-  const cleanSigner = signerName.trim().toLowerCase();
-  const nameTokens = cleanSigner
-    .replace(/^(dr|prof|engr|atty|ms|mr|dir|dean|vp)\.?\s+/i, "")
-    .split(/\s+/)
-    .filter((t) => t.length > 1);
+  const lines = groupItemsIntoLines(items);
+  const nameTokens = extractCoreNameTokens(signerName);
 
-  // 1. TIER 1: Exact or Multi-Token Name Matching (e.g. "ALJON M. TOLENTINO. PhD")
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    const textLower = item.text.toLowerCase();
+  // 1. TIER 1: Reconstructed Line Name Matching (handles "ALJON M. TOLENTINO. PhD", "EMMANUEL S. SATOR", "DENNIS R. RAMOS")
+  if (nameTokens.length >= 1) {
+    for (const line of lines) {
+      const lineClean = line.text.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, " ");
 
-    // Check if both first and last name tokens are present in this text chunk
-    const hasAllTokens = nameTokens.length > 0 && nameTokens.every((token) => textLower.includes(token));
-    if (hasAllTokens || textLower.includes(cleanSigner)) {
-      return {
-        x: item.x,
-        y: item.y + 16, // Hovering cleanly above the name line
-        matchedText: item.text,
-        matchType: "NAME",
-        isExplicitTag: false,
-      };
+      // Check if all core name tokens (e.g. "aljon" AND "tolentino") appear in this single reconstructed line
+      const matchesAllTokens = nameTokens.length > 0 && nameTokens.every((token) => lineClean.includes(token));
+
+      // Or if name has 3+ tokens (First, Middle, Last), check if at least First and Last match
+      const firstAndLastMatch =
+        nameTokens.length >= 2 &&
+        lineClean.includes(nameTokens[0]) &&
+        lineClean.includes(nameTokens[nameTokens.length - 1]);
+
+      if (matchesAllTokens || firstAndLastMatch) {
+        return {
+          x: line.minX,
+          y: line.y + 12, // Position cleanly above the name line
+          matchedText: line.text,
+          matchType: "NAME",
+          isExplicitTag: false,
+        };
+      }
     }
 
-    // Also check combination of adjacent items on the same line (y within 4 pt)
-    if (i < items.length - 1) {
-      const next = items[i + 1];
-      if (Math.abs(next.y - item.y) <= 4) {
-        const combined = `${item.text} ${next.text}`.toLowerCase();
+    // Also check adjacent lines in case first name and last name wrapped across 2 lines
+    for (let i = 0; i < lines.length - 1; i++) {
+      const line1 = lines[i];
+      const line2 = lines[i + 1];
+      if (Math.abs(line1.y - line2.y) <= 28) {
+        const combined = `${line1.text} ${line2.text}`.toLowerCase().replace(/[.,/#!$%^&*;:{}=\-_`~()]/g, " ");
         if (nameTokens.length > 0 && nameTokens.every((token) => combined.includes(token))) {
           return {
-            x: item.x,
-            y: item.y + 16,
-            matchedText: `${item.text} ${next.text}`,
+            x: Math.min(line1.minX, line2.minX),
+            y: Math.max(line1.y, line2.y) + 12,
+            matchedText: `${line1.text} / ${line2.text}`,
             matchType: "NAME",
             isExplicitTag: false,
           };
@@ -285,13 +393,28 @@ function findSmartAnchorInPageItems(
     }
   }
 
-  // 2. TIER 2: Explicit Template Tags ({{SIGN_COORDINATOR}}, {{SIGN_DIRECTOR}})
+  // 2. TIER 2: Explicit Template Tags ({{SIGN_COORDINATOR}}, {{SIGN_DIRECTOR}}, {{SIGN_1}}, etc.)
   const explicitTags = isCoordinator
     ? ["{{SIGN_COORDINATOR}}", "{{COORD_SIG}}", "{{SIGN_1}}", "{{SIGN_LEVEL_1}}", "[[coordinator_sign]]", "[[sig_1]]"]
     : isDirector
     ? ["{{SIGN_DIRECTOR}}", "{{DIR_SIG}}", "{{SIGN_2}}", "{{SIGN_LEVEL_2}}", "[[director_sign]]", "[[sig_2]]"]
     : ["{{SIGN_ADMIN}}", "{{SIGN_3}}", "[[sig_3]]"];
 
+  for (const line of lines) {
+    for (const tag of explicitTags) {
+      if (line.text.includes(tag)) {
+        return {
+          x: line.minX,
+          y: line.y,
+          matchedText: tag,
+          matchType: "TAG",
+          isExplicitTag: true,
+        };
+      }
+    }
+  }
+
+  // Also check raw items for tags in case of single token tag
   for (const item of items) {
     for (const tag of explicitTags) {
       if (item.text.includes(tag)) {
@@ -306,21 +429,37 @@ function findSmartAnchorInPageItems(
     }
   }
 
-  // 3. TIER 3: Role & Designation Match (e.g. "Director, Student and Alumni Services", "Recommending Approval:")
+  // 3. TIER 3: Role & Designation Match (e.g. "Recommending Approval", "Approved by:", "Prepared by:")
   const roleKeywords = isCoordinator
     ? ["recommending approval", "coordinator", "reviewed", "prepared by", "reviewer", ...(unitName ? [unitName.toLowerCase()] : [])]
     : isDirector
     ? ["approved by", "approved", "recommending approval", "director", "executive director", "dean", "vice president", ...(unitName ? [unitName.toLowerCase()] : [])]
     : ["attested by", "conforme"];
 
-  for (const item of items) {
-    const textLower = item.text.toLowerCase();
+  for (const line of lines) {
+    const textLower = line.text.toLowerCase();
     for (const kw of roleKeywords) {
       if (textLower.includes(kw)) {
         return {
-          x: item.x,
-          y: item.y + 18,
-          matchedText: item.text,
+          x: line.minX,
+          y: line.y + 14,
+          matchedText: line.text,
+          matchType: "ROLE",
+          isExplicitTag: false,
+        };
+      }
+    }
+  }
+
+  // Check adjacent line pairs for split titles like "Recommending \n Approval:"
+  for (let i = 0; i < lines.length - 1; i++) {
+    const combined = `${lines[i].text} ${lines[i + 1].text}`.toLowerCase();
+    for (const kw of roleKeywords) {
+      if (combined.includes(kw)) {
+        return {
+          x: lines[i].minX,
+          y: Math.max(lines[i].y, lines[i + 1].y) + 14,
+          matchedText: combined,
           matchType: "ROLE",
           isExplicitTag: false,
         };
@@ -329,6 +468,15 @@ function findSmartAnchorInPageItems(
   }
 
   return null;
+}
+
+/**
+ * Checks whether a PDF page is considered empty or blank (e.g. trailing blank page artifact)
+ */
+function isPageSubstantiallyEmpty(items: TextItemPosition[]): boolean {
+  if (!items || items.length === 0) return true;
+  const nonWhitespaceChars = items.reduce((acc, it) => acc + (it.text ? it.text.replace(/\s+/g, "").length : 0), 0);
+  return nonWhitespaceChars < 12;
 }
 
 /**
@@ -343,6 +491,71 @@ function formatStampDate(d: Date): string {
   const minutes = pad(d.getMinutes());
   const seconds = pad(d.getSeconds());
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds} PST`;
+}
+
+/**
+ * Public detection helper to locate the smart coordinates of a signatory ahead of approval
+ */
+export async function detectSignatoryCoordinatesInPdf(
+  pdfBuffer: Buffer,
+  signatory: {
+    signerName: string;
+    signerRole: string;
+    slotIndex: number;
+    unitName?: string;
+  }
+): Promise<{ pageIndex: number; x: number; y: number; matchedText: string; totalPages: number; pageWidth: number; pageHeight: number } | null> {
+  try {
+    const pdfDoc = await PDFDocument.load(pdfBuffer, { ignoreEncryption: true });
+    const pages = pdfDoc.getPages();
+    if (pages.length === 0) return null;
+
+    for (let pageIdx = pages.length - 1; pageIdx >= 0; pageIdx--) {
+      const page = pages[pageIdx];
+      const { width, height } = page.getSize();
+      const decompressedStream = extractDecompressedPageStream(page);
+      const textItems = parseTextPositionsFromStream(decompressedStream);
+
+      if (isPageSubstantiallyEmpty(textItems)) continue;
+
+      const pageMatch = findSmartAnchorInPageItems(
+        textItems,
+        signatory.signerName,
+        signatory.signerRole,
+        signatory.slotIndex,
+        signatory.unitName
+      );
+
+      if (pageMatch) {
+        return {
+          pageIndex: pageIdx,
+          x: pageMatch.x,
+          y: pageMatch.y,
+          matchedText: pageMatch.matchedText,
+          totalPages: pages.length,
+          pageWidth: width,
+          pageHeight: height,
+        };
+      }
+    }
+
+    // Default fallback to bottom of last non-empty page
+    const lastPageIdx = pages.length > 1 ? 0 : 0;
+    const fallbackPage = pages[lastPageIdx];
+    const { width, height } = fallbackPage.getSize();
+    return {
+      pageIndex: lastPageIdx,
+      x: signatory.slotIndex === 1 ? width - 230 : 35,
+      y: 40,
+      matchedText: "fallback-bottom",
+      totalPages: pages.length,
+      pageWidth: width,
+      pageHeight: height,
+    };
+  } catch (err) {
+    console.warn("[DETECT_COORDINATES_ERROR]", err);
+    return null;
+  }
 }
 
 /**
@@ -390,22 +603,37 @@ export async function stampPdfWithSignature(
 
     let matchResult: AnchorMatchResult | null = null;
 
+    // Track non-empty pages for safe fallback (avoiding blank trailing pages)
+    const pageTextItems: TextItemPosition[][] = [];
+    const nonEmptyPageIndices: number[] = [];
+
+    for (let pIdx = 0; pIdx < pages.length; pIdx++) {
+      const page = pages[pIdx];
+      const decompressedStream = extractDecompressedPageStream(page);
+      const textItems = parseTextPositionsFromStream(decompressedStream);
+      pageTextItems.push(textItems);
+      if (!isPageSubstantiallyEmpty(textItems)) {
+        nonEmptyPageIndices.push(pIdx);
+      }
+    }
+
     if (signatory.customCoordinates) {
+      // User explicitly placed / fine-tuned the stamp via interactive modal
+      const targetPageIdx = Math.max(0, Math.min(signatory.customCoordinates.page, pages.length - 1));
       matchResult = {
-        pageIndex: Math.min(signatory.customCoordinates.page, pages.length - 1),
+        pageIndex: targetPageIdx,
         x: signatory.customCoordinates.x,
         y: signatory.customCoordinates.y,
         isExplicitTag: false,
-        matchedText: "custom",
-        matchType: "NAME",
+        matchedText: "user-defined-coordinates",
+        matchType: "CUSTOM",
       };
     } else {
-      // Scan pages from last page upwards (signatures are on the last page in institutional forms)
-      for (let pageIdx = pages.length - 1; pageIdx >= 0; pageIdx--) {
-        const page = pages[pageIdx];
-        const decompressedStream = extractDecompressedPageStream(page);
-        const textItems = parseTextPositionsFromStream(decompressedStream);
+      // Scan pages from last non-empty page upwards
+      const searchOrder = nonEmptyPageIndices.length > 0 ? [...nonEmptyPageIndices].reverse() : [pages.length - 1];
 
+      for (const pageIdx of searchOrder) {
+        const textItems = pageTextItems[pageIdx] || [];
         const pageMatch = findSmartAnchorInPageItems(
           textItems,
           signatory.signerName,
@@ -433,12 +661,12 @@ export async function stampPdfWithSignature(
     let posY: number;
 
     if (matchResult) {
-      // Exact Match Found on existing page!
+      // Match Found (or Custom Coordinates provided)
       targetPage = pages[matchResult.pageIndex];
       const { width, height } = targetPage.getSize();
 
-      posX = Math.max(25, Math.min(width - boxWidth - 25, matchResult.x - 10));
-      posY = Math.max(25, Math.min(height - boxHeight - 20, matchResult.y - 12));
+      posX = Math.max(20, Math.min(width - boxWidth - 20, matchResult.x));
+      posY = Math.max(20, Math.min(height - boxHeight - 15, matchResult.y));
 
       // If explicit template tag (e.g. {{SIGN_COORDINATOR}}), draw clean white knockout
       if (matchResult.isExplicitTag) {
@@ -451,17 +679,18 @@ export async function stampPdfWithSignature(
         });
       }
     } else {
-      // Geometric Fallback: Direct bottom placement on last document page
-      targetPage = pages[pages.length - 1]; // Last page of the document
+      // Geometric Fallback: Direct bottom placement on last non-empty document page
+      const fallbackPageIndex = nonEmptyPageIndices.length > 0 ? nonEmptyPageIndices[nonEmptyPageIndices.length - 1] : pages.length - 1;
+      targetPage = pages[fallbackPageIndex];
       const { width } = targetPage.getSize();
-      const marginX = 40;
+      const marginX = 35;
       const availableWidth = width - marginX * 2 - boxWidth;
 
       if (signatory.slotIndex === 0) {
-        // Slot 0 (Coordinator) -> Bottom Left
+        // Slot 0 (Coordinator / Prepared) -> Bottom Left
         posX = marginX;
       } else if (signatory.slotIndex === 1) {
-        // Slot 1 (Director) -> Bottom Right
+        // Slot 1 (Director / Recommending) -> Bottom Right
         posX = width - marginX - boxWidth;
       } else {
         // Slot 2+ (Further Signatories) -> Proportionally Distributed
@@ -469,7 +698,7 @@ export async function stampPdfWithSignature(
         posX = marginX + step * signatory.slotIndex;
       }
 
-      posY = 40; // Clean bottom clearance on page
+      posY = 35; // Clean bottom clearance on page
     }
 
     // Generate unique verification token
@@ -500,7 +729,7 @@ export async function stampPdfWithSignature(
       opacity: 0.08,
     });
 
-    targetPage.drawText("FAITH COLLEGES • SAS VERIFIED", {
+    targetPage.drawText("FAITH COLLEGES | SAS VERIFIED", {
       x: posX + 6,
       y: posY + boxHeight - 9,
       size: 5.5,
@@ -559,7 +788,7 @@ export async function stampPdfWithSignature(
     });
 
     // Role & Unit Designation
-    const roleText = `${signatory.signerRole} • ${signatory.unitName || "SAS"}`;
+    const roleText = `${signatory.signerRole} - ${signatory.unitName || "SAS"}`;
     targetPage.drawText(roleText.length > 24 ? roleText.substring(0, 22) + "..." : roleText, {
       x: rightX,
       y: posY + boxHeight - 29,
@@ -590,7 +819,7 @@ export async function stampPdfWithSignature(
     });
 
     // Verified Audit Status
-    targetPage.drawText("✓ RA 10173 Audit Verified", {
+    targetPage.drawText("[VERIFIED] RA 10173 Audited", {
       x: rightX,
       y: posY + 4,
       size: 4.6,

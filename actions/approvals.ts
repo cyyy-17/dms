@@ -4,8 +4,9 @@ import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser, checkActiveDelegation } from "@/lib/auth/session";
 import { logAuditEvent } from "@/lib/audit";
 import { queueNotification } from "@/lib/notifications";
-import { AUTO_ESCALATION_REJECTION_THRESHOLD } from "@/lib/constants";
-import { applyElectronicSignatureToStorageDocument } from "@/lib/pdf/stamper";
+import { AUTO_ESCALATION_REJECTION_THRESHOLD, STORAGE_BUCKETS } from "@/lib/constants";
+import { applyElectronicSignatureToStorageDocument, detectSignatoryCoordinatesInPdf } from "@/lib/pdf/stamper";
+import { supabaseAdmin } from "@/lib/supabase/admin";
 import { DocumentStatus, ApprovalActionType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
@@ -14,6 +15,7 @@ export interface ApprovalInput {
   comments?: string;
   signatureApplied?: boolean;
   escalateToDirectorOverride?: boolean;
+  customCoordinates?: { page: number; x: number; y: number } | null;
 }
 
 export interface RejectionInput {
@@ -25,7 +27,7 @@ import { AssignedSignatoryStep } from "@/actions/documents";
 
 /**
  * Universal Assigned Signatory Approval Action
- * Handles step-by-step turn-based signatory flow and Smart Anchor e-signature stamping
+ * Handles step-by-step turn-based signatory flow and Smart Anchor / Visual Placement e-signature stamping
  */
 export async function assignedSignatoryApproveAction(input: ApprovalInput): Promise<{
   success: boolean;
@@ -150,7 +152,7 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
       });
     }
 
-    // Apply Non-Overlapping Smart PDF Electronic Signature Stamp
+    // Apply Non-Overlapping Smart / Custom PDF Electronic Signature Stamp
     if (input.signatureApplied && doc.currentVersion?.storagePath) {
       try {
         const stampRes = await applyElectronicSignatureToStorageDocument({
@@ -161,6 +163,7 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
           unitName: doc.unit.name,
           actionTitle: `${currentUser.fullName} Sign-Off`,
           slotIndex: currentIndex,
+          customCoordinates: input.customCoordinates || null,
         });
 
         if (stampRes.success && stampRes.newChecksum) {
@@ -181,7 +184,13 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
       targetType: "DOCUMENT",
       targetId: doc.id,
       documentId: doc.id,
-      details: { nextStatus, comments: input.comments, signatureApplied: input.signatureApplied, stepIndex: currentIndex },
+      details: {
+        nextStatus,
+        comments: input.comments,
+        signatureApplied: input.signatureApplied,
+        stepIndex: currentIndex,
+        customCoordinates: input.customCoordinates || null,
+      },
     });
 
     revalidatePath(`/dashboard/documents/${doc.id}`);
@@ -191,6 +200,80 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
   } catch (error) {
     console.error("[ASSIGNED_SIGNATORY_APPROVE_ERROR]", error);
     return { success: false, error: "Failed to process approval." };
+  }
+}
+
+/**
+ * Server Action: Detects the Smart Anchor Placement Coordinates for the active document and signatory
+ */
+export async function detectSignatoryPlacementAction(documentId: string): Promise<{
+  success: boolean;
+  coordinates?: {
+    pageIndex: number;
+    x: number;
+    y: number;
+    matchedText: string;
+    totalPages: number;
+    pageWidth: number;
+    pageHeight: number;
+  };
+  error?: string;
+}> {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    return { success: false, error: "Unauthorized. Please log in." };
+  }
+
+  try {
+    const doc = await prisma.document.findUnique({
+      where: { id: documentId },
+      include: { currentVersion: true, unit: true },
+    });
+
+    if (!doc || !doc.currentVersion?.storagePath) {
+      return { success: false, error: "Document or version file not found." };
+    }
+
+    const { data: fileData, error: fileError } = await supabaseAdmin.storage
+      .from(STORAGE_BUCKETS.DOCUMENTS)
+      .download(doc.currentVersion.storagePath);
+
+    if (fileError || !fileData) {
+      return { success: false, error: "Could not download document file for analysis." };
+    }
+
+    const pdfBuffer = Buffer.from(await fileData.arrayBuffer());
+    const currentIndex = doc.currentSignatoryIndex || 0;
+
+    const detected = await detectSignatoryCoordinatesInPdf(pdfBuffer, {
+      signerName: currentUser.fullName,
+      signerRole: currentUser.role,
+      slotIndex: currentIndex,
+      unitName: doc.unit.name,
+    });
+
+    if (detected) {
+      return { success: true, coordinates: detected };
+    }
+
+    return {
+      success: true,
+      coordinates: {
+        pageIndex: 0,
+        x: 35,
+        y: 40,
+        matchedText: "fallback",
+        totalPages: 1,
+        pageWidth: 612,
+        pageHeight: 792,
+      },
+    };
+  } catch (err: unknown) {
+    console.error("[DETECT_PLACEMENT_ACTION_ERROR]", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to analyze document placement.",
+    };
   }
 }
 

@@ -16,6 +16,7 @@ import {
   rejectCloseAction,
 } from "@/actions/approvals";
 import SignaturePadModal from "@/components/SignaturePadModal";
+import VisualStampPlacerModal, { StampCoordinates } from "@/components/VisualStampPlacerModal";
 import { useOptionalToast } from "@/components/ToastContext";
 import {
   Send,
@@ -33,6 +34,7 @@ import {
   ShieldCheck,
   Undo2,
   Fingerprint,
+  Crosshair,
 } from "lucide-react";
 import { DocumentStatus, UserRole } from "@prisma/client";
 
@@ -62,6 +64,9 @@ interface DocumentDetailActionsProps {
     role: UserRole;
     unitId: string | null;
     signaturePath: string | null;
+    fullName?: string;
+    firstName?: string;
+    lastName?: string;
   };
 }
 
@@ -79,6 +84,10 @@ export default function DocumentDetailActions({
   // Electronic Signature state
   const [hasSignature, setHasSignature] = useState(!!currentUser.signaturePath);
   const [isSignaturePadOpen, setIsSignaturePadOpen] = useState(false);
+
+  // Precision Visual Stamp Placement state
+  const [isPlacerModalOpen, setIsPlacerModalOpen] = useState(false);
+  const [customCoordinates, setCustomCoordinates] = useState<StampCoordinates | null>(null);
 
   // New Version Modal state
   const [showVersionModal, setShowVersionModal] = useState(false);
@@ -251,6 +260,7 @@ export default function DocumentDetailActions({
         documentId: document.id,
         comments,
         signatureApplied,
+        customCoordinates: customCoordinates ? { page: customCoordinates.page, x: customCoordinates.x, y: customCoordinates.y } : null,
       });
 
       if (!res.success) {
@@ -678,32 +688,71 @@ export default function DocumentDetailActions({
               />
             </div>
 
-            {/* E-Signature Status Banner */}
-            <div className="p-4 rounded-2xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/80 border-slate-200">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-blue-100 text-[#0F2962] flex items-center justify-center shrink-0 shadow-xs">
-                  <PenLine className="w-4.5 h-4.5" />
+            {/* E-Signature Status Banner & Precision Stamp Placement */}
+            <div className="p-4 rounded-2xl border flex flex-col gap-3.5 bg-slate-50/80 border-slate-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-100 text-[#0F2962] flex items-center justify-center shrink-0 shadow-xs">
+                    <PenLine className="w-4.5 h-4.5" />
+                  </div>
+                  <div>
+                    <span className="text-xs font-bold text-slate-900 block">
+                      {hasSignature ? "Electronic Signature Registered" : "No Signature on File"}
+                    </span>
+                    <span className="text-[11px] text-slate-500 block font-medium">
+                      {hasSignature
+                        ? "Ready to apply cryptographic stamp on approval."
+                        : "Draw or upload your signature before finalizing review."}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-xs font-bold text-slate-900 block">
-                    {hasSignature ? "Electronic Signature Registered" : "No Signature on File"}
-                  </span>
-                  <span className="text-[11px] text-slate-500 block font-medium">
-                    {hasSignature
-                      ? "Ready to apply cryptographic stamp on approval."
-                      : "Draw or upload your signature before finalizing review."}
-                  </span>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsSignaturePadOpen(true)}
+                    className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-[#0F2962] font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                  >
+                    <PenLine className="w-3.5 h-3.5" />
+                    <span>{hasSignature ? "Edit Signature" : "Draw Signature"}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsPlacerModalOpen(true)}
+                    className="px-3 py-1.5 rounded-xl border border-blue-300 bg-blue-50/80 hover:bg-blue-100 text-[#0F2962] font-black text-xs shadow-xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    title="Open precision stamp placement canvas"
+                  >
+                    <Crosshair className="w-3.5 h-3.5 text-blue-600" />
+                    <span>{customCoordinates ? "Adjust Placement" : "Set Stamp Position"}</span>
+                  </button>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setIsSignaturePadOpen(true)}
-                className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-[#0F2962] font-bold text-xs shadow-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer"
-              >
-                <PenLine className="w-3.5 h-3.5" />
-                <span>{hasSignature ? "Edit Signature" : "Draw Signature"}</span>
-              </button>
+              {/* Placement Coordinate Feedback Bar */}
+              <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[11px]">
+                <div className="flex items-center gap-1.5 text-slate-600">
+                  <Crosshair className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                  {customCoordinates ? (
+                    <span>
+                      Target: <strong>Page {customCoordinates.page + 1}</strong> (X: {customCoordinates.x}pt, Y: {customCoordinates.y}pt)
+                    </span>
+                  ) : (
+                    <span>
+                      Target: <strong className="text-emerald-700">🎯 Smart Auto-Detect Active</strong> (Matches name line & skips blank pages)
+                    </span>
+                  )}
+                </div>
+                {customCoordinates && (
+                  <button
+                    type="button"
+                    onClick={() => setCustomCoordinates(null)}
+                    className="text-[10px] font-bold text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                  >
+                    Reset to Auto
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -788,6 +837,30 @@ export default function DocumentDetailActions({
         onSignatureSaved={() => {
           setHasSignature(true);
           setIsSignaturePadOpen(false);
+        }}
+      />
+
+      {/* Precision Visual Stamp Placement Modal */}
+      <VisualStampPlacerModal
+        isOpen={isPlacerModalOpen}
+        onClose={() => setIsPlacerModalOpen(false)}
+        documentId={document.id}
+        storagePath={document.currentVersion?.storagePath}
+        currentUser={{
+          fullName: currentUser.fullName || `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim() || "Signatory",
+          role: currentUser.role,
+          signaturePath: currentUser.signaturePath,
+        }}
+        initialCoordinates={customCoordinates}
+        onConfirm={(newCoords) => {
+          setCustomCoordinates(newCoords);
+          if (showToast) {
+            showToast({
+              title: "Stamp Position Configured",
+              message: `Placement locked to Page ${newCoords.page + 1} (X: ${newCoords.x}pt, Y: ${newCoords.y}pt)`,
+              type: "success",
+            });
+          }
         }}
       />
 
