@@ -27,7 +27,9 @@ interface ApprovalQueueItem {
   isEscalated: boolean;
   rejectionCount: number;
   createdAt: Date;
+  currentSignatoryId?: string | null;
   currentSignatoryIndex: number;
+  currentSignatory?: { firstName: string; lastName: string; role: string } | null;
   signatoryFlow?: unknown;
   unit: { name: string; code: string } | null;
   uploader?: { firstName: string; lastName: string } | null;
@@ -75,6 +77,7 @@ export default async function ApprovalQueuePage() {
             unit: true,
             uploader: true,
             currentVersion: true,
+            currentSignatory: true,
           },
           orderBy: { updatedAt: "desc" },
         });
@@ -94,6 +97,7 @@ export default async function ApprovalQueuePage() {
             unit: true,
             uploader: true,
             currentVersion: true,
+            currentSignatory: true,
           },
           orderBy: { updatedAt: "desc" },
         });
@@ -107,6 +111,7 @@ export default async function ApprovalQueuePage() {
               {
                 unitId: user.unitId || undefined,
                 status: DocumentStatus.PENDING_COORDINATOR,
+                currentSignatoryId: null,
               },
             ],
           },
@@ -115,6 +120,7 @@ export default async function ApprovalQueuePage() {
             unit: true,
             uploader: true,
             currentVersion: true,
+            currentSignatory: true,
           },
           orderBy: { updatedAt: "desc" },
         });
@@ -212,6 +218,12 @@ export default async function ApprovalQueuePage() {
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
                     {getStatusLabel(doc.status)}
                   </span>
+                  {doc.currentSignatoryId === user.id && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-900 bg-blue-100 border border-blue-300 px-2.5 py-0.5 rounded-full shadow-xs animate-pulse">
+                      <Sparkles className="w-3 h-3 text-amber-500" />
+                      Your Turn to Review & Sign
+                    </span>
+                  )}
                   {(() => {
                     const flow = Array.isArray(doc.signatoryFlow) ? doc.signatoryFlow : [];
                     if (flow.length > 0) {

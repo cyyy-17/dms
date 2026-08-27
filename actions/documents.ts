@@ -406,11 +406,16 @@ export async function submitDocumentForReviewAction(documentId: string): Promise
     const firstSigner = resetFlow[0] || null;
     const targetSignerId = firstSigner ? firstSigner.userId : null;
 
+    const initialStatus =
+      firstSigner && (firstSigner.role === "DIRECTOR" || firstSigner.role === "ADMIN")
+        ? DocumentStatus.PENDING_DIRECTOR
+        : DocumentStatus.PENDING_COORDINATOR;
+
     await prisma.$transaction(async (tx) => {
       await tx.document.update({
         where: { id: doc.id },
         data: {
-          status: DocumentStatus.PENDING_COORDINATOR,
+          status: initialStatus,
           signatoryFlow: resetFlow.length > 0 ? JSON.parse(JSON.stringify(resetFlow)) : undefined,
           currentSignatoryId: targetSignerId,
           currentSignatoryIndex: 0,

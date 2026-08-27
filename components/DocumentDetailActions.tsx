@@ -252,6 +252,17 @@ export default function DocumentDetailActions({
   };
 
   const handleApprove = async () => {
+    if (signatureApplied && !hasSignature) {
+      if (
+        confirm(
+          "You haven't registered your institutional signature yet. Would you like to draw or upload your signature now before approving?"
+        )
+      ) {
+        setIsSignaturePadOpen(true);
+        return;
+      }
+    }
+
     setIsLoading(true);
     setError(null);
 

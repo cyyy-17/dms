@@ -85,9 +85,19 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
       return step;
     });
 
-    const nextStatus = isFinalStep
-      ? DocumentStatus.APPROVED
-      : DocumentStatus.PENDING_COORDINATOR;
+    let nextStatus: DocumentStatus;
+    if (isFinalStep) {
+      nextStatus = DocumentStatus.APPROVED;
+    } else if (nextSigner && (nextSigner.role === "DIRECTOR" || nextSigner.role === "ADMIN")) {
+      nextStatus = DocumentStatus.PENDING_DIRECTOR;
+    } else {
+      nextStatus = DocumentStatus.PENDING_COORDINATOR;
+    }
+
+    const approvalActionType =
+      currentUser.role === "DIRECTOR" || isFinalStep
+        ? ApprovalActionType.DIRECTOR_APPROVE
+        : ApprovalActionType.COORDINATOR_APPROVE;
 
     await prisma.$transaction(async (tx) => {
       await tx.document.update({
@@ -106,7 +116,7 @@ export async function assignedSignatoryApproveAction(input: ApprovalInput): Prom
           versionId: doc.currentVersion!.id,
           actorId: currentUser.id,
           actorRole: currentUser.role,
-          action: isFinalStep ? ApprovalActionType.DIRECTOR_APPROVE : ApprovalActionType.COORDINATOR_APPROVE,
+          action: approvalActionType,
           comments: input.comments?.trim() || `Approved by ${currentUser.fullName} (${currentUser.role || "Signatory"})`,
           signatureApplied: !!input.signatureApplied,
           signaturePath: input.signatureApplied ? currentUser.signaturePath : null,
