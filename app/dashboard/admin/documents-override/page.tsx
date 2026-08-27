@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 import AdminDocumentOverrideManagement from "@/components/AdminDocumentOverrideManagement";
 import { Wrench } from "lucide-react";
 import { DocumentStatus, ApprovalLevel } from "@prisma/client";
@@ -22,6 +24,11 @@ interface DocumentWithDetails {
 export const dynamic = "force-dynamic";
 
 export default async function AdminDocumentsOverridePage() {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
+
   let documents: DocumentWithDetails[] = [];
 
   if (isDatabaseConfigured) {

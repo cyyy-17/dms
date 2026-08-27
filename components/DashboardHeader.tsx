@@ -182,6 +182,16 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             <Search className="w-4 h-4" />
           </button>
 
+          {/* Quick Notification / Action Shortcut */}
+          <Link
+            href="/dashboard/approvals"
+            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962]"
+            title="View sequential approval action items"
+          >
+            <BellRing className="w-3.5 h-3.5 text-[#0F2962]" />
+            <span className="hidden sm:inline">Approvals</span>
+          </Link>
+
           <button
             onClick={() => setIsSignatureModalOpen(true)}
             className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-xs hover:-translate-y-0.5 active:scale-98 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none ${

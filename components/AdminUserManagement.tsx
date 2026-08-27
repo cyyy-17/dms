@@ -222,7 +222,10 @@ export default function AdminUserManagement({
     const res = await suspendUserAction(suspendUser.id, actionReason || "Administrative suspension");
     setIsLoading(false);
     if (res.success) {
-      setFeedback({ type: "success", message: `Suspended account for ${suspendUser.email}.` });
+      setFeedback({
+        type: res.warning ? "error" : "success",
+        message: res.warning || `Suspended account for ${suspendUser.email}.`,
+      });
       setSuspendUser(null);
       setActionReason("");
       router.refresh();

@@ -285,7 +285,7 @@ export async function updateUserRoleUnitAction(params: {
 /**
  * Suspend an active employee account
  */
-export async function suspendUserAction(userId: string, reason: string): Promise<{ success: boolean; error?: string }> {
+export async function suspendUserAction(userId: string, reason: string): Promise<{ success: boolean; warning?: string; error?: string }> {
   const currentUser = await getAuthenticatedUser();
   if (!currentUser || currentUser.role !== "ADMIN") {
     return { success: false, error: "Unauthorized. Admin privileges required." };
@@ -296,6 +296,17 @@ export async function suspendUserAction(userId: string, reason: string): Promise
   }
 
   try {
+    const [pendingDocsCount] = await Promise.all([
+      prisma.document.count({
+        where: {
+          currentSignatoryId: userId,
+          status: {
+            in: [DocumentStatus.PENDING_COORDINATOR, DocumentStatus.PENDING_DIRECTOR],
+          },
+        },
+      }),
+    ]);
+
     const user = await prisma.user.update({
       where: { id: userId },
       data: { status: UserStatus.SUSPENDED },
@@ -306,11 +317,21 @@ export async function suspendUserAction(userId: string, reason: string): Promise
       action: "USER_SUSPEND",
       targetType: "USER",
       targetId: user.id,
-      details: { email: user.email, reason },
+      details: {
+        email: user.email,
+        reason,
+        activeAwaitingDocumentsCount: pendingDocsCount,
+      },
     });
 
     revalidatePath("/dashboard/admin/users");
-    return { success: true };
+
+    const warning =
+      pendingDocsCount > 0
+        ? `User suspended. Note: This user was the active signatory on ${pendingDocsCount} pending document(s). Please reassign them via Document Overrides.`
+        : undefined;
+
+    return { success: true, warning };
   } catch (error) {
     console.error("[ADMIN_SUSPEND_USER_ERROR]", error);
     return { success: false, error: "Failed to suspend user." };
@@ -885,6 +906,132 @@ export async function adminArchiveDocumentAction(params: {
   } catch (error) {
     console.error("[ADMIN_ARCHIVE_DOC_ERROR]", error);
     return { success: false, error: "Failed to archive document." };
+  }
+}
+
+/**
+ * Admin action to replace an assigned signatory in a document's sequential flow
+ */
+export async function adminReplaceSignatoryAction(params: {
+  documentId: string;
+  stepIndex: number;
+  newUserId: string;
+  reason: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    return { success: false, error: "Unauthorized. Admin privileges required." };
+  }
+
+  if (!params.reason || params.reason.trim().length < 5) {
+    return { success: false, error: "Mandatory: A detailed justification for replacing the signatory is required." };
+  }
+
+  if (!isDatabaseConfigured) {
+    return { success: true };
+  }
+
+  try {
+    const doc = await prisma.document.findUnique({
+      where: { id: params.documentId },
+      include: { uploader: true, unit: true },
+    });
+
+    if (!doc) {
+      return { success: false, error: "Document not found." };
+    }
+
+    const newUser = await prisma.user.findUnique({
+      where: { id: params.newUserId },
+    });
+
+    if (!newUser || newUser.status !== "ACTIVE") {
+      return { success: false, error: "New signatory must be an active registered user." };
+    }
+
+    interface FlowStep {
+      userId: string;
+      fullName: string;
+      role: string;
+      title?: string;
+      stepOrder: number;
+      status: "PENDING" | "APPROVED" | "REJECTED";
+      signedAt?: string;
+    }
+
+    const flow: FlowStep[] = Array.isArray(doc.signatoryFlow)
+      ? (doc.signatoryFlow as unknown as FlowStep[])
+      : [];
+
+    if (params.stepIndex < 0 || params.stepIndex >= flow.length) {
+      return { success: false, error: "Invalid signatory step index." };
+    }
+
+    const oldSignatory = flow[params.stepIndex];
+    if (oldSignatory.status === "APPROVED") {
+      return { success: false, error: "Cannot replace a signatory who has already approved and signed this step." };
+    }
+
+    const updatedFlow = [...flow];
+    updatedFlow[params.stepIndex] = {
+      ...oldSignatory,
+      userId: newUser.id,
+      fullName: `${newUser.firstName} ${newUser.lastName}`,
+      role: newUser.role,
+    };
+
+    const isCurrentStep = doc.currentSignatoryIndex === params.stepIndex;
+
+    await prisma.$transaction(async (tx) => {
+      await tx.document.update({
+        where: { id: doc.id },
+        data: {
+          signatoryFlow: JSON.parse(JSON.stringify(updatedFlow)),
+          currentSignatoryId: isCurrentStep ? newUser.id : doc.currentSignatoryId,
+        },
+      });
+
+      if (isCurrentStep && doc.status === "PENDING_COORDINATOR") {
+        await queueNotification({
+          recipientId: newUser.id,
+          recipientEmail: newUser.email,
+          type: "DOCUMENT_SUBMITTED_COORDINATOR",
+          subject: `SASDMS: Document Signatory Assignment - ${doc.trackingNumber}`,
+          templateName: "coordinator-review-alert",
+          payload: {
+            trackingNumber: doc.trackingNumber,
+            title: doc.title,
+            uploaderName: `${doc.uploader.firstName} ${doc.uploader.lastName}`,
+            documentId: doc.id,
+            stepOrder: params.stepIndex + 1,
+            totalSteps: flow.length,
+          },
+        });
+      }
+    });
+
+    await logAuditEvent({
+      actorId: currentUser.id,
+      unitId: doc.unitId,
+      action: "USER_ROLE_CHANGE",
+      targetType: "DOCUMENT",
+      targetId: doc.id,
+      documentId: doc.id,
+      details: {
+        actionType: "SIGNATORY_REPLACED",
+        stepIndex: params.stepIndex,
+        oldUserId: oldSignatory.userId,
+        newUserId: newUser.id,
+        reason: params.reason,
+      },
+    });
+
+    revalidatePath(`/dashboard/documents/${doc.id}`);
+    revalidatePath("/dashboard/admin/documents-override");
+    return { success: true };
+  } catch (error) {
+    console.error("[ADMIN_REPLACE_SIGNATORY_ERROR]", error);
+    return { success: false, error: "Failed to replace signatory." };
   }
 }
 

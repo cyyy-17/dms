@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 import AdminDocTypeManagement from "@/components/AdminDocTypeManagement";
 import { FileCode2 } from "lucide-react";
 import { ApprovalLevel } from "@prisma/client";
@@ -20,6 +22,11 @@ interface DocTypeItem {
 export const dynamic = "force-dynamic";
 
 export default async function AdminDocumentTypesPage() {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
+
   let docTypes: DocTypeItem[] = [];
 
   if (isDatabaseConfigured) {

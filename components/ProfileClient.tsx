@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
@@ -8,6 +8,7 @@ const SignaturePadModal = dynamic(() => import("@/components/SignaturePadModal")
 import {
   updateUserProfileDetailsAction,
   updateUserPasswordAction,
+  getSignedSignatureUrlAction,
 } from "@/actions/auth";
 import {
   User,
@@ -21,6 +22,7 @@ import {
   LogOut,
   Save,
   KeyRound,
+  Image as ImageIcon,
 } from "lucide-react";
 
 interface ProfileClientProps {
@@ -65,6 +67,27 @@ export default function ProfileClient({ user }: ProfileClientProps) {
   // Electronic Signature State
   const [hasSignature, setHasSignature] = useState(!!user.signaturePath);
   const [isSignaturePadOpen, setIsSignaturePadOpen] = useState(false);
+  const [signaturePreviewUrl, setSignaturePreviewUrl] = useState<string | null>(null);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    if (user.signaturePath && activeTab === "signature") {
+      getSignedSignatureUrlAction(user.signaturePath)
+        .then((res) => {
+          if (!isMounted) return;
+          if (res.success && res.signedUrl) {
+            setSignaturePreviewUrl(res.signedUrl);
+          }
+        })
+        .finally(() => {
+          if (isMounted) setIsLoadingPreview(false);
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [user.signaturePath, activeTab, hasSignature]);
 
   // Handle Profile Details Form Submission
   const handleSaveDetails = async (e: React.FormEvent) => {
@@ -438,6 +461,41 @@ export default function ProfileClient({ user }: ProfileClientProps) {
               <span>{hasSignature ? "Update Signature" : "Set Up Signature"}</span>
             </button>
           </div>
+
+          {/* Visual Signature Vault Preview */}
+          {hasSignature && (
+            <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-[#0F2962]" />
+                  <span>Registered Signature Vault Preview</span>
+                </span>
+                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  Ready for Smart Stamping
+                </span>
+              </div>
+
+              <div className="h-32 rounded-xl bg-slate-50/80 border border-dashed border-slate-300 flex items-center justify-center p-3 overflow-hidden">
+                {isLoadingPreview ? (
+                  <div className="flex items-center gap-2 text-xs text-slate-400 font-medium">
+                    <Loader2 className="w-4 h-4 animate-spin text-[#0F2962]" />
+                    <span>Loading cryptographic signature stream...</span>
+                  </div>
+                ) : signaturePreviewUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={signaturePreviewUrl}
+                    alt="Registered Signature Preview"
+                    className="max-h-full max-w-full object-contain filter drop-shadow-xs"
+                  />
+                ) : (
+                  <span className="text-xs text-slate-400 font-medium">
+                    Signature encrypted in private storage vault.
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200/70 space-y-2">
             <span className="text-xs font-bold text-blue-950 block">How Smart Anchor E-Signatures Work</span>

@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 import AdminAuditExplorer from "@/components/AdminAuditExplorer";
 import { ShieldCheck } from "lucide-react";
 import { AuditAction } from "@prisma/client";
@@ -20,12 +22,17 @@ interface AuditLogWithRelations {
 export const dynamic = "force-dynamic";
 
 export default async function AdminAuditPage() {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
+
   let auditLogs: AuditLogWithRelations[] = [];
 
   if (isDatabaseConfigured) {
     try {
       const logs = await prisma.auditLog.findMany({
-        take: 100,
+        take: 500,
         orderBy: { createdAt: "desc" },
         include: {
           actor: { select: { firstName: true, lastName: true, email: true } },

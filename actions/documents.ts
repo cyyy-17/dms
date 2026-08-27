@@ -1,5 +1,7 @@
 "use server";
 
+import { z } from "zod";
+import crypto from "crypto";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { supabaseAdmin } from "@/lib/supabase/admin";
@@ -18,6 +20,16 @@ export interface AssignedSignatoryStep {
   status: "PENDING" | "APPROVED" | "REJECTED";
   signedAt?: string;
 }
+
+const SignatoryStepSchema = z.object({
+  userId: z.string().uuid("Invalid signatory user ID format"),
+  fullName: z.string().min(1, "Signatory full name is required"),
+  role: z.string().min(1, "Signatory role is required"),
+  title: z.string().optional(),
+  stepOrder: z.number().int().nonnegative(),
+  status: z.enum(["PENDING", "APPROVED", "REJECTED"]).default("PENDING"),
+  signedAt: z.string().optional(),
+});
 
 export interface CreateDocumentInput {
   title: string;
@@ -94,6 +106,44 @@ export async function createDocumentAction(input: CreateDocumentInput): Promise<
       return { success: false, error: "Only official PDF documents (application/pdf) are permitted." };
     }
 
+    // Server-Side PDF Magic-Bytes Verification
+    const buffer = Buffer.from(input.fileBufferBase64, "base64");
+    if (buffer.length < 5 || buffer.subarray(0, 5).toString("ascii") !== "%PDF-") {
+      return { success: false, error: "Security Exception: Uploaded file does not have valid PDF magic headers." };
+    }
+
+    // Server-Side Signatory Flow Validation
+    let validatedFlow: AssignedSignatoryStep[] | null = null;
+    if (input.signatoryFlow && input.signatoryFlow.length > 0) {
+      const flowParse = z.array(SignatoryStepSchema).safeParse(input.signatoryFlow);
+      if (!flowParse.success) {
+        return {
+          success: false,
+          error: `Invalid signatory pipeline definition: ${flowParse.error.issues[0]?.message}`,
+        };
+      }
+
+      // Check all assigned user IDs exist and are active
+      const userIds = flowParse.data.map((s) => s.userId);
+      const existingUsers = await prisma.user.findMany({
+        where: { id: { in: userIds }, status: "ACTIVE" },
+        select: { id: true },
+      });
+
+      if (existingUsers.length !== userIds.length) {
+        return {
+          success: false,
+          error: "One or more assigned signatories are inactive or not found in the institution registry.",
+        };
+      }
+
+      validatedFlow = flowParse.data.map((s, idx) => ({
+        ...s,
+        stepOrder: idx,
+        status: "PENDING" as const,
+      }));
+    }
+
     // 1. Generate Sequential Tracking Number
     const countInYear = await prisma.document.count({
       where: {
@@ -105,7 +155,6 @@ export async function createDocumentAction(input: CreateDocumentInput): Promise<
     const trackingNumber = generateTrackingNumber(unit.code, countInYear + 1);
 
     // 2. Decode File Buffer and Upload to Supabase Storage
-    const buffer = Buffer.from(input.fileBufferBase64, "base64");
     const sanitizedFileName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
     const storagePath = `documents/${unit.code}/${docType.code}/${trackingNumber}/v1_${Date.now()}_${sanitizedFileName}`;
 
@@ -125,8 +174,7 @@ export async function createDocumentAction(input: CreateDocumentInput): Promise<
     let result;
     try {
       result = await prisma.$transaction(async (tx) => {
-        const signatoryFlow = input.signatoryFlow && input.signatoryFlow.length > 0 ? input.signatoryFlow : null;
-        const firstSignatoryId = signatoryFlow && signatoryFlow.length > 0 ? signatoryFlow[0].userId : null;
+        const firstSignatoryId = validatedFlow && validatedFlow.length > 0 ? validatedFlow[0].userId : null;
 
         const doc = await tx.document.create({
           data: {
@@ -140,7 +188,7 @@ export async function createDocumentAction(input: CreateDocumentInput): Promise<
             approvalLevel: docType.defaultApprovalLevel,
             effectiveDate: input.effectiveDate || null,
             expiryDate: input.expiryDate || null,
-            signatoryFlow: signatoryFlow ? JSON.parse(JSON.stringify(signatoryFlow)) : undefined,
+            signatoryFlow: validatedFlow ? JSON.parse(JSON.stringify(validatedFlow)) : undefined,
             currentSignatoryId: firstSignatoryId,
             currentSignatoryIndex: 0,
           },
@@ -229,7 +277,7 @@ export async function createDocumentVersionAction(input: CreateVersionInput): Pr
       return { success: false, error: "Only the original uploader or an Admin can upload new versions." };
     }
 
-    // 1D: Only editable documents accept new versions
+    // Only editable documents accept new versions
     const editableStatuses = ["DRAFT", "REJECTED_RETURNED"];
     if (!editableStatuses.includes(doc.status)) {
       return { success: false, error: `Cannot upload a new version while the document is in '${doc.status}' status.` };
@@ -244,8 +292,13 @@ export async function createDocumentVersionAction(input: CreateVersionInput): Pr
       return { success: false, error: "Only official PDF documents (application/pdf) are permitted." };
     }
 
-    const nextVersionNumber = (doc.versions[0]?.versionNumber || 0) + 1;
+    // PDF Magic-Bytes Check
     const buffer = Buffer.from(input.fileBufferBase64, "base64");
+    if (buffer.length < 5 || buffer.subarray(0, 5).toString("ascii") !== "%PDF-") {
+      return { success: false, error: "Security Exception: Uploaded file does not have valid PDF magic headers." };
+    }
+
+    const nextVersionNumber = (doc.versions[0]?.versionNumber || 0) + 1;
     const sanitizedFileName = input.fileName.replace(/[^a-zA-Z0-9._-]/g, "_");
     const storagePath = `documents/${doc.unit.code}/${doc.documentType.code}/${doc.trackingNumber}/v${nextVersionNumber}_${Date.now()}_${sanitizedFileName}`;
 
@@ -309,7 +362,7 @@ export async function createDocumentVersionAction(input: CreateVersionInput): Pr
 }
 
 /**
- * Submit Document for Sequential Review
+ * Submit / Resubmit Document for Sequential Review
  */
 export async function submitDocumentForReviewAction(documentId: string): Promise<{
   success: boolean;
@@ -338,8 +391,19 @@ export async function submitDocumentForReviewAction(documentId: string): Promise
       return { success: false, error: "Document is already in review or finalized." };
     }
 
-    const flow = Array.isArray(doc.signatoryFlow) ? (doc.signatoryFlow as unknown as AssignedSignatoryStep[]) : [];
-    const firstSigner = flow[0];
+    const rawFlow = Array.isArray(doc.signatoryFlow)
+      ? (doc.signatoryFlow as unknown as AssignedSignatoryStep[])
+      : [];
+
+    // Reset flow statuses to PENDING for a fresh sequential review cycle
+    const resetFlow = rawFlow.map((step, idx) => ({
+      ...step,
+      stepOrder: idx,
+      status: "PENDING" as const,
+      signedAt: undefined,
+    }));
+
+    const firstSigner = resetFlow[0] || null;
     const targetSignerId = firstSigner ? firstSigner.userId : null;
 
     await prisma.$transaction(async (tx) => {
@@ -347,6 +411,7 @@ export async function submitDocumentForReviewAction(documentId: string): Promise
         where: { id: doc.id },
         data: {
           status: DocumentStatus.PENDING_COORDINATOR,
+          signatoryFlow: resetFlow.length > 0 ? JSON.parse(JSON.stringify(resetFlow)) : undefined,
           currentSignatoryId: targetSignerId,
           currentSignatoryIndex: 0,
         },
@@ -366,7 +431,7 @@ export async function submitDocumentForReviewAction(documentId: string): Promise
       });
     });
 
-    // 4A: Notify AFTER transaction commit
+    // Notify first signatory or unit coordinators
     if (targetSignerId) {
       const assignedUser = await prisma.user.findUnique({ where: { id: targetSignerId } });
       if (assignedUser) {
@@ -374,13 +439,15 @@ export async function submitDocumentForReviewAction(documentId: string): Promise
           recipientId: assignedUser.id,
           recipientEmail: assignedUser.email,
           type: "DOCUMENT_SUBMITTED_COORDINATOR",
-          subject: `SASDMS: Document Awaiting Your Signature - ${doc.trackingNumber}`,
+          subject: `SASDMS: Document Awaiting Your Signature (Step 1 of ${resetFlow.length}) - ${doc.trackingNumber}`,
           templateName: "coordinator-review-alert",
           payload: {
             trackingNumber: doc.trackingNumber,
             title: doc.title,
             uploaderName: `${doc.uploader.firstName} ${doc.uploader.lastName}`,
             documentId: doc.id,
+            stepOrder: 1,
+            totalSteps: resetFlow.length,
           },
         });
       }
@@ -413,11 +480,12 @@ export async function submitDocumentForReviewAction(documentId: string): Promise
       targetType: "DOCUMENT",
       targetId: doc.id,
       documentId: doc.id,
-      details: { trackingNumber: doc.trackingNumber },
+      details: { trackingNumber: doc.trackingNumber, totalSignatories: resetFlow.length },
     });
 
     revalidatePath(`/dashboard/documents/${doc.id}`);
     revalidatePath("/dashboard/documents");
+    revalidatePath("/dashboard/approvals");
     return { success: true };
   } catch (error) {
     console.error("[SUBMIT_DOCUMENT_ERROR]", error);
@@ -426,12 +494,158 @@ export async function submitDocumentForReviewAction(documentId: string): Promise
 }
 
 /**
- * Generate Secure Short-Lived Signed Download URL (15 mins)
- * Validates requester role and tenancy boundaries.
+ * Uploader Action: Recall / Withdraw a document back to DRAFT
+ * Permitted only if no approvals or rejections have taken place yet.
+ */
+export async function withdrawDocumentAction(documentId: string): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    return { success: false, error: "Unauthorized." };
+  }
+
+  if (!isDatabaseConfigured) {
+    return { success: true };
+  }
+
+  try {
+    const doc = await prisma.document.findUnique({
+      where: { id: documentId },
+      include: { currentVersion: true, approvalActions: true },
+    });
+
+    if (!doc) {
+      return { success: false, error: "Document not found." };
+    }
+
+    if (doc.uploaderId !== currentUser.id && currentUser.role !== "ADMIN") {
+      return { success: false, error: "Only the uploader or an Admin can withdraw a submitted document." };
+    }
+
+    if (doc.status !== DocumentStatus.PENDING_COORDINATOR && doc.status !== DocumentStatus.PENDING_DIRECTOR) {
+      return { success: false, error: "Only documents currently pending initial review can be recalled." };
+    }
+
+    // Verify no signatory approval has taken place
+    const approvalCount = doc.approvalActions.filter(
+      (a) => a.action === "COORDINATOR_APPROVE" || a.action === "DIRECTOR_APPROVE"
+    ).length;
+
+    if (approvalCount > 0) {
+      return { success: false, error: "Cannot withdraw: One or more signatories have already recorded formal sign-offs." };
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.document.update({
+        where: { id: doc.id },
+        data: {
+          status: DocumentStatus.DRAFT,
+          currentSignatoryId: null,
+        },
+      });
+
+      if (doc.currentVersion) {
+        await tx.approvalAction.create({
+          data: {
+            documentId: doc.id,
+            versionId: doc.currentVersion.id,
+            actorId: currentUser.id,
+            actorRole: currentUser.role,
+            action: "REJECT_RETURN",
+            comments: "Document recalled/withdrawn by uploader for editing.",
+          },
+        });
+      }
+    });
+
+    await logAuditEvent({
+      actorId: currentUser.id,
+      unitId: doc.unitId,
+      action: "DOCUMENT_REJECT_RETURN",
+      targetType: "DOCUMENT",
+      targetId: doc.id,
+      documentId: doc.id,
+      details: { actionType: "WITHDRAWAL_BY_UPLOADER", trackingNumber: doc.trackingNumber },
+    });
+
+    revalidatePath(`/dashboard/documents/${doc.id}`);
+    revalidatePath("/dashboard/documents");
+    revalidatePath("/dashboard/approvals");
+    return { success: true };
+  } catch (error) {
+    console.error("[WITHDRAW_DOCUMENT_ERROR]", error);
+    return { success: false, error: "Failed to withdraw document." };
+  }
+}
+
+/**
+ * Verify SHA-256 Checksum Integrity for Non-Repudiation
+ */
+export async function verifyDocumentChecksumAction(
+  documentId: string,
+  versionId?: string
+): Promise<{
+  success: boolean;
+  isValid?: boolean;
+  storedChecksum?: string;
+  calculatedChecksum?: string;
+  error?: string;
+}> {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    return { success: false, error: "Unauthorized." };
+  }
+
+  if (!isDatabaseConfigured) {
+    return { success: true, isValid: true, storedChecksum: "mock-hash", calculatedChecksum: "mock-hash" };
+  }
+
+  try {
+    const version = versionId
+      ? await prisma.documentVersion.findUnique({ where: { id: versionId } })
+      : await prisma.documentVersion.findFirst({
+          where: { documentId },
+          orderBy: { versionNumber: "desc" },
+        });
+
+    if (!version) {
+      return { success: false, error: "Document version record not found." };
+    }
+
+    const { data: fileData, error: downloadError } = await supabaseAdmin.storage
+      .from(STORAGE_BUCKETS.DOCUMENTS)
+      .download(version.storagePath);
+
+    if (downloadError || !fileData) {
+      return { success: false, error: "Unable to retrieve storage binary for checksum calculation." };
+    }
+
+    const arrayBuffer = await fileData.arrayBuffer();
+    const hash = crypto.createHash("sha256").update(Buffer.from(arrayBuffer)).digest("hex");
+    const isValid = hash.toLowerCase() === version.sha256Checksum.toLowerCase();
+
+    return {
+      success: true,
+      isValid,
+      storedChecksum: version.sha256Checksum,
+      calculatedChecksum: hash,
+    };
+  } catch (error) {
+    console.error("[VERIFY_CHECKSUM_ERROR]", error);
+    return { success: false, error: "Failed to compute checksum." };
+  }
+}
+
+/**
+ * Generate Secure Short-Lived Signed Download/View URL (15 mins)
+ * Validates requester role, tenancy boundaries, and logs RA 10173 audit trail.
  */
 export async function getSignedDocumentUrlAction(
   storagePath: string,
-  documentId?: string
+  documentId?: string,
+  actionType: "VIEW" | "DOWNLOAD" = "VIEW"
 ): Promise<{
   success: boolean;
   signedUrl?: string;
@@ -483,18 +697,18 @@ export async function getSignedDocumentUrlAction(
       .createSignedUrl(storagePath, 900); // 15 minutes (900 seconds)
 
     if (error || !data?.signedUrl) {
-      return { success: false, error: "Unable to generate secure download link." };
+      return { success: false, error: "Unable to generate secure signed link." };
     }
 
-    // Include in audit trail for RA 10173 compliance
+    // Record immutable audit event (RA 10173 non-repudiation)
     await logAuditEvent({
       actorId: currentUser.id,
       unitId: currentUser.unitId,
-      action: "DOCUMENT_DOWNLOAD",
+      action: actionType === "DOWNLOAD" ? "DOCUMENT_DOWNLOAD" : "DOCUMENT_VIEW",
       targetType: "DOCUMENT",
       targetId: documentId,
       documentId: documentId,
-      details: { storagePath },
+      details: { storagePath, accessType: actionType },
     });
 
     return { success: true, signedUrl: data.signedUrl };

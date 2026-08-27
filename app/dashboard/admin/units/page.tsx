@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 import AdminUnitManagement from "@/components/AdminUnitManagement";
 import { Building2 } from "lucide-react";
 
@@ -18,6 +20,11 @@ interface UnitWithStats {
 export const dynamic = "force-dynamic";
 
 export default async function AdminUnitsPage() {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
+
   let units: UnitWithStats[] = [];
 
   if (isDatabaseConfigured) {

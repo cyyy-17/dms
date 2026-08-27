@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
 import { NotificationStatus } from "@prisma/client";
-
 import { renderNotificationEmail } from "@/lib/email-templates";
-
-const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
 export async function GET(req: NextRequest) {
   // Verify Vercel Cron Authorization Header
@@ -15,6 +12,16 @@ export async function GET(req: NextRequest) {
   if (!expectedSecret || authHeader !== `Bearer ${expectedSecret}`) {
     return NextResponse.json({ error: "Unauthorized cron execution." }, { status: 401 });
   }
+
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey || apiKey.startsWith("re_placeholder") || apiKey.includes("your_resend_api_key")) {
+    return NextResponse.json(
+      { error: "RESEND_API_KEY is not configured on server. Email dispatch halted." },
+      { status: 503 }
+    );
+  }
+
+  const resend = new Resend(apiKey);
 
   // Fetch pending notifications scheduled for now or earlier (Limit: 25 per run)
   const pendingJobs = await prisma.notificationQueue.findMany({
@@ -37,26 +44,29 @@ export async function GET(req: NextRequest) {
 
   for (const job of pendingJobs) {
     try {
-      if (process.env.RESEND_API_KEY) {
-        const payload = (typeof job.payload === "object" && job.payload !== null)
+      const payload =
+        typeof job.payload === "object" && job.payload !== null
           ? (job.payload as Record<string, unknown>)
           : {};
 
-        const rendered = renderNotificationEmail({
-          type: job.type,
-          templateName: job.templateName,
-          subject: job.subject,
-          payload,
-          recipientEmail: job.recipientEmail,
-        });
+      const rendered = renderNotificationEmail({
+        type: job.type,
+        templateName: job.templateName,
+        subject: job.subject,
+        payload,
+        recipientEmail: job.recipientEmail,
+      });
 
-        await resend.emails.send({
-          from: sender,
-          to: job.recipientEmail,
-          subject: rendered.subject,
-          html: rendered.html,
-          text: rendered.text,
-        });
+      const { error: sendError } = await resend.emails.send({
+        from: sender,
+        to: job.recipientEmail,
+        subject: rendered.subject,
+        html: rendered.html,
+        text: rendered.text,
+      });
+
+      if (sendError) {
+        throw new Error(sendError.message || "Resend API rejected delivery");
       }
 
       await prisma.notificationQueue.update({
@@ -65,6 +75,7 @@ export async function GET(req: NextRequest) {
           status: NotificationStatus.SENT,
           sentAt: new Date(),
           attempts: job.attempts + 1,
+          lastError: null,
         },
       });
 

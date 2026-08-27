@@ -254,6 +254,8 @@ export async function rejectReturnAction(input: RejectionInput): Promise<{
           status: DocumentStatus.REJECTED_RETURNED,
           rejectionCount: newRejectionCount,
           isEscalated: isEscalatedNow ? true : doc.isEscalated,
+          currentSignatoryId: null,
+          currentSignatoryIndex: 0,
         },
       });
 

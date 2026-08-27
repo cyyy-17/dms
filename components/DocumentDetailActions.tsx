@@ -6,6 +6,8 @@ import {
   submitDocumentForReviewAction,
   createDocumentVersionAction,
   getSignedDocumentUrlAction,
+  withdrawDocumentAction,
+  verifyDocumentChecksumAction,
   AssignedSignatoryStep,
 } from "@/actions/documents";
 import {
@@ -28,6 +30,8 @@ import {
   CheckCircle2,
   Clock,
   ShieldCheck,
+  Undo2,
+  Fingerprint,
 } from "lucide-react";
 import { DocumentStatus, UserRole } from "@prisma/client";
 
@@ -85,6 +89,13 @@ export default function DocumentDetailActions({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showCloseConfirm, setShowCloseConfirm] = useState(false);
 
+  // Checksum verification state
+  const [isVerifyingChecksum, setIsVerifyingChecksum] = useState(false);
+  const [checksumResult, setChecksumResult] = useState<{
+    isValid: boolean;
+    calculated: string;
+  } | null>(null);
+
   const flow: AssignedSignatoryStep[] = Array.isArray(document.signatoryFlow)
     ? (document.signatoryFlow as AssignedSignatoryStep[])
     : [];
@@ -114,7 +125,11 @@ export default function DocumentDetailActions({
     setError(null);
 
     try {
-      const res = await getSignedDocumentUrlAction(document.currentVersion.storagePath);
+      const res = await getSignedDocumentUrlAction(
+        document.currentVersion.storagePath,
+        document.id,
+        "DOWNLOAD"
+      );
       if (res.success && res.signedUrl) {
         window.open(res.signedUrl, "_blank");
       } else {
@@ -124,6 +139,56 @@ export default function DocumentDetailActions({
       setError("Error downloading file.");
     } finally {
       setDownloadLoading(false);
+    }
+  };
+
+  const handleVerifyChecksum = async () => {
+    if (!document.id) return;
+    setIsVerifyingChecksum(true);
+    setError(null);
+    setChecksumResult(null);
+
+    try {
+      const res = await verifyDocumentChecksumAction(document.id);
+      if (res.success && res.calculatedChecksum) {
+        setChecksumResult({
+          isValid: !!res.isValid,
+          calculated: res.calculatedChecksum,
+        });
+        if (res.isValid) {
+          setSuccessMessage("Cryptographic SHA-256 integrity verified against storage binary.");
+        } else {
+          setError("Integrity Warning: Binary checksum does not match registered database record.");
+        }
+      } else {
+        setError(res.error || "Failed to verify checksum.");
+      }
+    } catch {
+      setError("Error performing checksum verification.");
+    } finally {
+      setIsVerifyingChecksum(false);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (!confirm("Are you sure you want to recall this document back to Draft? Reviewers will be notified.")) {
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const res = await withdrawDocumentAction(document.id);
+      if (!res.success) {
+        setError(res.error || "Failed to recall document.");
+      } else {
+        setSuccessMessage("Document recalled back to Draft for editing.");
+        router.refresh();
+      }
+    } catch {
+      setError("Error recalling document.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -392,25 +457,67 @@ export default function DocumentDetailActions({
         </div>
       )}
 
-      {/* Download Action Bar */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-white/90 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-        <div>
-          <span className="text-xs font-black uppercase tracking-wider text-slate-500 block">
-            Active Binary File (v{document.currentVersion?.versionNumber || 1})
-          </span>
-          <span className="font-extrabold text-slate-900 text-sm block mt-1">
-            {document.currentVersion?.fileName || "document.pdf"}
-          </span>
+      {/* Download & Integrity Action Bar */}
+      <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-white/90 space-y-4 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <span className="text-xs font-black uppercase tracking-wider text-slate-500 block">
+              Active Binary File (v{document.currentVersion?.versionNumber || 1})
+            </span>
+            <span className="font-extrabold text-slate-900 text-sm block mt-1">
+              {document.currentVersion?.fileName || "document.pdf"}
+            </span>
+            {document.currentVersion?.sha256Checksum && (
+              <span className="text-[11px] font-mono text-slate-400 block mt-0.5 truncate max-w-md">
+                SHA-256: {document.currentVersion.sha256Checksum}
+              </span>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={handleVerifyChecksum}
+              disabled={isVerifyingChecksum}
+              className="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <Fingerprint className="w-4 h-4 text-emerald-600" />
+              <span>{isVerifyingChecksum ? "Calculating SHA-256..." : "Verify Hash Integrity"}</span>
+            </button>
+
+            <button
+              onClick={handleDownload}
+              disabled={downloadLoading}
+              className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
+            >
+              <Download className="w-4 h-4 text-amber-400" />
+              <span>{downloadLoading ? "Generating Signed URL..." : "Download File"}</span>
+            </button>
+          </div>
         </div>
 
-        <button
-          onClick={handleDownload}
-          disabled={downloadLoading}
-          className="w-full sm:w-auto px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-md transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
-        >
-          <Download className="w-4 h-4 text-amber-400" />
-          <span>{downloadLoading ? "Generating Signed URL..." : "Download File"}</span>
-        </button>
+        {checksumResult && (
+          <div
+            className={`p-3.5 rounded-2xl text-xs font-medium border flex items-center gap-2.5 ${
+              checksumResult.isValid
+                ? "bg-emerald-50 text-emerald-900 border-emerald-300"
+                : "bg-red-50 text-red-900 border-red-300"
+            }`}
+          >
+            {checksumResult.isValid ? (
+              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            )}
+            <div className="overflow-hidden">
+              <span className="font-bold">
+                {checksumResult.isValid
+                  ? "Binary Integrity Verified (Match): "
+                  : "Integrity Warning (Mismatch): "}
+              </span>
+              <span className="font-mono text-[10px] break-all">{checksumResult.calculated}</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Workflow Action Panel */}
@@ -453,6 +560,28 @@ export default function DocumentDetailActions({
               </div>
             </div>
           )}
+
+        {/* 1B. Uploader Recall / Withdrawal when document is currently awaiting review */}
+        {isPendingApproval && isUploader && (
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span className="text-xs font-extrabold text-slate-900 block">
+                Submitted Document Awaiting Review
+              </span>
+              <span className="text-[11px] text-slate-500 font-medium block mt-0.5">
+                Need to make immediate corrections? You can recall this document back to Draft before signatories take action.
+              </span>
+            </div>
+            <button
+              onClick={handleWithdraw}
+              disabled={isLoading}
+              className="px-4 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-rose-50 hover:text-rose-700 text-slate-700 font-bold text-xs shadow-xs transition flex items-center gap-2 shrink-0 cursor-pointer disabled:opacity-50"
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+              <span>Recall to Draft</span>
+            </button>
+          </div>
+        )}
 
         {/* 2. Active Assigned Signatory Approval Box */}
         {canApprove && (

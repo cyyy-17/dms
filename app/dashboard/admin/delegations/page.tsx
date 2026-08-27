@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 import AdminDelegationManagement from "@/components/AdminDelegationManagement";
 import { FileCheck2 } from "lucide-react";
 
@@ -35,6 +37,11 @@ interface UnitOption {
 export const dynamic = "force-dynamic";
 
 export default async function AdminDelegationsPage() {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    redirect("/dashboard");
+  }
+
   let delegations: DelegationItem[] = [];
   let users: UserOption[] = [];
   let units: UnitOption[] = [];
