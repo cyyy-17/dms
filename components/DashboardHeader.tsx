@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -52,6 +52,19 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const isAdmin = user.role === "ADMIN";
+
+  // Global Ctrl+K / Cmd+K Keyboard Shortcut Listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setIsQuickSearchOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   // Human-Friendly Breadcrumbs Title
   const getBreadcrumbTitle = (path: string): string => {

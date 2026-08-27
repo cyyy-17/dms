@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { AlertOctagon, RotateCcw, Home } from "lucide-react";
+import { useEffect, useState } from "react";
+import { AlertOctagon, RotateCcw, Home, ChevronDown, ChevronUp, ShieldAlert } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardError({
@@ -11,6 +11,8 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const [showDetails, setShowDetails] = useState(false);
+
   useEffect(() => {
     // Log exception to console / client monitoring
     console.error("[DASHBOARD_RUNTIME_ERROR]", error);
@@ -35,8 +37,32 @@ export default function DashboardError({
       </div>
 
       {error.digest && (
-        <div className="p-3 rounded-xl bg-slate-100 text-slate-500 font-mono text-[10px] max-w-sm mx-auto truncate border border-slate-200">
+        <div className="p-3 rounded-xl bg-slate-100 text-slate-600 font-mono text-[11px] max-w-sm mx-auto truncate border border-slate-200">
           Digest ID: {error.digest}
+        </div>
+      )}
+
+      {/* Collapsible Error Message Details */}
+      {error.message && (
+        <div className="max-w-md mx-auto text-left">
+          <button
+            type="button"
+            onClick={() => setShowDetails(!showDetails)}
+            className="text-[11px] font-bold text-slate-500 hover:text-slate-800 flex items-center gap-1.5 mx-auto transition cursor-pointer"
+          >
+            <span>{showDetails ? "Hide Technical Details" : "View Technical Diagnostics"}</span>
+            {showDetails ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </button>
+
+          {showDetails && (
+            <div className="mt-2.5 p-3.5 rounded-2xl bg-slate-900 text-rose-300 font-mono text-[11px] border border-slate-800 wrap-break-word shadow-inner animate-in fade-in slide-in-from-top-1">
+              <div className="flex items-center gap-1.5 text-slate-400 font-bold mb-1">
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
+                <span>Exception Trace</span>
+              </div>
+              <p>{error.message}</p>
+            </div>
+          )}
         </div>
       )}
 

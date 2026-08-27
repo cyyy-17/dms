@@ -16,6 +16,7 @@ import {
   rejectCloseAction,
 } from "@/actions/approvals";
 import SignaturePadModal from "@/components/SignaturePadModal";
+import { useOptionalToast } from "@/components/ToastContext";
 import {
   Send,
   CheckCircle,
@@ -69,6 +70,8 @@ export default function DocumentDetailActions({
   currentUser,
 }: DocumentDetailActionsProps) {
   const router = useRouter();
+  const toast = useOptionalToast();
+  const showToast = toast?.showToast;
 
   const [comments, setComments] = useState("");
   const [signatureApplied, setSignatureApplied] = useState(true);
@@ -157,8 +160,22 @@ export default function DocumentDetailActions({
         });
         if (res.isValid) {
           setSuccessMessage("Cryptographic SHA-256 integrity verified against storage binary.");
+          if (showToast) {
+            showToast({
+              title: "SHA-256 Hash Verified",
+              message: "Storage binary matches immutable cryptographic checksum.",
+              type: "success",
+            });
+          }
         } else {
           setError("Integrity Warning: Binary checksum does not match registered database record.");
+          if (showToast) {
+            showToast({
+              title: "Integrity Warning",
+              message: "Storage binary does not match registered checksum.",
+              type: "error",
+            });
+          }
         }
       } else {
         setError(res.error || "Failed to verify checksum.");
@@ -183,6 +200,13 @@ export default function DocumentDetailActions({
         setError(res.error || "Failed to recall document.");
       } else {
         setSuccessMessage("Document recalled back to Draft for editing.");
+        if (showToast) {
+          showToast({
+            title: "Document Recalled",
+            message: "Document returned to Draft state for editing.",
+            type: "info",
+          });
+        }
         router.refresh();
       }
     } catch {
@@ -202,6 +226,13 @@ export default function DocumentDetailActions({
         setError(res.error || "Failed to submit document.");
       } else {
         setSuccessMessage("Document submitted for sequential review.");
+        if (showToast) {
+          showToast({
+            title: "Submitted for Review",
+            message: "Document entered sequential signatory pipeline.",
+            type: "success",
+          });
+        }
         router.refresh();
       }
     } catch {
@@ -226,6 +257,13 @@ export default function DocumentDetailActions({
         setError(res.error || "Approval failed.");
       } else {
         setSuccessMessage("Electronic signature stamped & approval recorded!");
+        if (showToast) {
+          showToast({
+            title: "Approval Recorded",
+            message: "E-Signature stamped and document advanced in workflow.",
+            type: "success",
+          });
+        }
         router.refresh();
       }
     } catch {
@@ -254,6 +292,13 @@ export default function DocumentDetailActions({
         setError(res.error || "Failed to return document.");
       } else {
         setSuccessMessage("Document returned to uploader for revision.");
+        if (showToast) {
+          showToast({
+            title: "Returned for Revision",
+            message: "Uploader notified with rework remarks.",
+            type: "warning",
+          });
+        }
         router.refresh();
       }
     } catch {
@@ -286,6 +331,13 @@ export default function DocumentDetailActions({
         setError(res.error || "Failed to close document.");
       } else {
         setSuccessMessage("Document closed and rejected.");
+        if (showToast) {
+          showToast({
+            title: "Document Rejected",
+            message: "Terminal status recorded and document closed.",
+            type: "error",
+          });
+        }
         router.refresh();
       }
     } catch {

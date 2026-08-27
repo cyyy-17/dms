@@ -15,6 +15,8 @@ import {
   X,
   Loader2,
   FileCheck,
+  CornerDownLeft,
+  History,
 } from "lucide-react";
 import { quickSearchLiveAction } from "@/actions/documents";
 import { getStatusLabel, getStatusBadgeClass } from "@/lib/status-labels";
@@ -43,13 +45,38 @@ interface LiveUnitResult {
   name: string;
 }
 
+const RECENT_SEARCHES_KEY = "sasdms_recent_searches";
+
 export default function QuickSearchModal({ isOpen, onClose, userRole, units = [] }: QuickSearchModalProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [liveDocs, setLiveDocs] = useState<LiveDocumentResult[]>([]);
   const [liveUnits, setLiveUnits] = useState<LiveUnitResult[]>([]);
+  const [recentSearches, setRecentSearches] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem(RECENT_SEARCHES_KEY);
+        if (saved) return JSON.parse(saved);
+      } catch {
+        // Ignore JSON error
+      }
+    }
+    return [];
+  });
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const saveRecentSearch = (term: string) => {
+    const trimmed = term.trim();
+    if (!trimmed || trimmed.length < 2) return;
+    try {
+      const updated = [trimmed, ...recentSearches.filter((s) => s.toLowerCase() !== trimmed.toLowerCase())].slice(0, 5);
+      setRecentSearches(updated);
+      localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+    } catch {
+      // Ignore
+    }
+  };
 
   const handleClose = useCallback(() => {
     setQuery("");
@@ -116,7 +143,7 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
           setIsSearching(false);
         }
       }
-    }, 200);
+    }, 180);
 
     return () => {
       isMounted = false;
@@ -124,7 +151,7 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
     };
   }, [query]);
 
-  // Keyboard navigation
+  // Keyboard navigation for escape, enter, up, down
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
@@ -208,31 +235,34 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
 
   const displayedUnits = liveUnits.length > 0 ? liveUnits : fallbackUnits;
 
-  const handleNavigate = (href: string) => {
+  const handleNavigate = (href: string, termToSave?: string) => {
+    if (termToSave) saveRecentSearch(termToSave);
     handleClose();
     router.push(href);
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    const trimmed = query.trim();
+    if (!trimmed) return;
 
+    saveRecentSearch(trimmed);
     handleClose();
-    router.push(`/dashboard/documents?search=${encodeURIComponent(query.trim())}`);
+    router.push(`/dashboard/documents?search=${encodeURIComponent(trimmed)}`);
   };
 
   const hasLiveResults = liveDocs.length > 0 || displayedUnits.length > 0;
   const isQueryActive = query.trim().length >= 2;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-10 sm:pt-20 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-10 sm:pt-20 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-150">
       <div className="glass-panel rounded-3xl max-w-2xl w-full bg-white shadow-2xl border border-white/90 overflow-hidden space-y-0 flex flex-col max-h-[85vh]">
         {/* Search Input Bar */}
-        <form onSubmit={handleSearchSubmit} className="p-3.5 sm:p-5 border-b border-slate-200/80 flex items-center gap-2.5 sm:gap-3 shrink-0">
+        <form onSubmit={handleSearchSubmit} className="p-3.5 sm:p-5 border-b border-slate-200/80 flex items-center gap-2.5 sm:gap-3 shrink-0 bg-white/95">
           {isSearching ? (
             <Loader2 className="w-5 h-5 text-blue-600 animate-spin shrink-0" />
           ) : (
-            <Search className="w-5 h-5 text-slate-400 shrink-0" />
+            <Search className="w-5 h-5 text-[#0F2962] shrink-0" />
           )}
           <input
             ref={inputRef}
@@ -258,6 +288,43 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
 
         {/* Search Recommendations / Quick Jump list */}
         <div className="p-3.5 sm:p-5 overflow-y-auto space-y-4 flex-1">
+          {/* Recent Searches (when query is empty) */}
+          {query.trim() === "" && recentSearches.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between px-2">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <History className="w-3 h-3 text-slate-400" />
+                  <span>Recent Searches</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRecentSearches([]);
+                    localStorage.removeItem(RECENT_SEARCHES_KEY);
+                  }}
+                  className="text-[10px] font-semibold text-slate-400 hover:text-slate-600 transition cursor-pointer"
+                >
+                  Clear History
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-1.5 px-1">
+                {recentSearches.map((term) => (
+                  <button
+                    key={term}
+                    type="button"
+                    onClick={() => {
+                      setQuery(term);
+                      inputRef.current?.focus();
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition cursor-pointer flex items-center gap-1"
+                  >
+                    <span>{term}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Quick Repository Search Link */}
           {query.trim() !== "" && (
             <button
@@ -269,7 +336,7 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
                 <Search className="w-4 h-4 text-blue-700" />
                 <span>Search Full Repository for &ldquo;{query}&rdquo;</span>
               </div>
-              <ArrowRight className="w-4 h-4" />
+              <CornerDownLeft className="w-4 h-4 text-blue-700" />
             </button>
           )}
 
@@ -284,7 +351,7 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
                   <button
                     key={doc.id}
                     type="button"
-                    onClick={() => handleNavigate(`/dashboard/documents/${doc.id}`)}
+                    onClick={() => handleNavigate(`/dashboard/documents/${doc.id}`, doc.trackingNumber)}
                     className="w-full text-left p-3 rounded-2xl hover:bg-blue-50/60 border border-slate-200/80 hover:border-blue-300 transition-all flex items-center justify-between group cursor-pointer"
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -330,7 +397,7 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
                   <button
                     key={u.code}
                     type="button"
-                    onClick={() => handleNavigate(`/dashboard/documents?unit=${u.code}`)}
+                    onClick={() => handleNavigate(`/dashboard/documents?unit=${u.code}`, u.name)}
                     className="p-2.5 rounded-xl hover:bg-amber-50/80 border border-slate-200/80 hover:border-amber-300 text-left flex items-center gap-2.5 transition group cursor-pointer"
                   >
                     <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-900 flex items-center justify-center font-mono font-bold text-[10px] shrink-0">
@@ -399,7 +466,8 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
         <div className="p-3 bg-slate-50 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-500 px-5 shrink-0">
           <span>Navigate instantly across SASDMS with real-time async search</span>
           <div className="flex items-center gap-2">
-            <span>Press <kbd className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-200">Enter</kbd> to execute</span>
+            <span className="font-mono bg-white px-1.5 py-0.5 rounded border border-slate-200 text-[10px]">Ctrl+K</span>
+            <span>to toggle</span>
           </div>
         </div>
       </div>

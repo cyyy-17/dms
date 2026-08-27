@@ -3,6 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { saveUserSignatureAction } from "@/actions/auth";
 import { PenLine, Upload, Eraser, CheckCircle2, AlertCircle, X, Loader2 } from "lucide-react";
+import { useOptionalToast } from "@/components/ToastContext";
 
 interface SignaturePadModalProps {
   isOpen: boolean;
@@ -24,6 +25,10 @@ export default function SignaturePadModal({
   const [error, setError] = useState<string | null>(null);
   const [hasDrawn, setHasDrawn] = useState(false);
   const [penColor, setPenColor] = useState<string>("#0F2962");
+  const [strokeWidth, setStrokeWidth] = useState<number>(2.5);
+
+  const toast = useOptionalToast();
+  const showToast = toast?.showToast;
 
   // Initialize Canvas
   useEffect(() => {
@@ -44,13 +49,13 @@ export default function SignaturePadModal({
       ctx.scale(ratio, ratio);
 
       ctx.strokeStyle = penColor;
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = strokeWidth;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [isOpen, activeTab, penColor]);
+  }, [isOpen, activeTab, penColor, strokeWidth]);
 
   if (!isOpen) return null;
 
@@ -68,6 +73,8 @@ export default function SignaturePadModal({
     const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
     const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
 
+    ctx.strokeStyle = penColor;
+    ctx.lineWidth = strokeWidth;
     ctx.beginPath();
     ctx.moveTo(clientX - rect.left, clientY - rect.top);
   };
@@ -83,7 +90,6 @@ export default function SignaturePadModal({
     const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
     const clientY = "touches" in e ? e.touches[0].clientY : e.clientY;
 
-    ctx.strokeStyle = penColor;
     ctx.lineTo(clientX - rect.left, clientY - rect.top);
     ctx.stroke();
   };
@@ -149,6 +155,14 @@ export default function SignaturePadModal({
     setIsLoading(false);
 
     if (res.success && res.signaturePath) {
+      if (showToast) {
+        showToast({
+          title: "E-Signature Saved",
+          message: "Your official cryptographic signature is active and ready for document approval workflows.",
+          type: "success",
+          duration: 4000,
+        });
+      }
       onSignatureSaved(res.signaturePath, dataUrl);
       onClose();
     } else {
@@ -157,8 +171,8 @@ export default function SignaturePadModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4">
-      <div className="glass-panel rounded-3xl max-w-lg w-full p-5 sm:p-7 max-h-[90vh] overflow-y-auto shadow-2xl space-y-5 border border-white/90 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+      <div className="glass-panel rounded-3xl max-w-lg w-full p-5 sm:p-7 max-h-[90vh] overflow-y-auto shadow-2xl space-y-5 border border-white/90 animate-in zoom-in-95 duration-200 bg-white">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
           <div className="flex items-center gap-3">
@@ -221,7 +235,7 @@ export default function SignaturePadModal({
 
         {/* Draw Mode */}
         {activeTab === "draw" && (
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             <div className="relative border-2 border-dashed border-slate-300 rounded-2xl bg-slate-50/80 overflow-hidden h-48 cursor-crosshair shadow-inner">
               <canvas
                 ref={canvasRef}
@@ -236,33 +250,72 @@ export default function SignaturePadModal({
               />
               {!hasDrawn && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none text-slate-400 text-xs font-medium space-y-1">
-                  <PenLine className="w-6 h-6 opacity-40 animate-pulse" />
+                  <PenLine className="w-6 h-6 opacity-40 animate-pulse text-[#0F2962]" />
                   <span>Sign your name here with mouse, trackpad, or finger</span>
                 </div>
               )}
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+            {/* Controls Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600 pt-1">
+              {/* Color Presets */}
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold text-slate-600">Ink Color:</span>
                 <button
                   type="button"
                   onClick={() => setPenColor("#0F2962")}
-                  className={`w-5 h-5 rounded-full bg-[#0F2962] border-2 transition ${penColor === "#0F2962" ? "border-amber-400 scale-110" : "border-white"}`}
-                  title="FAITH Navy"
+                  className={`w-5 h-5 rounded-full bg-[#0F2962] border-2 transition ${penColor === "#0F2962" ? "border-amber-400 scale-110 shadow-xs" : "border-white"}`}
+                  title="FAITH Navy (#0F2962)"
                 />
                 <button
                   type="button"
-                  onClick={() => setPenColor("#000000")}
-                  className={`w-5 h-5 rounded-full bg-black border-2 transition ${penColor === "#000000" ? "border-amber-400 scale-110" : "border-white"}`}
-                  title="Black"
+                  onClick={() => setPenColor("#111827")}
+                  className={`w-5 h-5 rounded-full bg-[#111827] border-2 transition ${penColor === "#111827" ? "border-amber-400 scale-110 shadow-xs" : "border-white"}`}
+                  title="Executive Black (#111827)"
                 />
+                <button
+                  type="button"
+                  onClick={() => setPenColor("#1E40AF")}
+                  className={`w-5 h-5 rounded-full bg-[#1E40AF] border-2 transition ${penColor === "#1E40AF" ? "border-amber-400 scale-110 shadow-xs" : "border-white"}`}
+                  title="Royal Blue (#1E40AF)"
+                />
+                <button
+                  type="button"
+                  onClick={() => setPenColor("#D97706")}
+                  className={`w-5 h-5 rounded-full bg-[#D97706] border-2 transition ${penColor === "#D97706" ? "border-amber-400 scale-110 shadow-xs" : "border-white"}`}
+                  title="Seal Amber (#D97706)"
+                />
+              </div>
+
+              {/* Stroke Width Toggle */}
+              <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+                <button
+                  type="button"
+                  onClick={() => setStrokeWidth(1.5)}
+                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${strokeWidth === 1.5 ? "bg-white text-slate-900 shadow-xs" : "text-slate-500"}`}
+                >
+                  Fine
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStrokeWidth(2.5)}
+                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${strokeWidth === 2.5 ? "bg-white text-slate-900 shadow-xs" : "text-slate-500"}`}
+                >
+                  Normal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStrokeWidth(4)}
+                  className={`px-2 py-0.5 rounded-lg text-[10px] font-bold transition ${strokeWidth === 4 ? "bg-white text-slate-900 shadow-xs" : "text-slate-500"}`}
+                >
+                  Bold
+                </button>
               </div>
 
               <button
                 type="button"
                 onClick={clearCanvas}
-                className="inline-flex items-center gap-1 text-slate-600 hover:text-red-600 font-bold transition cursor-pointer"
+                className="inline-flex items-center gap-1 text-slate-600 hover:text-red-600 font-bold transition cursor-pointer ml-auto"
               >
                 <Eraser className="w-3.5 h-3.5" />
                 <span>Clear</span>

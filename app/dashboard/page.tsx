@@ -155,6 +155,10 @@ export default async function DashboardPage() {
   const slaOnTimeRate = stats.total > 0 ? Math.round(((stats.total - stats.escalated) / stats.total) * 100) : 100;
   const sha256Rate = totalVersionsCount > 0 ? Math.round((verifiedVersionsCount / totalVersionsCount) * 100) : 100;
 
+  const currentHour = (new Date().getUTCHours() + 8) % 24;
+  const timeOfDayGreeting =
+    currentHour < 12 ? "Good morning" : currentHour < 18 ? "Good afternoon" : "Good evening";
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
       {/* Main Welcome Hero Banner */}
@@ -188,7 +192,7 @@ export default async function DashboardPage() {
               </div>
 
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
-                Welcome, {user.firstName}
+                {timeOfDayGreeting}, {user.firstName}
               </h1>
               <p className="text-xs sm:text-sm text-slate-600 max-w-xl leading-relaxed font-medium">
                 {user.role === "DIRECTOR" || user.role === "ADMIN"
