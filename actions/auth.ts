@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/audit";
 import { queueNotification } from "@/lib/notifications";
-import { INSTITUTION_EMAIL_DOMAIN, SEED_UNITS } from "@/lib/constants";
+import { INSTITUTION_EMAIL_DOMAIN } from "@/lib/constants";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -46,8 +46,8 @@ export async function registerEmployee(input: RegisterInput): Promise<{
   }
 
   try {
-    // 3. Robust Unit Resolution (by ID, Code, or fallback placeholder)
-    let unit = await prisma.unit.findFirst({
+    // 3. Unit Resolution directly from live database
+    const unit = await prisma.unit.findFirst({
       where: {
         OR: [
           { id: input.unitId },
@@ -57,27 +57,10 @@ export async function registerEmployee(input: RegisterInput): Promise<{
       },
     });
 
-    // If submitted from a stale client cache with "placeholder-unit-X"
-    if (!unit && input.unitId.startsWith("placeholder-unit-")) {
-      const idx = parseInt(input.unitId.replace("placeholder-unit-", ""), 10) - 1;
-      const targetCode = SEED_UNITS[idx]?.code || SEED_UNITS[0].code;
-      unit = await prisma.unit.findUnique({
-        where: { code: targetCode },
-      });
-    }
-
-    // Default to first active unit if still not resolved
-    if (!unit) {
-      unit = await prisma.unit.findFirst({
-        where: { isActive: true },
-        orderBy: { name: "asc" },
-      });
-    }
-
     if (!unit) {
       return {
         success: false,
-        error: "No active department units found in system.",
+        error: "Selected department unit does not exist or is inactive.",
       };
     }
 

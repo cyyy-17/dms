@@ -47,7 +47,7 @@ export default function LandingFooter({ unitCount }: LandingFooterProps) {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
               <span>
-                {unitCount ? `${unitCount} SAS Units Online` : "7 Department Units"} • Zero-Trust Perimeter Active • RA 10173 Certified
+                {unitCount} SAS Units Configured • Zero-Trust Perimeter Active • RA 10173 Certified
               </span>
             </div>
           </div>

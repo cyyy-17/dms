@@ -126,7 +126,7 @@ export default function LandingHeroInteractive({
             <div className="pt-8 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
               <div className="stat-kpi-card p-3 rounded-2xl bg-slate-900/50 border border-slate-800/60">
                 <span className="text-2xl sm:text-3xl font-black text-white font-mono block">
-                  {unitCount || 7}
+                  {unitCount}
                 </span>
                 <span className="text-[11px] text-slate-400 font-medium">Department Units</span>
               </div>
