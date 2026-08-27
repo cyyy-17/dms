@@ -50,7 +50,9 @@ async function createSampleSignatoryAccounts() {
       email: "dennis.ramos@firstasia.edu.ph",
       password: "Password123!",
       firstName: "Dennis",
+      middleName: "R.",
       lastName: "Ramos",
+      suffix: null,
       employeeId: "EMP-COORD-002",
       role: UserRole.COORDINATOR,
       unitId: aseanUnit.id,
@@ -61,7 +63,9 @@ async function createSampleSignatoryAccounts() {
       email: "janine.javier@firstasia.edu.ph",
       password: "Password123!",
       firstName: "Janine Mae",
+      middleName: "A.",
       lastName: "Javier",
+      suffix: null,
       employeeId: "EMP-COORD-003",
       role: UserRole.COORDINATOR,
       unitId: programsUnit.id,
@@ -72,7 +76,9 @@ async function createSampleSignatoryAccounts() {
       email: "aljon.tolentino@firstasia.edu.ph",
       password: "Password123!",
       firstName: "Aljon",
+      middleName: "M.",
       lastName: "Tolentino",
+      suffix: "PhD",
       employeeId: "EMP-DIR-001",
       role: UserRole.DIRECTOR,
       unitId: generalUnit?.id || aseanUnit.id,
@@ -83,7 +89,9 @@ async function createSampleSignatoryAccounts() {
       email: "emmanuel.sator@firstasia.edu.ph",
       password: "Password123!",
       firstName: "Emmanuel",
+      middleName: "S.",
       lastName: "Sator",
+      suffix: null,
       employeeId: "EMP-SVP-001",
       role: UserRole.DIRECTOR,
       unitId: generalUnit?.id || aseanUnit.id,
@@ -94,7 +102,7 @@ async function createSampleSignatoryAccounts() {
 
   for (const acc of accounts) {
     console.log(`\n-------------------------------------------------`);
-    console.log(`Provisioning: ${acc.firstName} ${acc.lastName} (${acc.role})...`);
+    console.log(`Provisioning: ${acc.firstName} ${acc.middleName ? acc.middleName + " " : ""}${acc.lastName} (${acc.role})...`);
 
     let authUserId: string;
 
@@ -103,14 +111,17 @@ async function createSampleSignatoryAccounts() {
     const existingAuthUser = listUsers?.users?.find((u) => u.email?.toLowerCase() === acc.email.toLowerCase());
 
     if (existingAuthUser) {
-      console.log(`  Supabase Auth user exists (${existingAuthUser.id}). Updating password...`);
+      console.log(`  Supabase Auth user exists (${existingAuthUser.id}). Updating password & metadata...`);
       authUserId = existingAuthUser.id;
       await supabaseAdmin.auth.admin.updateUserById(authUserId, {
         password: acc.password,
         email_confirm: true,
         user_metadata: {
           firstName: acc.firstName,
+          middleName: acc.middleName,
           lastName: acc.lastName,
+          suffix: acc.suffix,
+          title: acc.title,
         },
       });
     } else {
@@ -121,7 +132,10 @@ async function createSampleSignatoryAccounts() {
         email_confirm: true,
         user_metadata: {
           firstName: acc.firstName,
+          middleName: acc.middleName,
           lastName: acc.lastName,
+          suffix: acc.suffix,
+          title: acc.title,
         },
       });
 
@@ -138,7 +152,10 @@ async function createSampleSignatoryAccounts() {
       update: {
         id: authUserId,
         firstName: acc.firstName,
+        middleName: acc.middleName,
         lastName: acc.lastName,
+        suffix: acc.suffix,
+        title: acc.title,
         employeeId: acc.employeeId,
         role: acc.role,
         status: UserStatus.ACTIVE,
@@ -149,7 +166,10 @@ async function createSampleSignatoryAccounts() {
         id: authUserId,
         email: acc.email,
         firstName: acc.firstName,
+        middleName: acc.middleName,
         lastName: acc.lastName,
+        suffix: acc.suffix,
+        title: acc.title,
         employeeId: acc.employeeId,
         role: acc.role,
         status: UserStatus.ACTIVE,
@@ -159,7 +179,7 @@ async function createSampleSignatoryAccounts() {
     });
 
     console.log(`✓ Provisioned & Activated successfully!`);
-    console.log(`  Name: ${userRecord.firstName} ${userRecord.lastName}`);
+    console.log(`  Full Name: ${userRecord.firstName} ${userRecord.middleName ? userRecord.middleName + " " : ""}${userRecord.lastName}${userRecord.suffix ? " " + userRecord.suffix : ""}`);
     console.log(`  Email: ${acc.email}`);
     console.log(`  Password: ${acc.password}`);
     console.log(`  Role: ${acc.role}`);

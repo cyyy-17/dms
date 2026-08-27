@@ -368,7 +368,10 @@ export async function getSignedSignatureUrlAction(storagePath: string): Promise<
  */
 export async function updateUserProfileDetailsAction(input: {
   firstName: string;
+  middleName?: string;
   lastName: string;
+  suffix?: string;
+  title?: string;
   employeeId?: string;
 }): Promise<{
   success: boolean;
@@ -380,7 +383,10 @@ export async function updateUserProfileDetailsAction(input: {
   }
 
   const cleanFirstName = input.firstName.trim();
+  const cleanMiddleName = input.middleName?.trim() || null;
   const cleanLastName = input.lastName.trim();
+  const cleanSuffix = input.suffix?.trim() || null;
+  const cleanTitle = input.title?.trim() || null;
   const cleanEmployeeId = input.employeeId?.trim() || null;
 
   if (!cleanFirstName || !cleanLastName) {
@@ -406,7 +412,10 @@ export async function updateUserProfileDetailsAction(input: {
         where: { id: currentUser.id },
         data: {
           firstName: cleanFirstName,
+          middleName: cleanMiddleName,
           lastName: cleanLastName,
+          suffix: cleanSuffix,
+          title: cleanTitle,
           employeeId: cleanEmployeeId,
         },
       });
@@ -416,7 +425,10 @@ export async function updateUserProfileDetailsAction(input: {
         await supabaseAdmin.auth.admin.updateUserById(currentUser.id, {
           user_metadata: {
             firstName: cleanFirstName,
+            middleName: cleanMiddleName,
             lastName: cleanLastName,
+            suffix: cleanSuffix,
+            title: cleanTitle,
           },
         });
       } catch {
@@ -432,7 +444,10 @@ export async function updateUserProfileDetailsAction(input: {
         details: {
           actionType: "PROFILE_DETAILS_UPDATED",
           firstName: cleanFirstName,
+          middleName: cleanMiddleName,
           lastName: cleanLastName,
+          suffix: cleanSuffix,
+          title: cleanTitle,
           employeeId: cleanEmployeeId,
         },
       });

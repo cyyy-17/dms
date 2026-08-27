@@ -30,7 +30,10 @@ interface ProfileClientProps {
     id: string;
     email: string;
     firstName: string;
+    middleName?: string | null;
     lastName: string;
+    suffix?: string | null;
+    title?: string | null;
     employeeId?: string | null;
     role: string;
     unitName: string | null;
@@ -47,7 +50,10 @@ export default function ProfileClient({ user }: ProfileClientProps) {
 
   // Profile Details State
   const [firstName, setFirstName] = useState(user.firstName);
+  const [middleName, setMiddleName] = useState(user.middleName || "");
   const [lastName, setLastName] = useState(user.lastName);
+  const [suffix, setSuffix] = useState(user.suffix || "");
+  const [title, setTitle] = useState(user.title || "");
   const [employeeId, setEmployeeId] = useState(user.employeeId || "");
   const [isSavingDetails, setIsSavingDetails] = useState(false);
   const [detailsSuccess, setDetailsSuccess] = useState<string | null>(null);
@@ -99,7 +105,10 @@ export default function ProfileClient({ user }: ProfileClientProps) {
     try {
       const res = await updateUserProfileDetailsAction({
         firstName,
+        middleName: middleName.trim() || undefined,
         lastName,
+        suffix: suffix.trim() || undefined,
+        title: title.trim() || undefined,
         employeeId: employeeId.trim() || undefined,
       });
 
@@ -148,7 +157,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         setPasswordSuccess("Password updated successfully! Logging you out across all sessions...");
         setTimeout(() => {
           router.push("/login?reason=password_changed");
-        }, 1500);
+        }, 1200);
       }
     } catch {
       setPasswordError("A network error occurred while updating your password.");
@@ -158,8 +167,8 @@ export default function ProfileClient({ user }: ProfileClientProps) {
 
   return (
     <div className="space-y-6">
-      {/* Navigation Pill Tabs */}
-      <div className="flex flex-wrap items-center gap-2 p-1.5 rounded-2xl bg-slate-100/90 border border-slate-200/80">
+      {/* Navigation Tabs */}
+      <div className="flex flex-wrap p-1.5 rounded-2xl bg-slate-200/70 border border-slate-300/60 gap-1 shadow-inner">
         <button
           type="button"
           onClick={() => setActiveTab("details")}
@@ -206,7 +215,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
           <div>
             <h2 className="text-base font-black text-slate-900">Personal & Employee Details</h2>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Update your institutional identity records and employee ID designation.
+              Update your institutional identity records, middle initial, and designation.
             </p>
           </div>
 
@@ -225,7 +234,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
           )}
 
           <form onSubmit={handleSaveDetails} className="space-y-4">
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid sm:grid-cols-3 gap-3.5">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">First Name</label>
                 <input
@@ -238,12 +247,47 @@ export default function ProfileClient({ user }: ProfileClientProps) {
               </div>
 
               <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Middle Initial / Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. S. or Santos"
+                  value={middleName}
+                  onChange={(e) => setMiddleName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                />
+              </div>
+
+              <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">Last Name</label>
                 <input
                   type="text"
                   required
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                />
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Suffix / Degree (Optional)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. PhD, CPA, Jr., III"
+                  value={suffix}
+                  onChange={(e) => setSuffix(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">Official Position / Title</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Director, Student and Alumni Services"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                 />
               </div>

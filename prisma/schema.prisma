@@ -126,7 +126,10 @@ model User {
   id            String     @id @db.Uuid // Matches Supabase Auth uid (UUIDv4)
   email         String     @unique @db.VarChar(255) // Must end with @firstasia.edu.ph
   firstName     String     @db.VarChar(64)
+  middleName    String?    @db.VarChar(64) // Middle Name or Middle Initial (e.g. "S.", "M.", "R.", "A.")
   lastName      String     @db.VarChar(64)
+  suffix        String?    @db.VarChar(32) // Suffix / Degree (e.g. "PhD", "Jr.", "III", "CPA")
+  title         String?    @db.VarChar(128) // Professional Title / Honorific / Designation
   employeeId    String?    @unique @db.VarChar(32) // Institutional ID number
   role          UserRole   @default(STAFF)
   status        UserStatus @default(PENDING_APPROVAL)

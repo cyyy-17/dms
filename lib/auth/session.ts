@@ -6,7 +6,10 @@ export interface AuthenticatedUser {
   id: string;
   email: string;
   firstName: string;
+  middleName?: string | null;
   lastName: string;
+  suffix?: string | null;
+  title?: string | null;
   fullName: string;
   employeeId?: string | null;
   role: UserRole;
@@ -49,12 +52,19 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> 
       return null;
     }
 
+    const middlePart = profile.middleName ? ` ${profile.middleName}` : "";
+    const suffixPart = profile.suffix ? ` ${profile.suffix}` : "";
+    const computedFullName = `${profile.firstName}${middlePart} ${profile.lastName}${suffixPart}`.replace(/\s+/g, " ").trim();
+
     return {
       id: profile.id,
       email: profile.email,
       firstName: profile.firstName,
+      middleName: profile.middleName,
       lastName: profile.lastName,
-      fullName: `${profile.firstName} ${profile.lastName}`,
+      suffix: profile.suffix,
+      title: profile.title,
+      fullName: computedFullName || `${profile.firstName} ${profile.lastName}`,
       employeeId: profile.employeeId || null,
       role: profile.role,
       status: profile.status,
