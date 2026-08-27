@@ -54,42 +54,42 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="rounded-3xl py-7 px-5 sm:py-8 sm:px-9 shadow-2xl bg-slate-900/85 border border-slate-800/90 backdrop-blur-2xl transition-all duration-300">
+    <div className="rounded-2xl sm:rounded-3xl py-5 px-5 sm:py-6 sm:px-8 shadow-2xl bg-slate-900/85 border border-slate-800/90 backdrop-blur-2xl transition-all duration-300">
       {reason === "password_changed" && (
-        <div className="mb-6 p-4 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 flex items-start gap-3 text-emerald-300 text-xs font-semibold shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
-          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
-          <span className="leading-relaxed">Your password has been changed successfully. Please sign in with your new credentials.</span>
+        <div className="mb-3.5 p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 flex items-start gap-2.5 text-emerald-300 text-xs font-semibold shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+          <span className="leading-tight">Password changed successfully. Please sign in with your new credentials.</span>
         </div>
       )}
 
       {reason === "session_timeout" && (
-        <div className="mb-6 p-4 rounded-2xl bg-amber-950/60 border border-amber-500/40 flex items-start gap-3 text-amber-300 text-xs font-semibold shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
-          <Clock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-          <span className="leading-relaxed">Your session expired due to inactivity. Please sign in again to continue.</span>
+        <div className="mb-3.5 p-3 rounded-xl bg-amber-950/60 border border-amber-500/40 flex items-start gap-2.5 text-amber-300 text-xs font-semibold shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
+          <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+          <span className="leading-tight">Session expired due to inactivity. Please sign in again.</span>
         </div>
       )}
 
       {error && (
-        <div className="mb-6 p-4 rounded-2xl bg-red-950/60 border border-red-500/40 flex items-start gap-3 text-red-300 text-xs font-semibold shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="mb-3.5 p-3 rounded-xl bg-red-950/60 border border-red-500/40 flex items-start gap-2.5 text-red-300 text-xs font-semibold shadow-sm animate-in fade-in slide-in-from-top-2 duration-200">
           <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-          <span className="leading-relaxed">{error}</span>
+          <span className="leading-tight">{error}</span>
         </div>
       )}
 
-      <div className="mb-6 p-3.5 rounded-2xl bg-blue-950/50 border border-blue-500/30 flex items-start gap-3 text-blue-200 text-xs shadow-xs">
+      <div className="mb-3.5 p-2.5 rounded-xl bg-blue-950/50 border border-blue-500/30 flex items-start gap-2.5 text-blue-200 text-xs shadow-xs">
         <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-        <div className="leading-relaxed">
-          <span className="font-bold text-white">Institutional Access Only:</span> Log in with your registered{" "}
-          <code className="font-mono text-amber-300 bg-blue-900/60 border border-blue-400/30 px-1.5 py-0.5 rounded-md font-bold text-[11px]">
+        <div className="leading-tight text-[11.5px]">
+          <span className="font-bold text-white">Institutional Access:</span> Sign in with official{" "}
+          <code className="font-mono text-amber-300 bg-blue-900/60 border border-blue-400/30 px-1 py-0.5 rounded font-bold text-[10.5px]">
             @firstasia.edu.ph
           </code>{" "}
-          credentials.
+          account.
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-3.5">
         <div>
-          <label className="block text-xs font-black text-slate-300 uppercase tracking-wider mb-2">
+          <label className="block text-[11px] font-black text-slate-300 uppercase tracking-wider mb-1.5">
             Institutional Email
           </label>
           <div className="relative rounded-xl shadow-xs">
@@ -102,14 +102,14 @@ export default function LoginForm() {
               placeholder="username@firstasia.edu.ph"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="block w-full pl-10 pr-3.5 py-3 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
+              className="block w-full pl-10 pr-3.5 py-2.5 text-xs sm:text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
             />
           </div>
         </div>
 
         <div>
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-xs font-black text-slate-300 uppercase tracking-wider">
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-[11px] font-black text-slate-300 uppercase tracking-wider">
               Password
             </label>
           </div>
@@ -123,7 +123,7 @@ export default function LoginForm() {
               placeholder="••••••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block w-full pl-10 pr-11 py-3 text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
+              className="block w-full pl-10 pr-11 py-2.5 text-xs sm:text-sm bg-slate-950/80 border border-slate-700/80 rounded-xl text-white placeholder:text-slate-500 focus:ring-2 focus:ring-amber-400/30 focus:border-amber-400 focus:bg-slate-950 transition-all shadow-inner"
             />
             <button
               type="button"
@@ -139,7 +139,7 @@ export default function LoginForm() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full py-3.5 px-4 rounded-xl bg-linear-to-r from-blue-700 via-[#0F2962] to-blue-800 hover:from-blue-600 hover:to-blue-700 text-white font-black text-xs shadow-lg shadow-blue-950/40 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2.5 disabled:opacity-60 hover:-translate-y-0.5 active:scale-98 cursor-pointer ring-1 ring-blue-400/40"
+          className="w-full py-3 px-4 rounded-xl bg-linear-to-r from-blue-700 via-[#0F2962] to-blue-800 hover:from-blue-600 hover:to-blue-700 text-white font-black text-xs shadow-lg shadow-blue-950/40 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60 hover:-translate-y-0.5 active:scale-98 cursor-pointer ring-1 ring-blue-400/40"
         >
           {isLoading ? (
             <>
@@ -155,7 +155,7 @@ export default function LoginForm() {
         </button>
       </form>
 
-      <div className="mt-7 pt-6 border-t border-slate-800/80 text-center">
+      <div className="mt-4 pt-3.5 border-t border-slate-800/80 text-center">
         <p className="text-xs text-slate-400 font-medium">
           Not yet registered in the system?{" "}
           <Link
