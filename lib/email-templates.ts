@@ -142,19 +142,28 @@ export function renderNotificationEmail(params: EmailRenderParams): RenderedEmai
       const comments = payload.comments ? String(payload.comments) : "No specific remarks provided.";
       const rejectionCount = payload.rejectionCount ? Number(payload.rejectionCount) : 1;
       const isEscalated = !!payload.isEscalated;
+      const reviewerName = payload.reviewerName ? String(payload.reviewerName) : null;
+      const reviewerRole = payload.reviewerRole ? String(payload.reviewerRole) : null;
 
-      badgeText = isEscalated ? "Revision Required • Escalated" : "Revision Required";
+      badgeText = isEscalated ? "Revision Required • Escalated to Director" : "Revision Required • Action Needed";
       badgeBg = "#D97706";
       badgeColor = "#FFFFFF";
 
       headline = "Document Returned for Revision";
-      leadText = `Your document was reviewed and returned with revision remarks. Please address the feedback and upload a new version.`;
+      leadText = reviewerName
+        ? `Your document submission was reviewed by ${escapeHtml(reviewerName)}${reviewerRole ? ` (${escapeHtml(reviewerRole)})` : ""} and returned with revision remarks. Please inspect the feedback below and upload a revised version (v2+).`
+        : `Your document submission was reviewed and returned with revision remarks. Please inspect the feedback below and upload a revised version (v2+).`;
 
       calloutHtml = `
-        <div style="margin: 20px 0; padding: 16px 20px; background-color: #FFFBEB; border-left: 4px solid #F59E0B; border-radius: 4px;">
-          <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #B45309;">Reviewer Remarks &amp; Action Items</p>
-          <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #78350F; font-style: italic;">&ldquo;${escapeHtml(comments)}&rdquo;</p>
-          ${isEscalated ? `<p style="margin: 10px 0 0 0; font-size: 12px; color: #92400E; font-weight: 600;">Note: This document has undergone ${rejectionCount} revision rounds and is tagged for Director visibility.</p>` : ""}
+        <div style="margin: 20px 0; padding: 18px 22px; background-color: #FFFBEB; border-left: 5px solid #F59E0B; border-radius: 6px;">
+          <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #B45309;">
+            Reviewer Remarks &amp; Required Adjustments
+          </p>
+          <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #78350F; font-style: italic; font-weight: 500;">
+            &ldquo;${escapeHtml(comments)}&rdquo;
+          </p>
+          ${reviewerName ? `<p style="margin: 8px 0 0 0; font-size: 11px; color: #92400E; font-weight: 700;">— Stated by ${escapeHtml(reviewerName)}${reviewerRole ? ` (${escapeHtml(reviewerRole)})` : ""}</p>` : ""}
+          ${isEscalated ? `<p style="margin: 12px 0 0 0; font-size: 11px; color: #DC2626; font-weight: 800; border-top: 1px dashed #FCD34D; pt: 8px;">⚠️ Escalation Notice: This document has undergone ${rejectionCount} revision rounds and has been flagged for Executive Director oversight.</p>` : ""}
         </div>
       `;
 
@@ -164,16 +173,26 @@ export function renderNotificationEmail(params: EmailRenderParams): RenderedEmai
             <td style="padding: 12px 18px; font-size: 13px; color: #64748B; border-bottom: 1px solid #E2E8F0; font-weight: 600; width: 35%;">Tracking Number</td>
             <td style="padding: 12px 18px; font-size: 13px; color: #0F172A; border-bottom: 1px solid #E2E8F0; font-weight: 700; font-family: monospace;">${escapeHtml(trackingNumber || "N/A")}</td>
           </tr>
+          ${title ? `
           <tr>
-            <td style="padding: 12px 18px; font-size: 13px; color: #64748B; font-weight: 600;">Revision Round</td>
-            <td style="padding: 12px 18px; font-size: 13px; color: #0F172A; font-weight: 600;">Attempt #${rejectionCount}</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #64748B; border-bottom: 1px solid #E2E8F0; font-weight: 600;">Document Title</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #0F172A; border-bottom: 1px solid #E2E8F0; font-weight: 600;">${escapeHtml(title)}</td>
+          </tr>` : ""}
+          ${reviewerName ? `
+          <tr>
+            <td style="padding: 12px 18px; font-size: 13px; color: #64748B; border-bottom: 1px solid #E2E8F0; font-weight: 600;">Returned By</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #0F172A; border-bottom: 1px solid #E2E8F0; font-weight: 600;">${escapeHtml(reviewerName)}${reviewerRole ? ` (${escapeHtml(reviewerRole)})` : ""}</td>
+          </tr>` : ""}
+          <tr>
+            <td style="padding: 12px 18px; font-size: 13px; color: #64748B; font-weight: 600;">Revision Cycle</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #D97706; font-weight: 700;">Revision Round #${rejectionCount}</td>
           </tr>
         </table>
       `;
 
-      ctaText = "Update & Resubmit Document";
+      ctaText = "Upload Revised Version (v2+)";
       ctaUrl = docId ? `${baseUrl}/dashboard/documents/${docId}` : `${baseUrl}/dashboard/documents`;
-      plainDetails = `Tracking Number: ${trackingNumber}\nRemarks: ${comments}\nRevision Round: #${rejectionCount}\nURL: ${ctaUrl}`;
+      plainDetails = `Tracking Number: ${trackingNumber}\nTitle: ${title || "N/A"}\nReturned By: ${reviewerName || "Reviewer"}\nRemarks: ${comments}\nRevision Round: #${rejectionCount}\nAction URL: ${ctaUrl}`;
       break;
     }
 
@@ -213,33 +232,52 @@ export function renderNotificationEmail(params: EmailRenderParams): RenderedEmai
 
     case "document-closed": {
       const comments = payload.comments ? String(payload.comments) : "No closing remarks provided.";
+      const closedByName = payload.closedByName ? String(payload.closedByName) : null;
+      const closedByRole = payload.closedByRole ? String(payload.closedByRole) : null;
 
-      badgeText = "Document Closed";
-      badgeBg = "#475569";
+      badgeText = "Terminally Closed & Rejected";
+      badgeBg = "#DC2626";
       badgeColor = "#FFFFFF";
 
       headline = "Document Terminated & Closed";
-      leadText = "The following document workflow has been terminated and permanently closed.";
+      leadText = closedByName
+        ? `The following document workflow has been terminally rejected and closed by ${escapeHtml(closedByName)}${closedByRole ? ` (${escapeHtml(closedByRole)})` : ""}.`
+        : "The following document workflow has been terminated and permanently closed.";
 
       calloutHtml = `
-        <div style="margin: 20px 0; padding: 16px 20px; background-color: #F1F5F9; border-left: 4px solid #64748B; border-radius: 4px;">
-          <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #475569;">Closing Reason</p>
-          <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #1E293B;">${escapeHtml(comments)}</p>
+        <div style="margin: 20px 0; padding: 18px 22px; background-color: #FEF2F2; border-left: 5px solid #DC2626; border-radius: 6px;">
+          <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #991B1B;">
+            Mandatory Cancellation Reason
+          </p>
+          <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #7F1D1D; font-weight: 600;">
+            &ldquo;${escapeHtml(comments)}&rdquo;
+          </p>
+          ${closedByName ? `<p style="margin: 8px 0 0 0; font-size: 11px; color: #991B1B; font-weight: 700;">— Closed by ${escapeHtml(closedByName)}${closedByRole ? ` (${escapeHtml(closedByRole)})` : ""}</p>` : ""}
         </div>
       `;
 
       bodyHtml = `
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin: 15px 0; border-collapse: collapse; background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 10px; overflow: hidden;">
           <tr>
-            <td style="padding: 12px 18px; font-size: 13px; color: #64748B; font-weight: 600; width: 35%;">Tracking Number</td>
-            <td style="padding: 12px 18px; font-size: 13px; color: #0F172A; font-weight: 700; font-family: monospace;">${escapeHtml(trackingNumber || "N/A")}</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #64748B; border-bottom: 1px solid #E2E8F0; font-weight: 600; width: 35%;">Tracking Number</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #0F172A; border-bottom: 1px solid #E2E8F0; font-weight: 700; font-family: monospace;">${escapeHtml(trackingNumber || "N/A")}</td>
           </tr>
+          ${title ? `
+          <tr>
+            <td style="padding: 12px 18px; font-size: 13px; color: #64748B; border-bottom: 1px solid #E2E8F0; font-weight: 600;">Document Title</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #0F172A; border-bottom: 1px solid #E2E8F0; font-weight: 600;">${escapeHtml(title)}</td>
+          </tr>` : ""}
+          ${closedByName ? `
+          <tr>
+            <td style="padding: 12px 18px; font-size: 13px; color: #64748B; font-weight: 600;">Closed By</td>
+            <td style="padding: 12px 18px; font-size: 13px; color: #DC2626; font-weight: 600;">${escapeHtml(closedByName)}${closedByRole ? ` (${escapeHtml(closedByRole)})` : ""}</td>
+          </tr>` : ""}
         </table>
       `;
 
-      ctaText = "View Record in System";
+      ctaText = "View Document Audit History";
       ctaUrl = docId ? `${baseUrl}/dashboard/documents/${docId}` : `${baseUrl}/dashboard/documents`;
-      plainDetails = `Tracking Number: ${trackingNumber}\nClosing Reason: ${comments}\nURL: ${ctaUrl}`;
+      plainDetails = `Tracking Number: ${trackingNumber}\nTitle: ${title || "N/A"}\nClosed By: ${closedByName || "Admin/Reviewer"}\nReason: ${comments}\nURL: ${ctaUrl}`;
       break;
     }
 

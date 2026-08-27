@@ -810,32 +810,52 @@ export default function DocumentDetailActions({
           document.status === DocumentStatus.REJECTED_RETURNED) &&
           isUploader && (
             <div className="space-y-4">
-              <p className="text-xs text-slate-600 leading-relaxed font-medium">
-                {document.status === DocumentStatus.REJECTED_RETURNED
-                  ? "This document was returned for rework. Upload a revised version (v2+) addressing reviewer feedback before resubmitting."
-                  : "This document is in Draft status. Submit when ready to begin the sequential approval pipeline."}
-              </p>
+              {document.status === DocumentStatus.REJECTED_RETURNED ? (
+                <div className="p-4 rounded-2xl bg-amber-50/90 border border-amber-300/80 space-y-2.5 shadow-2xs">
+                  <div className="flex items-center gap-2 text-xs font-black text-amber-950 uppercase tracking-wider">
+                    <RotateCcw className="w-4 h-4 text-amber-600" />
+                    <span>Rework Cycle Active</span>
+                  </div>
+                  <p className="text-xs text-amber-900 leading-relaxed font-medium">
+                    Review the revision remarks above, prepare your revised file, and click below to upload <strong>Version v{(document.currentVersion?.versionNumber || 1) + 1}</strong>.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowVersionModal(true)}
+                    className="w-full py-3 px-4 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-amber-300 text-xs font-black shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer ring-2 ring-blue-500/20"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span>Upload Revised PDF Version (v{(document.currentVersion?.versionNumber || 1) + 1})</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-600 leading-relaxed font-medium">
+                    This document is in Draft status. Submit when ready to begin the sequential approval pipeline.
+                  </p>
 
-              <div className="flex flex-wrap gap-3.5">
-                <button
-                  onClick={handleSubmitForReview}
-                  disabled={isLoading}
-                  className="px-5 py-3 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
-                >
-                  <Send className="w-4 h-4 text-amber-400" />
-                  <span>Submit for Sequential Review</span>
-                </button>
+                  <div className="flex flex-wrap gap-3.5">
+                    <button
+                      onClick={handleSubmitForReview}
+                      disabled={isLoading}
+                      className="px-5 py-3 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
+                    >
+                      <Send className="w-4 h-4 text-amber-400" />
+                      <span>Submit for Sequential Review</span>
+                    </button>
 
-                <button
-                  onClick={() => setShowVersionModal(true)}
-                  className="px-5 py-3 rounded-xl bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-bold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
-                >
-                  <Upload className="w-4 h-4 text-blue-600" />
-                  <span>
-                    Upload Revised Version (v{(document.currentVersion?.versionNumber || 1) + 1})
-                  </span>
-                </button>
-              </div>
+                    <button
+                      onClick={() => setShowVersionModal(true)}
+                      className="px-5 py-3 rounded-xl bg-white border border-slate-300 hover:border-slate-400 text-slate-800 text-xs font-bold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
+                    >
+                      <Upload className="w-4 h-4 text-blue-600" />
+                      <span>
+                        Upload Revised Version (v{(document.currentVersion?.versionNumber || 1) + 1})
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -382,6 +382,8 @@ export async function rejectReturnAction(input: RejectionInput): Promise<{
           trackingNumber: doc.trackingNumber,
           title: doc.title,
           comments: input.comments.trim(),
+          reviewerName: currentUser.fullName,
+          reviewerRole: currentUser.role,
           rejectionCount: newRejectionCount,
           isEscalated: isEscalatedNow,
         },
@@ -491,6 +493,8 @@ export async function rejectCloseAction(input: RejectionInput): Promise<{
           trackingNumber: doc.trackingNumber,
           title: doc.title,
           comments: input.comments.trim(),
+          closedByName: currentUser.fullName,
+          closedByRole: currentUser.role,
         },
       });
     });

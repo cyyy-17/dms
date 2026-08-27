@@ -21,6 +21,8 @@ import {
   Lock,
   Shield,
   Fingerprint,
+  RotateCcw,
+  XCircle,
 } from "lucide-react";
 import { DocumentStatus, ApprovalActionType, UserRole, UserStatus } from "@prisma/client";
 
@@ -319,6 +321,102 @@ export default async function DocumentDetailPage({ params }: PageProps) {
           );
         })()}
       </div>
+
+      {/* ⚠️ Prominent Originator Callout: Revision Feedback or Rejection Reason Banner */}
+      {(() => {
+        const latestRejectionAction = doc.approvalActions
+          .filter((a) => a.action === "REJECT_RETURN" || a.action === "REJECT_CLOSE")
+          .slice(-1)[0];
+
+        if (doc.status === DocumentStatus.REJECTED_RETURNED) {
+          return (
+            <div className="p-5 sm:p-6 rounded-3xl bg-linear-to-br from-amber-500/15 via-orange-500/10 to-amber-50 border-2 border-amber-400 shadow-md space-y-4 animate-in fade-in duration-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-200/80">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold shadow-sm shrink-0">
+                    <RotateCcw className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-black text-amber-950 uppercase tracking-wide">
+                        Action Required: Document Returned for Revision
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-amber-200 text-amber-900 text-[10px] font-black border border-amber-300">
+                        Revision Cycle #{doc.rejectionCount || 1}
+                      </span>
+                    </div>
+                    {latestRejectionAction && (
+                      <p className="text-xs text-amber-800 font-medium mt-0.5">
+                        Returned by <span className="font-bold">{latestRejectionAction.actor.firstName} {latestRejectionAction.actor.lastName}</span> ({getRoleLabel(latestRejectionAction.actorRole)}) on {formatHumanDateTime(latestRejectionAction.createdAt)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                {doc.isEscalated && (
+                  <span className="px-3 py-1 rounded-xl bg-red-100 text-red-800 text-xs font-black border border-red-200 flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
+                    ⚠️ Flagged for Director Mediation
+                  </span>
+                )}
+              </div>
+
+              {/* The Mandatory Remarks Quote Box */}
+              <div className="p-4 rounded-2xl bg-white/95 border border-amber-300/80 shadow-xs space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-900">
+                  <PenLine className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Reviewer Feedback &amp; Required Rework Instructions</span>
+                </div>
+                <p className="text-sm text-slate-900 font-medium leading-relaxed italic bg-amber-50/70 p-3.5 rounded-xl border border-amber-200">
+                  &ldquo;{latestRejectionAction?.comments || "Please address reviewer feedback and upload a revised version."}&rdquo;
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-900 font-medium pt-1">
+                <p className="leading-tight">
+                  💡 <strong>Next Step for Originator:</strong> Upload a revised PDF document (v2+) addressing the reviewer feedback above in the Workflow Actions panel on the right.
+                </p>
+              </div>
+            </div>
+          );
+        }
+
+        if (doc.status === DocumentStatus.REJECTED_CLOSED) {
+          return (
+            <div className="p-5 sm:p-6 rounded-3xl bg-linear-to-br from-rose-500/15 via-red-500/10 to-rose-50 border-2 border-rose-400 shadow-md space-y-4 animate-in fade-in duration-200">
+              <div className="flex items-center gap-3 pb-3 border-b border-rose-200/80">
+                <div className="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center font-bold shadow-sm shrink-0">
+                  <XCircle className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-black text-rose-950 uppercase tracking-wide">
+                      Document Terminated &amp; Closed
+                    </span>
+                    <span className="px-2 py-0.5 rounded-full bg-rose-200 text-rose-900 text-[10px] font-black border border-rose-300">
+                      Terminal Rejection
+                    </span>
+                  </div>
+                  {latestRejectionAction && (
+                    <p className="text-xs text-rose-800 font-medium mt-0.5">
+                      Terminally rejected by <span className="font-bold">{latestRejectionAction.actor.firstName} {latestRejectionAction.actor.lastName}</span> ({getRoleLabel(latestRejectionAction.actorRole)}) on {formatHumanDateTime(latestRejectionAction.createdAt)}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white/95 border border-rose-300/80 shadow-xs space-y-2">
+                <div className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-rose-900">
+                  <span>Stated Reason for Cancellation</span>
+                </div>
+                <p className="text-sm text-slate-900 font-medium leading-relaxed italic bg-rose-50/70 p-3.5 rounded-xl border border-rose-200">
+                  &ldquo;{latestRejectionAction?.comments || "Document workflow was permanently closed by reviewer."}&rdquo;
+                </p>
+              </div>
+            </div>
+          );
+        }
+
+        return null;
+      })()}
 
       {/* Grid: Details & Actions */}
       <div className="grid lg:grid-cols-12 gap-6">
