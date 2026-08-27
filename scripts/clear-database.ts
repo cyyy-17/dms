@@ -24,7 +24,6 @@ async function clearDatabase() {
         email: "admin@firstasia.edu.ph",
         firstName: "System",
         lastName: "Administrator",
-        title: "Super Administrator",
         role: "ADMIN",
         status: "ACTIVE",
         unitId: null,
