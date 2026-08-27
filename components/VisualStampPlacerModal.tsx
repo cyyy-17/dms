@@ -6,8 +6,6 @@ import {
   CheckCircle2,
   Crosshair,
   Layers,
-  ShieldCheck,
-  PenLine,
   Loader2,
   ZoomIn,
   ZoomOut,
@@ -15,6 +13,7 @@ import {
 } from "lucide-react";
 import { detectSignatoryPlacementAction } from "@/actions/approvals";
 import { getSignedDocumentUrlAction } from "@/actions/documents";
+import { getSignedSignatureUrlAction } from "@/actions/auth";
 
 export interface StampCoordinates {
   page: number; // 0-indexed page number
@@ -49,6 +48,7 @@ export default function VisualStampPlacerModal({
   const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [signatureImageUrl, setSignatureImageUrl] = useState<string | null>(null);
   const [isRenderingCanvas, setIsRenderingCanvas] = useState<boolean>(true);
   const [zoomScale, setZoomScale] = useState<number>(1);
 
@@ -69,11 +69,11 @@ export default function VisualStampPlacerModal({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Stamp Dimensions in PDF points
-  const STAMP_WIDTH = 190;
-  const STAMP_HEIGHT = 58;
+  // Stamp Dimensions in PDF points (Pure Signature)
+  const STAMP_WIDTH = 140;
+  const STAMP_HEIGHT = 48;
 
-  // Load document preview URL and set initial position
+  // Load document preview URL and user signature image
   useEffect(() => {
     if (!isOpen) return;
 
@@ -85,6 +85,17 @@ export default function VisualStampPlacerModal({
           if (!isMounted) return;
           if (res.success && res.signedUrl) {
             setPdfUrl(res.signedUrl);
+          }
+        })
+        .catch(() => {});
+    }
+
+    if (currentUser.signaturePath) {
+      getSignedSignatureUrlAction(currentUser.signaturePath)
+        .then((res) => {
+          if (!isMounted) return;
+          if (res.success && res.signedUrl) {
+            setSignatureImageUrl(res.signedUrl);
           }
         })
         .catch(() => {});
@@ -123,7 +134,7 @@ export default function VisualStampPlacerModal({
     return () => {
       isMounted = false;
     };
-  }, [isOpen, documentId, storagePath, initialCoordinates]);
+  }, [isOpen, documentId, storagePath, initialCoordinates, currentUser.signaturePath]);
 
   // High-Precision Pixel-Perfect PDF Canvas Rendering via pdfjs-dist
   useEffect(() => {
@@ -419,7 +430,7 @@ export default function VisualStampPlacerModal({
               </div>
             )}
 
-            {/* Live Interactive Stamp Box Overlay */}
+            {/* Live Interactive Pure Electronic Signature Overlay */}
             {currentPage === coords.page && (
               <div
                 style={{
@@ -428,38 +439,33 @@ export default function VisualStampPlacerModal({
                   width: `${widthPercent}%`,
                   height: `${heightPercent}%`,
                 }}
-                className="absolute z-20 rounded-lg border-2 border-blue-600 bg-blue-50/95 shadow-2xl p-1.5 flex flex-col justify-between cursor-move backdrop-blur-xs ring-4 ring-blue-500/30 animate-in zoom-in-90 transition-all"
+                className="absolute z-20 flex items-center justify-center cursor-move group select-none transition-all"
               >
-                {/* Stamp Header */}
-                <div className="flex items-center justify-between border-b border-blue-300 pb-0.5">
-                  <span className="text-[7px] font-black text-[#0F2962] tracking-tighter truncate">
-                    FAITH COLLEGES • SAS
-                  </span>
-                  <span className="text-[6.5px] font-black text-emerald-800 bg-emerald-100 px-1 py-0.2 rounded">
-                    AUTHENTICATED
-                  </span>
-                </div>
+                {/* Minimalist dashed positioning boundary */}
+                <div className="absolute inset-0 rounded-md border-2 border-dashed border-blue-600 bg-blue-500/10 group-hover:bg-blue-500/20 transition-all pointer-events-none ring-2 ring-blue-400/30" />
 
-                {/* Stamp Body */}
-                <div className="flex items-center justify-between gap-1 py-0.5 overflow-hidden">
-                  <div className="flex items-center gap-1 min-w-0">
-                    <PenLine className="w-3.5 h-3.5 text-[#0F2962] shrink-0" />
-                    <div className="truncate">
-                      <span className="text-[7.5px] font-black text-slate-900 block leading-tight truncate">
-                        {currentUser.fullName.toUpperCase()}
-                      </span>
-                      <span className="text-[6px] font-bold text-slate-500 block leading-none truncate">
-                        {currentUser.role}
-                      </span>
-                    </div>
+                {/* The Pure E-Signature Itself */}
+                {signatureImageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={signatureImageUrl}
+                    alt="Electronic Signature"
+                    className="w-full h-full object-contain pointer-events-none drop-shadow-md select-none p-0.5"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-1 text-center pointer-events-none select-none">
+                    <span className="font-serif italic text-base text-[#0F2962] font-black tracking-wide leading-tight">
+                      {currentUser.fullName}
+                    </span>
+                    <span className="text-[7px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-0.5">
+                      Signature Placeholder
+                    </span>
                   </div>
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                </div>
+                )}
 
-                {/* Stamp Footer */}
-                <div className="text-[6px] font-mono text-slate-500 flex items-center justify-between border-t border-blue-200/80 pt-0.5">
-                  <span>PST DATE STAMP</span>
-                  <span className="text-emerald-700 font-bold">✓ RA 10173</span>
+                {/* Floating Alignment Handle Tag */}
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-[#0F2962] text-amber-300 text-[8px] font-bold rounded-md shadow-md opacity-90 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none flex items-center gap-1">
+                  <span>✍️ Electronic Signature</span>
                 </div>
               </div>
             )}
