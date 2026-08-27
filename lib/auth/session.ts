@@ -43,14 +43,20 @@ export async function getAuthenticatedUser(): Promise<AuthenticatedUser | null> 
       return null;
     }
 
-    const profile = await prisma.user.findUnique({
+    const rawProfile = await prisma.user.findUnique({
       where: { id: authUser.id },
       include: { unit: true },
     });
 
-    if (!profile || profile.status !== "ACTIVE") {
+    if (!rawProfile || rawProfile.status !== "ACTIVE") {
       return null;
     }
+
+    const profile = rawProfile as typeof rawProfile & {
+      middleName?: string | null;
+      suffix?: string | null;
+      title?: string | null;
+    };
 
     const middlePart = profile.middleName ? ` ${profile.middleName}` : "";
     const suffixPart = profile.suffix ? ` ${profile.suffix}` : "";

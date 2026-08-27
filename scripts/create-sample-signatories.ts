@@ -147,7 +147,7 @@ async function createSampleSignatoryAccounts() {
     }
 
     // 2. Prisma Database Upsert
-    const userRecord = await prisma.user.upsert({
+    const userRecord = (await prisma.user.upsert({
       where: { email: acc.email },
       update: {
         id: authUserId,
@@ -161,7 +161,7 @@ async function createSampleSignatoryAccounts() {
         status: UserStatus.ACTIVE,
         unitId: acc.unitId,
         approvedAt: new Date(),
-      },
+      } as Parameters<typeof prisma.user.upsert>[0]["update"],
       create: {
         id: authUserId,
         email: acc.email,
@@ -175,8 +175,13 @@ async function createSampleSignatoryAccounts() {
         status: UserStatus.ACTIVE,
         unitId: acc.unitId,
         approvedAt: new Date(),
-      },
-    });
+      } as Parameters<typeof prisma.user.upsert>[0]["create"],
+    })) as {
+      firstName: string;
+      middleName?: string | null;
+      lastName: string;
+      suffix?: string | null;
+    };
 
     console.log(`✓ Provisioned & Activated successfully!`);
     console.log(`  Full Name: ${userRecord.firstName} ${userRecord.middleName ? userRecord.middleName + " " : ""}${userRecord.lastName}${userRecord.suffix ? " " + userRecord.suffix : ""}`);

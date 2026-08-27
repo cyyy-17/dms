@@ -417,7 +417,7 @@ export async function updateUserProfileDetailsAction(input: {
           suffix: cleanSuffix,
           title: cleanTitle,
           employeeId: cleanEmployeeId,
-        },
+        } as Parameters<typeof prisma.user.update>[0]["data"],
       });
 
       // Update Supabase Auth user metadata
