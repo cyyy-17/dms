@@ -32,7 +32,7 @@ export default function LoginPage() {
       {/* Main Dual-Column Showcase Container */}
       <div className="max-w-6xl mx-auto w-full grid lg:grid-cols-12 gap-5 lg:gap-8 items-center flex-1 min-h-0 relative z-10 my-auto">
         {/* Left Column: Campus Heritage & Values Banner (Visible on lg screens) */}
-        <div className="lg:col-span-6 hidden lg:flex flex-col justify-between h-full max-h-[500px] space-y-3">
+        <div className="lg:col-span-6 hidden lg:flex flex-col justify-between h-full max-h-125 space-y-3">
           {/* Panoramic Campus Hero Card */}
           <div className="relative rounded-2xl overflow-hidden border border-slate-800/90 shadow-xl bg-slate-900 flex-1 min-h-0 flex flex-col justify-between p-5 group">
             {/* Campus Background Image */}
