@@ -140,7 +140,8 @@ export async function registerEmployee(input: RegisterInput): Promise<{
         unitId: unit.id,
         role: "STAFF", // Defaults to STAFF pending Admin review
         status: "PENDING_APPROVAL",
-      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
     });
 
     // 7. Notify All Active Admins via Background Notification Queue

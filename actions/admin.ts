@@ -80,7 +80,8 @@ export async function createUserDirectAction(input: CreateUserDirectInput): Prom
       return { success: false, error: authError?.message || "Failed to create auth identity." };
     }
 
-    const user = await prisma.user.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user: any = await prisma.user.create({
       data: {
         id: authUser.user.id,
         email: normalizedEmail,
@@ -95,7 +96,8 @@ export async function createUserDirectAction(input: CreateUserDirectInput): Prom
         status: UserStatus.ACTIVE,
         approvedById: currentUser.id,
         approvedAt: new Date(),
-      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
       include: { unit: true },
     });
 
