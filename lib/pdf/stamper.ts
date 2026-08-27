@@ -1,4 +1,4 @@
-import { PDFDocument, PDFPage, PDFRawStream, PDFRef, PDFArray, PDFName } from "pdf-lib";
+import { PDFDocument, PDFPage, PDFRawStream, PDFRef, PDFArray, PDFName, rgb } from "pdf-lib";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { STORAGE_BUCKETS } from "@/lib/constants";
 import crypto from "crypto";
@@ -664,7 +664,17 @@ export async function stampPdfWithSignature(
       posY = 35;
     }
 
-    // Draw ONLY the pure transparent electronic signature directly on the page
+    // 1. Draw solid opaque white background knockout behind the signature
+    targetPage.drawRectangle({
+      x: posX,
+      y: posY,
+      width: sigWidth,
+      height: sigHeight,
+      color: rgb(1, 1, 1),
+      opacity: 1.0,
+    });
+
+    // 2. Draw the electronic signature with 100% solid opacity
     targetPage.drawImage(embeddedImage, {
       x: posX,
       y: posY,

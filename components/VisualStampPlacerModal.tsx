@@ -441,8 +441,8 @@ export default function VisualStampPlacerModal({
                 }}
                 className="absolute z-20 flex items-center justify-center cursor-move group select-none transition-all"
               >
-                {/* Minimalist dashed positioning boundary */}
-                <div className="absolute inset-0 rounded-md border-2 border-dashed border-blue-600 bg-blue-500/10 group-hover:bg-blue-500/20 transition-all pointer-events-none ring-2 ring-blue-400/30" />
+                {/* Solid white background container with clear border and ring */}
+                <div className="absolute inset-0 rounded-md border-2 border-blue-600 bg-white shadow-xl pointer-events-none ring-2 ring-blue-500/30" />
 
                 {/* The Pure E-Signature Itself */}
                 {signatureImageUrl ? (
@@ -450,15 +450,15 @@ export default function VisualStampPlacerModal({
                   <img
                     src={signatureImageUrl}
                     alt="Electronic Signature"
-                    className="w-full h-full object-contain pointer-events-none drop-shadow-md select-none p-0.5"
+                    className="relative z-10 w-full h-full object-contain pointer-events-none select-none p-1"
                   />
                 ) : (
-                  <div className="flex flex-col items-center justify-center p-1 text-center pointer-events-none select-none">
+                  <div className="relative z-10 flex flex-col items-center justify-center p-1 text-center pointer-events-none select-none bg-white">
                     <span className="font-serif italic text-base text-[#0F2962] font-black tracking-wide leading-tight">
                       {currentUser.fullName}
                     </span>
                     <span className="text-[7px] font-bold text-slate-500 uppercase tracking-widest leading-none mt-0.5">
-                      Signature Placeholder
+                      Signature Placement
                     </span>
                   </div>
                 )}
