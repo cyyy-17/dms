@@ -29,6 +29,17 @@ export const metadata: Metadata = {
     "Smart Anchor E-Signatures",
     "Data Privacy Act RA 10173",
   ],
+  icons: {
+    icon: [
+      { url: "/images/faith-crest.png", sizes: "any" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/images/faith-crest.png",
+    apple: [
+      { url: "/images/faith-crest.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
 };
 
 export default function RootLayout({
