@@ -98,7 +98,7 @@ export default function LandingHeroInteractive({
 
             {/* Subheading */}
             <p className="text-sm sm:text-lg text-slate-300 leading-relaxed max-w-2xl font-normal">
-              Engineered exclusively for the <strong>Student & Alumni Services (SAS)</strong> department at First Asia Institute of Technology and Humanities. Delivering zero-overwrite version trees, cryptographic SHA-256 lineage, Smart Anchor vector e-signatures, and automated executive escalation.
+              Engineered exclusively for the <strong>Student & Alumni Services (SAS)</strong> department at First Asia Institute of Technology and Humanities. Delivering zero-overwrite version trees, cryptographic SHA-256 integrity release vaults, precision visual coordinate e-signatures, and automated executive escalation.
             </p>
 
             {/* Action Buttons Matrix */}
@@ -132,28 +132,28 @@ export default function LandingHeroInteractive({
             <div className="pt-8 border-t border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
               <div className="stat-kpi-card p-3 rounded-2xl bg-slate-900/50 border border-slate-800/60">
                 <span className="text-2xl sm:text-3xl font-black text-white font-mono block">
-                  {unitCount}
+                  {unitCount || 7}
                 </span>
                 <span className="text-[11px] text-slate-400 font-medium">SAS Units Integrated</span>
               </div>
               <div className="stat-kpi-card p-3 rounded-2xl bg-slate-900/50 border border-slate-800/60">
                 <span className="text-2xl sm:text-3xl font-black text-amber-400 font-mono block">
-                  {liveStats && liveStats.totalDocuments > 0 ? `${liveStats.totalDocuments}` : "100%"}
+                  {liveStats && liveStats.totalDocuments > 0 ? liveStats.totalDocuments : "100%"}
                 </span>
                 <span className="text-[11px] text-slate-400 font-medium">
-                  {liveStats && liveStats.totalDocuments > 0 ? "Documents Sealed" : "SHA-256 Audited"}
+                  {liveStats && liveStats.totalDocuments > 0 ? "Documents Vaulted" : "SHA-256 Audited"}
                 </span>
               </div>
               <div className="stat-kpi-card p-3 rounded-2xl bg-slate-900/50 border border-slate-800/60">
                 <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono block">
-                  {liveStats && liveStats.totalVersions > 0 ? `${liveStats.totalVersions}` : "RA 10173"}
+                  {liveStats && liveStats.totalApproved > 0 ? liveStats.totalApproved : "RA 10173"}
                 </span>
                 <span className="text-[11px] text-slate-400 font-medium">
-                  {liveStats && liveStats.totalVersions > 0 ? "Lineage Versions" : "Data Privacy Certified"}
+                  {liveStats && liveStats.totalApproved > 0 ? "Approved Sign-Offs" : "Privacy Compliant"}
                 </span>
               </div>
               <div className="stat-kpi-card p-3 rounded-2xl bg-slate-900/50 border border-slate-800/60">
-                <span className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono block">&lt;24h</span>
+                <span className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono block">&lt; 24h</span>
                 <span className="text-[11px] text-slate-400 font-medium">Approval SLA Target</span>
               </div>
             </div>

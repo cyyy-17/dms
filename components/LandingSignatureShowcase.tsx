@@ -4,37 +4,52 @@ import {
   FileSignature,
   ShieldCheck,
   Lock,
-  Cpu,
   Layers,
   KeyRound,
   FileLock2,
+  Crosshair,
+  Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 
-export default function LandingSignatureShowcase() {
+interface LandingSignatureShowcaseProps {
+  liveStats?: {
+    totalDocuments: number;
+    totalVersions: number;
+    totalApproved: number;
+    totalUsers: number;
+    totalAuditLogs: number;
+    totalUnits: number;
+  };
+}
+
+export default function LandingSignatureShowcase({
+  liveStats,
+}: LandingSignatureShowcaseProps) {
   const architecturalFeatures = [
     {
-      icon: Cpu,
-      title: "Sub-Pixel Dynamic Coordinate Parsing",
-      desc: "Analyzes document geometry to locate signatory title blocks mathematically, eliminating manual drag-and-drop placement.",
-      badge: "Automated Placement",
+      icon: Crosshair,
+      title: "Interactive 1:1 Visual Coordinate Placer",
+      desc: "Signatories precisely position their electronic signature on the vector PDF canvas before approval, ensuring perfect document alignment across multi-page agreements.",
+      badge: "Sub-Pixel Precision",
     },
     {
       icon: Layers,
-      title: "Zero Margin & Pagination Drift",
-      desc: "Embeds vector signature paths directly into PDF content streams without altering line-height, bounding boxes, or page formatting.",
-      badge: "0px Layout Shift",
+      title: "Pure Solid Knockout E-Signature",
+      desc: "Draws an authentic, non-transparent signature image backed by a solid white knockout layer (opacity 1.0), preventing text bleed-through without clunky boxed frames.",
+      badge: "Pure Solid Ink",
     },
     {
       icon: KeyRound,
-      title: "Session-Bound Cryptographic Hashing",
-      desc: "Every electronic signature is cryptographically bound to the reviewer's authenticated institutional UID, IP hash, and audit timestamp.",
-      badge: "RA 10173 Compliant",
+      title: "Complete Official Credentials & Lineage",
+      desc: "Every stamp is bound to the signatory's official academic title, middle initial, suffix (e.g. Dr. Aljon M. Tolentino, PhD), verified institutional UID, and timestamp.",
+      badge: "Official Credentials",
     },
     {
       icon: FileLock2,
-      title: "Private Vault Storage & Tamper Seal",
-      desc: "Upon final executive sign-off, binaries are locked in private encrypted object storage with SHA-256 integrity verification.",
-      badge: "AES-256 Vault",
+      title: "Cryptographic SHA-256 Release Vault",
+      desc: "Upon final executive sign-off, binaries are locked in private encrypted object storage with a 1-click verifiable SHA-256 integrity release vault.",
+      badge: "SHA-256 Vault",
     },
   ];
 
@@ -50,10 +65,10 @@ export default function LandingSignatureShowcase() {
           <span>Proprietary E-Signature Engine</span>
         </div>
         <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-          Smart Anchor Cryptographic Stamping Architecture
+          Visual Coordinate Placer & Solid Knockout E-Signature Engine
         </h2>
         <p className="text-sm sm:text-base text-slate-300">
-          Engineered for institutional security. Replaces legacy scan-and-paste distortions with intelligent vector anchoring executed exclusively within authenticated staff sessions.
+          Engineered for institutional rigor. Combines interactive 1:1 vector placement, solid white knockout signature stamping, and instant cryptographic SHA-256 vault sealing.
         </p>
       </div>
 
@@ -90,50 +105,64 @@ export default function LandingSignatureShowcase() {
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 <span className="text-xs font-black text-white uppercase tracking-wider">
-                  Internal Signing Security Pipeline
+                  Interactive Stamping Preview
                 </span>
               </div>
               <span className="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                Zero-Public Access
+                100% Solid Knockout
               </span>
             </div>
 
-            {/* Visual Security Pipeline Nodes */}
-            <div className="space-y-3.5">
-              <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/90 space-y-1">
-                <div className="flex items-center justify-between text-xs font-bold text-white">
-                  <span>1. Authenticated Session Gate</span>
-                  <span className="text-emerald-400 font-mono text-[10px]">Verified</span>
+            {/* Interactive Vector Signature Card Mockup */}
+            <div className="p-4 rounded-2xl bg-white text-slate-900 shadow-xl border border-slate-200 space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                <div className="flex items-center gap-1.5 text-[10px] font-mono font-bold text-slate-500 uppercase">
+                  <Sparkles className="w-3 h-3 text-amber-500" />
+                  <span>Stamping Vector Canvas</span>
                 </div>
-                <p className="text-[11px] text-slate-400">
-                  Reviewer must authenticate via @firstasia.edu.ph institutional SSO.
-                </p>
+                <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-mono text-[9px] font-bold">
+                  ✓ Coordinates Set
+                </span>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/90 space-y-1">
-                <div className="flex items-center justify-between text-xs font-bold text-white">
-                  <span>2. Dynamic Anchor Computation</span>
-                  <span className="text-blue-400 font-mono text-[10px]">Sub-Pixel</span>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  Vector engine computes signatory bounding boxes without manual alignment.
+              {/* Realistic Document Context with Stamped Solid Signature */}
+              <div className="relative p-3 bg-slate-50 rounded-xl border border-slate-200 text-[11px] text-slate-600 space-y-2">
+                <p className="italic text-[10px] text-slate-400">
+                  &ldquo;...hereby endorsed and approved in accordance with Student & Alumni Services institutional standards.&rdquo;
                 </p>
+
+                {/* Stamped Signature Box (Solid White Knockout) */}
+                <div className="p-2.5 bg-white rounded-lg border border-blue-400 shadow-md ring-2 ring-blue-500/20 space-y-1">
+                  <div className="font-serif italic font-black text-blue-950 text-base tracking-wide flex items-center justify-between">
+                    <span>Aljon M. Tolentino</span>
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <div className="border-t border-slate-200 pt-1 flex items-center justify-between text-[10px]">
+                    <span className="font-bold text-slate-800">ALJON M. TOLENTINO, PhD</span>
+                    <span className="font-mono text-slate-400">Page 1 • (X: 380, Y: 520)</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/90 space-y-1">
-                <div className="flex items-center justify-between text-xs font-bold text-white">
-                  <span>3. Tamper-Evident SHA-256 Seal</span>
-                  <span className="text-amber-400 font-mono text-[10px]">Immutable</span>
-                </div>
-                <p className="text-[11px] text-slate-400">
-                  Signed document binary is stamped with cryptographic checksum & stored in private vault.
-                </p>
+              <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-1">
+                <span>SHA-256: d0dcb785767...</span>
+                <span className="text-emerald-700 font-bold">Verified Lock</span>
               </div>
             </div>
 
+            {/* Live Metrics Pill */}
+            {liveStats && liveStats.totalApproved > 0 && (
+              <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-300">
+                <span className="font-medium">Total Vaulted Documents:</span>
+                <span className="font-mono font-black text-emerald-400">
+                  {liveStats.totalApproved} / {liveStats.totalDocuments} Sealed
+                </span>
+              </div>
+            )}
+
             <div className="p-3.5 rounded-2xl bg-blue-950/40 border border-blue-500/30 flex items-center gap-2.5 text-xs text-blue-300">
               <Lock className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>All signing pads and document functions are restricted exclusively inside staff accounts.</span>
+              <span>All signing pads and visual stamp placement modals run exclusively inside authenticated sessions.</span>
             </div>
           </div>
         </div>

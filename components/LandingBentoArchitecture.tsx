@@ -9,7 +9,20 @@ import {
   Award,
 } from "lucide-react";
 
-export default function LandingBentoArchitecture() {
+interface LandingBentoArchitectureProps {
+  liveStats?: {
+    totalDocuments: number;
+    totalVersions: number;
+    totalApproved: number;
+    totalUsers: number;
+    totalAuditLogs: number;
+    totalUnits: number;
+  };
+}
+
+export default function LandingBentoArchitecture({
+  liveStats,
+}: LandingBentoArchitectureProps) {
   return (
     <section id="architecture" className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
       {/* Background glow */}
@@ -39,7 +52,7 @@ export default function LandingBentoArchitecture() {
                 <GitBranch className="w-6 h-6" />
               </div>
               <span className="text-[11px] font-mono font-bold text-amber-400 bg-amber-950/40 border border-amber-500/30 px-3 py-1 rounded-full">
-                Immutable Lineage
+                {liveStats && liveStats.totalVersions > 0 ? `${liveStats.totalVersions} Version Trees Active` : "Immutable Lineage"}
               </span>
             </div>
 
@@ -101,7 +114,7 @@ export default function LandingBentoArchitecture() {
             </p>
           </div>
           <span className="text-[11px] font-mono font-bold text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 px-3 py-1 rounded-full w-fit mt-4">
-            Zero-Trust Isolation
+            {liveStats && liveStats.totalUnits > 0 ? `${liveStats.totalUnits} Units Isolated` : "Zero-Trust Isolation"}
           </span>
         </div>
 
@@ -119,7 +132,7 @@ export default function LandingBentoArchitecture() {
             </p>
           </div>
           <span className="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full w-fit mt-4">
-            National Compliance
+            {liveStats && liveStats.totalAuditLogs > 0 ? `${liveStats.totalAuditLogs} Logs Recorded` : "National Compliance"}
           </span>
         </div>
 
@@ -155,7 +168,7 @@ export default function LandingBentoArchitecture() {
             </p>
           </div>
           <span className="text-[11px] font-mono font-bold text-purple-400 bg-purple-950/40 border border-purple-500/30 px-3 py-1 rounded-full w-fit mt-4">
-            AES-256 Vault
+            {liveStats && liveStats.totalApproved > 0 ? `${liveStats.totalApproved} Vault Seals` : "AES-256 Vault"}
           </span>
         </div>
       </div>

@@ -7,9 +7,16 @@ import { ExternalLink, MapPin } from "lucide-react";
 interface LandingFooterProps {
   unitCount?: number;
   documentCount?: number;
+  versionCount?: number;
+  auditCount?: number;
 }
 
-export default function LandingFooter({ unitCount, documentCount }: LandingFooterProps) {
+export default function LandingFooter({
+  unitCount,
+  documentCount,
+  versionCount,
+  auditCount,
+}: LandingFooterProps) {
   return (
     <footer className="bg-slate-950 text-slate-400 py-16 text-xs border-t border-slate-800/80 relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
@@ -38,18 +45,21 @@ export default function LandingFooter({ unitCount, documentCount }: LandingFoote
             </div>
 
             <p className="text-xs text-slate-400 leading-relaxed max-w-md font-normal">
-              Official institutional document governance platform supporting unit-scoped tenancy, cryptographic SHA-256 integrity verification, and sequential multi-signatory routing in compliance with Philippine Republic Act 10173.
+              Official institutional document governance platform supporting unit-scoped tenancy, cryptographic SHA-256 integrity release vaults, and sequential multi-signatory routing in compliance with Philippine Republic Act 10173.
             </p>
 
             {/* Live Telemetry Pill */}
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-[11px] text-emerald-400 font-mono">
+            <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-slate-900 border border-slate-800 text-[11px] text-emerald-400 font-mono flex-wrap">
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
               </span>
               <span>
-                {unitCount ? `${unitCount} SAS Units Online` : "System Operational"} • Zero-Trust Perimeter Active
-                {documentCount && documentCount > 0 ? ` • ${documentCount} Documents Audited` : " • Latency < 15ms"}
+                {unitCount ? `${unitCount} SAS Units Online` : "7 Units Online"}
+                {documentCount && documentCount > 0 ? ` • ${documentCount} Documents Vaulted` : ""}
+                {versionCount && versionCount > 0 ? ` • ${versionCount} Version Trees` : ""}
+                {auditCount && auditCount > 0 ? ` • ${auditCount} Audit Logs` : ""}
+                {" • Zero-Trust Active"}
               </span>
             </div>
           </div>

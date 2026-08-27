@@ -26,44 +26,51 @@ const FAQS: FaqItem[] = [
   {
     id: "faq-2",
     category: "signatures",
-    question: "How does Smart Anchor vector e-signature stamping work?",
+    question: "How does the Visual Coordinate Placer & Solid Knockout E-Signature stamping work?",
     answer:
-      "Smart Anchor analyzes the document layout to detect signatory markers. When an authorized reviewer approves, the system places their verified vector signature directly above the designated title block without distorting line height, margins, or document integrity.",
+      "Reviewers set their exact electronic signature location on the interactive 1:1 vector canvas before approval. The backend PDF stamper draws the authentic signature image with a solid white knockout background (opacity 1.0) directly onto the binary stream, preventing any text bleed-through without using cumbersome boxed card frames.",
   },
   {
     id: "faq-3",
+    category: "signatures",
+    question: "How are official names, honorific titles, and middle initials formatted?",
+    answer:
+      "SASDMS enforces complete professional credentials across the entire system. Profiles include Official Title (e.g. Dr., Engr., Ms.), First Name, Middle Initial / Name, Last Name, and Suffix (e.g. PhD, Jr., III). Signatory cards and approval stamps render full official names (e.g. ALJON M. TOLENTINO, PhD).",
+  },
+  {
+    id: "faq-4",
     category: "workflow",
     question: "What occurs when a reviewer returns a document for revision?",
     answer:
       "The document transitions to REJECTED_RETURNED status with mandatory feedback remarks. The uploader receives an automated notification to submit version v2+ addressing the remarks, preserving full historical version trees without overwriting initial drafts.",
   },
   {
-    id: "faq-4",
+    id: "faq-5",
     category: "workflow",
     question: "How does the automated 2-rejection executive escalation safeguard work?",
     answer:
       "If a document receives 2 consecutive returns or rejections between the originator and reviewers, SASDMS automatically triggers an executive circuit-breaker, escalating the document directly to the SAS Department Director for mediation and priority resolution.",
   },
   {
-    id: "faq-5",
+    id: "faq-6",
     category: "legal",
     question: "Is SASDMS compliant with the Philippine Data Privacy Act (RA 10173)?",
     answer:
-      "Yes. SASDMS complies with Republic Act 10173 through strict unit-level tenancy isolation, encrypted binary storage in private Supabase vaults, and tamper-evident audit logging for every document creation, signature, view, and download action.",
+      "Yes. SASDMS complies with Republic Act 10173 through strict unit-level tenancy isolation, encrypted binary storage in private Supabase vaults, 15-minute inactivity session management, and tamper-evident audit logging for every document creation, signature, view, and download action.",
   },
   {
-    id: "faq-6",
+    id: "faq-7",
     category: "access",
     question: "Can coordinators view confidential documents from other SAS department units?",
     answer:
       "No. Standard Staff and Unit Coordinators operate within a Zero-Trust unit-scoped boundary and can only access records belonging to their assigned unit (e.g. Guidance staff only see Guidance documents). Cross-unit visibility is restricted exclusively to the Department Director and Super Admins.",
   },
   {
-    id: "faq-7",
+    id: "faq-8",
     category: "legal",
-    question: "How does the system track document retention and expiry?",
+    question: "How does the cryptographic SHA-256 Release Vault verify file integrity?",
     answer:
-      "Automated cron workers inspect covenant expiration dates daily. The system dispatches automated proactive email notifications 30 days prior to expiry and marks expired agreements for institutional archiving or renewal according to university policies.",
+      "Every document version computes a cryptographic SHA-256 checksum digest upon upload and approval. Users and auditors can verify or copy the exact hash in 1-click from the Active Binary Vault card to mathematically prove zero byte tampering.",
   },
 ];
 
