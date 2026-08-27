@@ -59,7 +59,10 @@ export default function DocumentUploadForm({
   availableUsers?: AvailableUserOption[];
 }) {
   const router = useRouter();
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [direction, setDirection] = useState<"forward" | "backward">("forward");
 
+  // Step 1: Metadata
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [documentTypeId, setDocumentTypeId] = useState(docTypes[0]?.id || "");
@@ -67,26 +70,26 @@ export default function DocumentUploadForm({
   const [effectiveDate, setEffectiveDate] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
 
+  // Step 2: Signatory Chain
+  const [signatoryChain, setSignatoryChain] = useState<AssignedSignatoryStep[]>([]);
+  const [selectedUserToAdd, setSelectedUserToAdd] = useState<string>("");
+  const [selectedTitleToAdd, setSelectedTitleToAdd] = useState<string>("Recommending Approval");
+
+  // Step 3: PDF File
   const [file, setFile] = useState<File | null>(null);
   const [fileChecksum, setFileChecksum] = useState<string | null>(null);
   const [isHashing, setIsHashing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Assigned Signatory Flow State
-  const [signatoryChain, setSignatoryChain] = useState<AssignedSignatoryStep[]>([]);
-
-  const [selectedUserToAdd, setSelectedUserToAdd] = useState<string>("");
-  const [selectedTitleToAdd, setSelectedTitleToAdd] = useState<string>("Recommending Approval");
-
   const selectedDocType = docTypes.find((d) => d.id === documentTypeId);
+  const selectedUnit = units.find((u) => u.id === unitId);
 
-  // Compute SHA-256 checksum on file selection with instant client validation
+  // File selection and SHA-256 computation
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    // Validate size (25MB limit)
     const MAX_SIZE = 25 * 1024 * 1024;
     if (selectedFile.size > MAX_SIZE) {
       setError("File exceeds the maximum allowable size of 25MB.");
@@ -96,7 +99,6 @@ export default function DocumentUploadForm({
       return;
     }
 
-    // Validate PDF MIME/extension
     if (
       selectedFile.type !== "application/pdf" &&
       !selectedFile.name.toLowerCase().endsWith(".pdf")
@@ -150,8 +152,8 @@ export default function DocumentUploadForm({
     setError(null);
   };
 
-  const handleMoveStep = (index: number, direction: "up" | "down") => {
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
+  const handleMoveStep = (index: number, moveDirection: "up" | "down") => {
+    const targetIndex = moveDirection === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= signatoryChain.length) return;
 
     const newChain = [...signatoryChain];
@@ -159,14 +161,46 @@ export default function DocumentUploadForm({
     newChain[index] = newChain[targetIndex];
     newChain[targetIndex] = temp;
 
-    const reordered = newChain.map((step, idx) => ({ ...step, stepOrder: idx }));
+    const reordered = newChain.map((stepItem, idx) => ({ ...stepItem, stepOrder: idx }));
     setSignatoryChain(reordered);
   };
 
   const handleRemoveStep = (index: number) => {
     const filtered = signatoryChain.filter((_, idx) => idx !== index);
-    const reordered = filtered.map((step, idx) => ({ ...step, stepOrder: idx }));
+    const reordered = filtered.map((stepItem, idx) => ({ ...stepItem, stepOrder: idx }));
     setSignatoryChain(reordered);
+  };
+
+  // Wizard Step Navigation
+  const handleStep1Next = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!title.trim()) {
+      setError("Please provide an Official Document Title.");
+      return;
+    }
+    if (!documentTypeId) {
+      setError("Please select a Document Type.");
+      return;
+    }
+    if (selectedDocType?.requiresExpiryTracking && !expiryDate) {
+      setError(`Expiry Date is mandatory for ${selectedDocType.name} classification.`);
+      return;
+    }
+    setDirection("forward");
+    setStep(2);
+  };
+
+  const handleStep2Next = () => {
+    setError(null);
+    setDirection("forward");
+    setStep(3);
+  };
+
+  const handleBack = () => {
+    setError(null);
+    setDirection("backward");
+    setStep((prev) => (prev > 1 ? ((prev - 1) as 1 | 2 | 3) : 1));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -184,8 +218,8 @@ export default function DocumentUploadForm({
       const base64String = Buffer.from(arrayBuffer).toString("base64");
 
       const res = await createDocumentAction({
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim() || undefined,
         documentTypeId,
         unitId: isCrossUnit ? unitId : undefined,
         effectiveDate: effectiveDate ? new Date(effectiveDate) : undefined,
@@ -214,420 +248,524 @@ export default function DocumentUploadForm({
   const isStep1Done = title.trim().length > 0 && !!documentTypeId && !!unitId;
   const isStep2Done = signatoryChain.length > 0;
   const isStep3Done = !!file && !!fileChecksum;
-  const completedStepsCount = (isStep1Done ? 1 : 0) + (isStep2Done ? 1 : 0) + (isStep3Done ? 1 : 0);
-  const progressPercent = Math.round((completedStepsCount / 3) * 100);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8 max-w-5xl mx-auto">
-      {/* 🚀 Multi-Stage Workflow Progress Stepper */}
-      <div className="glass-panel rounded-3xl p-5 sm:p-6 border border-white/90 shadow-sm space-y-4">
+    <div className="space-y-4 max-w-4xl mx-auto">
+      {/* 🚀 Multi-Stage Sliding Progress Stepper */}
+      <div className="glass-panel rounded-2xl p-4 sm:p-5 border border-white/90 shadow-sm space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <span className="text-xs font-black uppercase tracking-wider text-slate-500 block">
-              Document Ingestion Pipeline
+          <div className="flex items-center gap-2.5">
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-100/90 text-blue-900 text-xs font-mono font-bold border border-blue-200 shadow-xs">
+              Stage {step} of 3
             </span>
-            <span className="text-sm sm:text-base font-extrabold text-slate-900">
-              Form Progress: {progressPercent}% Completed ({completedStepsCount} of 3 Stages)
+            <span className="text-sm font-extrabold text-slate-900">
+              {step === 1 && "1. Classification & Metadata"}
+              {step === 2 && "2. Sequential Signatory Pipeline"}
+              {step === 3 && "3. PDF Ingestion & Cryptographic Verification"}
             </span>
           </div>
           <span className="text-xs font-mono font-bold text-[#0F2962] bg-blue-50 border border-blue-200 px-3 py-1 rounded-full w-fit">
-            {progressPercent === 100 ? "Ready for Cryptographic Ingestion" : "Draft In Progress"}
+            {step === 1 ? "33% • Classification" : step === 2 ? "66% • Signatory Routing" : "100% • Verification Ready"}
           </span>
         </div>
 
         {/* Visual Progress Bar Track */}
-        <div className="w-full h-2.5 bg-slate-200/80 rounded-full overflow-hidden p-0.5 shadow-inner">
+        <div className="w-full h-2 bg-slate-200/80 rounded-full overflow-hidden p-0.5 shadow-inner">
           <div
             className="h-full rounded-full bg-linear-to-r from-[#0F2962] via-blue-600 to-amber-400 transition-all duration-500 shadow-sm"
-            style={{ width: `${Math.max(progressPercent, 5)}%` }}
+            style={{ width: `${step === 1 ? 33 : step === 2 ? 66 : 100}%` }}
           />
         </div>
 
-        {/* 3 Step Indicator Nodes */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
-          <div className={`p-2.5 rounded-xl border transition-all flex items-center gap-2.5 ${
-            isStep1Done ? "bg-emerald-50/80 border-emerald-300 text-emerald-900" : "bg-slate-50 border-slate-200 text-slate-600"
-          }`}>
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
-              isStep1Done ? "bg-emerald-600 text-white" : "bg-slate-300 text-slate-700"
-            }`}>
-              {isStep1Done ? "✓" : "1"}
+        {/* 3 Clickable Step Pills */}
+        <div className="grid grid-cols-3 gap-2 pt-0.5 text-xs">
+          <button
+            type="button"
+            onClick={() => {
+              setDirection(step > 1 ? "backward" : "forward");
+              setStep(1);
+            }}
+            className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-left cursor-pointer ${
+              step === 1
+                ? "bg-blue-50/90 border-blue-400 ring-2 ring-blue-400/20 text-blue-950 font-bold"
+                : isStep1Done
+                ? "bg-emerald-50/80 border-emerald-300 text-emerald-900 font-semibold"
+                : "bg-slate-50 border-slate-200 text-slate-500"
+            }`}
+          >
+            <span
+              className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                step === 1
+                  ? "bg-[#0F2962] text-white"
+                  : isStep1Done
+                  ? "bg-emerald-600 text-white"
+                  : "bg-slate-300 text-slate-700"
+              }`}
+            >
+              {isStep1Done && step !== 1 ? "✓" : "1"}
             </span>
-            <div className="min-w-0">
-              <span className="font-bold block truncate">1. Classification</span>
-              <span className="text-[10px] text-slate-500 truncate block">Title & Unit Metadata</span>
-            </div>
-          </div>
+            <span className="truncate hidden sm:inline">1. Classification</span>
+            <span className="truncate sm:hidden">1. Metadata</span>
+          </button>
 
-          <div className={`p-2.5 rounded-xl border transition-all flex items-center gap-2.5 ${
-            isStep2Done ? "bg-emerald-50/80 border-emerald-300 text-emerald-900" : "bg-slate-50 border-slate-200 text-slate-600"
-          }`}>
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
-              isStep2Done ? "bg-emerald-600 text-white" : "bg-slate-300 text-slate-700"
-            }`}>
-              {isStep2Done ? "✓" : "2"}
+          <button
+            type="button"
+            onClick={() => {
+              if (isStep1Done) {
+                setDirection(step > 2 ? "backward" : "forward");
+                setStep(2);
+              }
+            }}
+            disabled={!isStep1Done}
+            className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+              step === 2
+                ? "bg-blue-50/90 border-blue-400 ring-2 ring-blue-400/20 text-blue-950 font-bold"
+                : isStep2Done
+                ? "bg-emerald-50/80 border-emerald-300 text-emerald-900 font-semibold"
+                : "bg-slate-50 border-slate-200 text-slate-500"
+            }`}
+          >
+            <span
+              className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                step === 2
+                  ? "bg-[#0F2962] text-white"
+                  : isStep2Done
+                  ? "bg-emerald-600 text-white"
+                  : "bg-slate-300 text-slate-700"
+              }`}
+            >
+              {isStep2Done && step !== 2 ? "✓" : "2"}
             </span>
-            <div className="min-w-0">
-              <span className="font-bold block truncate">2. Signatory Chain</span>
-              <span className="text-[10px] text-slate-500 truncate block">
-                {signatoryChain.length} Signer(s) Assigned
-              </span>
-            </div>
-          </div>
+            <span className="truncate hidden sm:inline">2. Signatories</span>
+            <span className="truncate sm:hidden">2. Routing</span>
+          </button>
 
-          <div className={`p-2.5 rounded-xl border transition-all flex items-center gap-2.5 ${
-            isStep3Done ? "bg-emerald-50/80 border-emerald-300 text-emerald-900" : "bg-slate-50 border-slate-200 text-slate-600"
-          }`}>
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
-              isStep3Done ? "bg-emerald-600 text-white" : "bg-slate-300 text-slate-700"
-            }`}>
-              {isStep3Done ? "✓" : "3"}
+          <button
+            type="button"
+            onClick={() => {
+              if (isStep1Done) {
+                setDirection("forward");
+                setStep(3);
+              }
+            }}
+            disabled={!isStep1Done}
+            className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+              step === 3
+                ? "bg-blue-50/90 border-blue-400 ring-2 ring-blue-400/20 text-blue-950 font-bold"
+                : isStep3Done
+                ? "bg-emerald-50/80 border-emerald-300 text-emerald-900 font-semibold"
+                : "bg-slate-50 border-slate-200 text-slate-500"
+            }`}
+          >
+            <span
+              className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${
+                step === 3
+                  ? "bg-[#0F2962] text-white"
+                  : isStep3Done
+                  ? "bg-emerald-600 text-white"
+                  : "bg-slate-300 text-slate-700"
+              }`}
+            >
+              {isStep3Done && step !== 3 ? "✓" : "3"}
             </span>
-            <div className="min-w-0">
-              <span className="font-bold block truncate">3. PDF & SHA-256</span>
-              <span className="text-[10px] text-slate-500 truncate block">
-                {isStep3Done ? "Checksum Verified" : "Awaiting PDF"}
-              </span>
-            </div>
-          </div>
+            <span className="truncate hidden sm:inline">3. PDF & Checksum</span>
+            <span className="truncate sm:hidden">3. File Ingest</span>
+          </button>
         </div>
       </div>
 
       {/* Error Alert */}
       {error && (
-        <div className="p-4.5 rounded-2xl bg-rose-50/95 border border-rose-200/90 flex items-center gap-3 text-rose-900 text-xs font-bold shadow-sm animate-in fade-in slide-in-from-top-2">
-          <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
+        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 flex items-center gap-2.5 text-rose-900 text-xs font-bold shadow-sm animate-in fade-in slide-in-from-top-1">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      {/* 1. Metadata Box */}
-      <div className="glass-panel rounded-3xl p-5 sm:p-8 border border-white/90 space-y-6 shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
-          <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2.5">
-            <Building2 className="w-5 h-5 text-[#0F2962]" />
-            <span>1. Document Classification & Metadata</span>
-          </h2>
-          <span className="text-xs font-mono font-bold text-slate-400">Step 1 of 3</span>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-5">
-          {/* Classification Taxonomy */}
-          <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
-              Document Type *
-            </label>
-            <select
-              value={documentTypeId}
-              onChange={(e) => setDocumentTypeId(e.target.value)}
-              className="block w-full px-3.5 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
-            >
-              {docTypes.map((dt) => (
-                <option key={dt.id} value={dt.id} className="text-slate-900 bg-white">
-                  {dt.name} ({dt.code})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Unit Scope */}
-          <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
-              Originating Unit *
-            </label>
-            <select
-              value={unitId}
-              disabled={!isCrossUnit}
-              onChange={(e) => setUnitId(e.target.value)}
-              className="block w-full px-3.5 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner disabled:bg-slate-100 disabled:text-slate-500"
-            >
-              {units.map((u) => (
-                <option key={u.id} value={u.id} className="text-slate-900 bg-white">
-                  {u.name} ({u.code})
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Title */}
-        <div>
-          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
-            Official Document Title *
-          </label>
-          <input
-            type="text"
-            required
-            placeholder="e.g. MOA Partnership Agreement - Industry Partner Inc."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="block w-full px-4 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner placeholder:text-slate-400"
-          />
-        </div>
-
-        {/* Description */}
-        <div>
-          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
-            Description & Context (Optional)
-          </label>
-          <textarea
-            rows={2}
-            placeholder="Provide context, parties involved, or key objectives for reviewer reference..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="block w-full px-4 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner placeholder:text-slate-400"
-          />
-        </div>
-
-        {/* Validity Dates */}
-        <div className="grid sm:grid-cols-2 gap-5 pt-1">
-          <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
-              Effective Date (Optional)
-            </label>
-            <div className="relative rounded-xl shadow-xs">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <Calendar className="w-4 h-4" />
-              </div>
-              <input
-                type="date"
-                value={effectiveDate}
-                onChange={(e) => setEffectiveDate(e.target.value)}
-                className="block w-full pl-10 pr-3.5 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
-              Expiry Date {selectedDocType?.requiresExpiryTracking && "(Required for Automated Alerts)"}
-            </label>
-            <div className="relative rounded-xl shadow-xs">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <Calendar className="w-4 h-4" />
-              </div>
-              <input
-                type="date"
-                value={expiryDate}
-                onChange={(e) => setExpiryDate(e.target.value)}
-                className="block w-full pl-10 pr-3.5 py-2.5 text-sm font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Assigned Signatory Workflow Builder */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/90 space-y-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-200/80 pb-4 gap-2">
-          <div>
-            <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2.5">
-              <Users className="w-5 h-5 text-blue-600" />
-              <span>2. Sequential Signatory Pipeline</span>
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {/* STEP 1: Document Classification & Metadata */}
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {step === 1 && (
+        <form
+          onSubmit={handleStep1Next}
+          key="step-1"
+          className={`glass-panel rounded-2xl p-5 sm:p-6 border border-white/90 space-y-4 shadow-sm animate-in fade-in ${
+            direction === "forward" ? "slide-in-from-right-4" : "slide-in-from-left-4"
+          } duration-200`}
+        >
+          <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+            <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-[#0F2962]" />
+              <span>Classification & Department Tenancy</span>
             </h2>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
-              Define the sequential order of reviewers required to apply electronic signatures.
-            </p>
+            <span className="text-[11px] font-mono text-slate-400">Step 1 of 3</span>
           </div>
-          <span className="text-xs font-mono font-bold text-slate-400">Step 2 of 3</span>
-        </div>
 
-        {/* Steps List */}
-        <div className="space-y-3">
-          {signatoryChain.length === 0 ? (
-            <div className="p-8 rounded-2xl border-2 border-dashed border-slate-300/90 text-center bg-slate-50/70">
-              <UserCheck className="w-9 h-9 text-slate-400 mx-auto mb-2" />
-              <span className="text-xs font-bold text-slate-700 block">No Signatories Configured</span>
-              <span className="text-[11px] text-slate-500">
-                Add signatories below to define the sequential review chain.
-              </span>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {signatoryChain.map((step, idx) => (
-                <div
-                  key={step.userId}
-                  className="flex items-center justify-between p-4 rounded-2xl border border-slate-200/90 bg-white/80 hover:bg-blue-50/40 hover:border-blue-300 transition-all duration-200 shadow-xs"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <div className="w-8 h-8 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center shadow-sm shrink-0">
-                      {idx + 1}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs sm:text-sm text-slate-900">{step.fullName}</span>
-                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100/90 text-blue-900 border border-blue-200">
-                          {getRoleLabel(step.role)}
-                        </span>
-                      </div>
-                      <span className="text-xs text-slate-500 font-medium block mt-0.5">
-                        Signatory Line: <strong className="text-slate-800">{step.title}</strong>
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      disabled={idx === 0}
-                      onClick={() => handleMoveStep(idx, "up")}
-                      className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 disabled:opacity-30 transition cursor-pointer"
-                      title="Move Step Up"
-                    >
-                      <ChevronUp className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      disabled={idx === signatoryChain.length - 1}
-                      onClick={() => handleMoveStep(idx, "down")}
-                      className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 disabled:opacity-30 transition cursor-pointer"
-                      title="Move Step Down"
-                    >
-                      <ChevronDown className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveStep(idx)}
-                      className="p-2 rounded-lg hover:bg-rose-100 text-rose-600 transition ml-1 cursor-pointer"
-                      title="Remove Signatory"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Add User Controls */}
-        <div className="p-5 rounded-2xl bg-blue-50/60 border border-blue-200/80 space-y-3.5">
-          <span className="text-xs font-bold text-slate-800 flex items-center gap-2">
-            <Plus className="w-4 h-4 text-blue-700" />
-            <span>Add Signatory to Sequential Pipeline</span>
-          </span>
-
-          <div className="grid sm:grid-cols-5 gap-3.5">
-            <div className="sm:col-span-3">
-              <label className="block text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">
-                Select Institutional User
+          <div className="grid sm:grid-cols-2 gap-3.5">
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                Document Type *
               </label>
               <select
-                value={selectedUserToAdd}
-                onChange={(e) => setSelectedUserToAdd(e.target.value)}
-                className="block w-full px-3.5 py-2.5 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                value={documentTypeId}
+                onChange={(e) => setDocumentTypeId(e.target.value)}
+                className="block w-full px-3 py-2 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
               >
-                <option value="" className="text-slate-900 bg-white">-- Choose Signer --</option>
-                {availableUsers.map((u) => (
-                  <option key={u.id} value={u.id} className="text-slate-900 bg-white">
-                    {u.fullName} ({u.role} {u.unitCode ? `• ${u.unitCode}` : ""})
+                {docTypes.map((dt) => (
+                  <option key={dt.id} value={dt.id} className="text-slate-900 bg-white">
+                    {dt.name} ({dt.code})
                   </option>
                 ))}
               </select>
             </div>
 
-            <div className="sm:col-span-2">
-              <label className="block text-[10px] font-bold text-slate-600 uppercase tracking-wider mb-1">
-                Signatory Title
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                Originating Unit *
               </label>
-              <div className="flex gap-2">
+              <select
+                value={unitId}
+                disabled={!isCrossUnit}
+                onChange={(e) => setUnitId(e.target.value)}
+                className="block w-full px-3 py-2 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner disabled:bg-slate-100 disabled:text-slate-500"
+              >
+                {units.map((u) => (
+                  <option key={u.id} value={u.id} className="text-slate-900 bg-white">
+                    {u.name} ({u.code})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+              Official Document Title *
+            </label>
+            <input
+              type="text"
+              required
+              placeholder="e.g. MOA Partnership Agreement - Industry Partner Inc."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="block w-full px-3.5 py-2 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner placeholder:text-slate-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+              Description &amp; Context (Optional)
+            </label>
+            <textarea
+              rows={2}
+              placeholder="Provide context, parties involved, or key objectives for reviewer reference..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="block w-full px-3.5 py-2 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner placeholder:text-slate-400"
+            />
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3.5 pt-0.5">
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                Effective Date (Optional)
+              </label>
+              <div className="relative rounded-xl shadow-xs">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Calendar className="w-3.5 h-3.5" />
+                </div>
+                <input
+                  type="date"
+                  value={effectiveDate}
+                  onChange={(e) => setEffectiveDate(e.target.value)}
+                  className="block w-full pl-9 pr-3 py-2 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+                Expiry Date {selectedDocType?.requiresExpiryTracking && "(Required for Alerts)"}
+              </label>
+              <div className="relative rounded-xl shadow-xs">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                  <Calendar className="w-3.5 h-3.5" />
+                </div>
+                <input
+                  type="date"
+                  value={expiryDate}
+                  onChange={(e) => setExpiryDate(e.target.value)}
+                  className="block w-full pl-9 pr-3 py-2 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-2 border-t border-slate-100">
+            <button
+              type="submit"
+              className="px-5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md shadow-blue-950/20 transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <span>Continue to Signatory Chain</span>
+              <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {/* STEP 2: Sequential Signatory Pipeline */}
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {step === 2 && (
+        <div
+          key="step-2"
+          className={`glass-panel rounded-2xl p-5 sm:p-6 border border-white/90 space-y-4 shadow-sm animate-in fade-in ${
+            direction === "forward" ? "slide-in-from-right-4" : "slide-in-from-left-4"
+          } duration-200`}
+        >
+          <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+            <div>
+              <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                <Users className="w-4 h-4 text-blue-600" />
+                <span>Sequential Signatory Pipeline</span>
+              </h2>
+              <p className="text-[11px] text-slate-500 font-medium mt-0.5">
+                Designate reviewer sequence. If none assigned, standard unit workflow applies.
+              </p>
+            </div>
+            <span className="text-[11px] font-mono text-slate-400">Step 2 of 3</span>
+          </div>
+
+          {/* Steps List */}
+          <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+            {signatoryChain.length === 0 ? (
+              <div className="p-5 rounded-xl border-2 border-dashed border-slate-300 text-center bg-slate-50/70">
+                <UserCheck className="w-7 h-7 text-slate-400 mx-auto mb-1.5" />
+                <span className="text-xs font-bold text-slate-700 block">Default Approval Policy</span>
+                <span className="text-[11px] text-slate-500">
+                  You may proceed with standard unit routing or add specific custom signatories below.
+                </span>
+              </div>
+            ) : (
+              signatoryChain.map((stepItem, idx) => (
+                <div
+                  key={stepItem.userId}
+                  className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition shadow-xs"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-[#0F2962] text-amber-400 font-black text-xs flex items-center justify-center shrink-0">
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-xs text-slate-900">{stepItem.fullName}</span>
+                        <span className="text-[9.5px] font-bold px-2 py-0.2 rounded-full bg-blue-100 text-blue-900 border border-blue-200">
+                          {getRoleLabel(stepItem.role)}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-slate-500">
+                        Line: <strong className="text-slate-800">{stepItem.title}</strong>
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      disabled={idx === 0}
+                      onClick={() => handleMoveStep(idx, "up")}
+                      className="p-1.5 rounded hover:bg-slate-100 text-slate-600 disabled:opacity-30 transition cursor-pointer"
+                    >
+                      <ChevronUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      disabled={idx === signatoryChain.length - 1}
+                      onClick={() => handleMoveStep(idx, "down")}
+                      className="p-1.5 rounded hover:bg-slate-100 text-slate-600 disabled:opacity-30 transition cursor-pointer"
+                    >
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveStep(idx)}
+                      className="p-1.5 rounded hover:bg-rose-100 text-rose-600 transition ml-0.5 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Add User Tool */}
+          <div className="p-3.5 rounded-xl bg-blue-50/60 border border-blue-200/80 space-y-2.5">
+            <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+              <Plus className="w-3.5 h-3.5 text-blue-700" />
+              <span>Add Signatory to Chain</span>
+            </span>
+
+            <div className="grid sm:grid-cols-5 gap-2.5">
+              <div className="sm:col-span-3">
+                <select
+                  value={selectedUserToAdd}
+                  onChange={(e) => setSelectedUserToAdd(e.target.value)}
+                  className="block w-full px-2.5 py-1.5 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962]"
+                >
+                  <option value="" className="text-slate-900 bg-white">-- Choose Signer --</option>
+                  {availableUsers.map((u) => (
+                    <option key={u.id} value={u.id} className="text-slate-900 bg-white">
+                      {u.fullName} ({u.role} {u.unitCode ? `• ${u.unitCode}` : ""})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="sm:col-span-2 flex gap-1.5">
                 <input
                   type="text"
-                  placeholder="e.g. Approved by, Reviewed"
+                  placeholder="e.g. Approved by"
                   value={selectedTitleToAdd}
                   onChange={(e) => setSelectedTitleToAdd(e.target.value)}
-                  className="block w-full px-3.5 py-2.5 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner placeholder:text-slate-400"
+                  className="block w-full px-2.5 py-1.5 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-lg placeholder:text-slate-400"
                 />
                 <button
                   type="button"
                   disabled={!selectedUserToAdd}
                   onClick={handleAddSignatory}
-                  className="px-4 py-2.5 rounded-xl bg-[#0F2962] text-white font-bold text-xs hover:bg-[#091a42] disabled:opacity-50 transition-all shadow-sm shrink-0 cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-[#0F2962] text-white font-bold text-xs hover:bg-[#091a42] disabled:opacity-50 transition shrink-0 cursor-pointer"
                 >
                   Add
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* 3. File Upload Box */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-white/90 space-y-5 shadow-sm">
-        <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
-          <h2 className="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2.5">
-            <UploadCloud className="w-5 h-5 text-emerald-600" />
-            <span>3. Document File & Integrity Checksum (v1)</span>
-          </h2>
-          <span className="text-xs font-mono font-bold text-slate-400">Step 3 of 3</span>
+          <div className="flex justify-between pt-2 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer"
+            >
+              ← Back to Metadata
+            </button>
+            <button
+              type="button"
+              onClick={handleStep2Next}
+              className="px-5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
+            >
+              <span>Continue to File Upload</span>
+              <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
+            </button>
+          </div>
         </div>
+      )}
 
-        <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center hover:border-blue-400 transition-all bg-slate-50/70 hover:bg-blue-50/20">
-          <input
-            type="file"
-            id="docFile"
-            accept=".pdf,application/pdf"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          <label htmlFor="docFile" className="cursor-pointer block space-y-3">
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 text-[#0F2962] flex items-center justify-center mx-auto shadow-sm">
-              <UploadCloud className="w-7 h-7" />
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {/* STEP 3: Document File Ingestion & Checksum */}
+      {/* ════════════════════════════════════════════════════════════════════ */}
+      {step === 3 && (
+        <form
+          onSubmit={handleSubmit}
+          key="step-3"
+          className={`glass-panel rounded-2xl p-5 sm:p-6 border border-white/90 space-y-4 shadow-sm animate-in fade-in ${
+            direction === "forward" ? "slide-in-from-right-4" : "slide-in-from-left-4"
+          } duration-200`}
+        >
+          <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+            <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
+              <UploadCloud className="w-4 h-4 text-emerald-600" />
+              <span>Document File &amp; Cryptographic SHA-256 Ingestion</span>
+            </h2>
+            <span className="text-[11px] font-mono text-slate-400">Step 3 of 3</span>
+          </div>
+
+          {/* Pre-Flight Metadata Summary Pill */}
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+            <div>
+              <span className="text-slate-400 block font-medium">Title</span>
+              <span className="font-bold text-slate-900 truncate block">{title}</span>
             </div>
-            <div className="text-sm font-bold text-slate-800">
-              {file ? (
-                <span className="text-[#0F2962] font-black">{file.name} ({formatFileSize(file.size)})</span>
-              ) : (
-                <span>Click to select document or drag and drop file here</span>
-              )}
+            <div>
+              <span className="text-slate-400 block font-medium">Doc Type</span>
+              <span className="font-bold text-slate-900 truncate block">{selectedDocType?.name}</span>
             </div>
-            <p className="text-xs text-slate-500 font-medium">
-              Supported format: Official PDF Documents (*.pdf) • Max 25 MB
-            </p>
-          </label>
-        </div>
-
-        {/* Checksum Display */}
-        {fileChecksum && (
-          <div className="p-4 rounded-2xl bg-emerald-50/90 border border-emerald-200 flex items-start gap-3 text-emerald-950 text-xs shadow-xs">
-            <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
-            <div className="min-w-0">
-              <span className="font-extrabold">RA 10173 Cryptographic Integrity Checksum:</span>
-              <code className="block font-mono text-[11px] text-emerald-900 break-all mt-1 bg-emerald-100/70 p-2 rounded-xl border border-emerald-200">
-                SHA-256: {fileChecksum}
-              </code>
+            <div className="col-span-2 sm:col-span-1">
+              <span className="text-slate-400 block font-medium">Target Unit</span>
+              <span className="font-bold text-slate-900 truncate block">{selectedUnit?.name}</span>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-3.5 pt-2">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition-all shadow-xs cursor-pointer text-center"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={isSubmitting || isHashing || !file}
-          className="w-full sm:w-auto px-6 py-3 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white font-bold text-xs shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2.5 disabled:opacity-50 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-              <span>Ingesting Document...</span>
-            </>
-          ) : (
-            <>
-              <span>Save & Register Document (v1)</span>
-              <ArrowRight className="w-4 h-4 text-amber-400" />
-            </>
+          {/* File Picker Dropzone */}
+          <div className="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-blue-400 transition bg-slate-50/70 hover:bg-blue-50/20">
+            <input
+              type="file"
+              id="docFile"
+              accept=".pdf,application/pdf"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <label htmlFor="docFile" className="cursor-pointer block space-y-2">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-[#0F2962] flex items-center justify-center mx-auto shadow-xs">
+                <UploadCloud className="w-5 h-5" />
+              </div>
+              <div className="text-xs font-bold text-slate-800">
+                {file ? (
+                  <span className="text-[#0F2962] font-black">{file.name} ({formatFileSize(file.size)})</span>
+                ) : (
+                  <span>Click to select PDF or drag and drop file here</span>
+                )}
+              </div>
+              <p className="text-[10.5px] text-slate-500">
+                Official PDF Format (*.pdf) • Maximum 25 MB
+              </p>
+            </label>
+          </div>
+
+          {/* Checksum Display */}
+          {fileChecksum && (
+            <div className="p-3 rounded-xl bg-emerald-50/90 border border-emerald-200 flex items-start gap-2.5 text-emerald-950 text-xs shadow-xs">
+              <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <span className="font-extrabold text-[11px]">RA 10173 Cryptographic Integrity Verified:</span>
+                <code className="block font-mono text-[10px] text-emerald-900 break-all mt-0.5 bg-emerald-100/70 p-1.5 rounded-lg border border-emerald-200">
+                  SHA-256: {fileChecksum}
+                </code>
+              </div>
+            </div>
           )}
-        </button>
-      </div>
-    </form>
+
+          <div className="flex justify-between pt-2 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={handleBack}
+              disabled={isSubmitting}
+              className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer disabled:opacity-50"
+            >
+              ← Back to Signatories
+            </button>
+
+            <button
+              type="submit"
+              disabled={isSubmitting || isHashing || !file}
+              className="px-6 py-2.5 rounded-xl bg-linear-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs shadow-lg shadow-emerald-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <span>Ingesting Document...</span>
+                </>
+              ) : (
+                <>
+                  <ShieldCheck className="w-4 h-4 text-amber-300" />
+                  <span>Ingest &amp; Register Document (v1)</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      )}
+    </div>
   );
 }

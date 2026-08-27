@@ -61,6 +61,8 @@ export default function AdminDelegationManagement({
   const [statusFilter, setStatusFilter] = useState("ALL");
 
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [assignStep, setAssignStep] = useState<1 | 2>(1);
+  const [assignDirection, setAssignDirection] = useState<"forward" | "backward">("forward");
   const [revokingDelegation, setRevokingDelegation] = useState<DelegationItem | null>(null);
   const [revokeReason, setRevokeReason] = useState("");
 
@@ -306,121 +308,204 @@ export default function AdminDelegationManagement({
         </DataTableWrapper>
       </div>
 
-      {/* Modal: Assign Delegation */}
+      {/* Modal: Assign Delegation (Multi-Step Sliding Wizard) */}
       {isAssignModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-200 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 border border-slate-200 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <FileCheck2 className="w-5 h-5 text-[#0F2962]" />
-                <span>Assign Acting Signatory / Delegate</span>
-              </h2>
-              <button onClick={() => setIsAssignModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0F2962] flex items-center justify-center font-bold">
+                  <FileCheck2 className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900">
+                    Assign Acting Signatory
+                  </h2>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    {assignStep === 1 ? "Step 1 of 2: Stakeholders & Unit" : "Step 2 of 2: Schedule & Purpose"}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setIsAssignModalOpen(false);
+                  setAssignStep(1);
+                }}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleAssign} className="space-y-3.5 text-xs">
-              <div>
-                <label className="font-bold text-slate-700 uppercase mb-1 block">
-                  Delegator (Coordinator or Director)
-                </label>
-                <select
-                  value={form.delegatorId}
-                  onChange={(e) => setForm({ ...form, delegatorId: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
-                >
-                  {coordinatorsAndDirectors.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.firstName} {u.lastName} ({getRoleLabel(u.role)}) – {u.email}
-                    </option>
-                  ))}
-                </select>
+            {/* Stepper Progress Bar */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-[10.5px] font-bold text-slate-500">
+                <span className="uppercase tracking-wider">
+                  {assignStep === 1 ? "1. Stakeholder Assignment" : "2. Validity Schedule"}
+                </span>
+                <span className="text-[#0F2962] font-mono">{assignStep === 1 ? "50%" : "100%"}</span>
               </div>
-
-              <div>
-                <label className="font-bold text-slate-700 uppercase mb-1 block">
-                  Appointed Delegate (Acting Signatory)
-                </label>
-                <select
-                  value={form.delegateId}
-                  onChange={(e) => setForm({ ...form, delegateId: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
-                >
-                  {allEligibleStaff.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.firstName} {u.lastName} ({getRoleLabel(u.role)}) – {u.email}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 uppercase mb-1 block">Target Department Unit</label>
-                <select
-                  value={form.unitId}
-                  onChange={(e) => setForm({ ...form, unitId: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
-                >
-                  {units.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name} ({u.code})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-700 uppercase mb-1 block">Start Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={form.startDate}
-                    onChange={(e) => setForm({ ...form, startDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 uppercase mb-1 block">End Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={form.endDate}
-                    onChange={(e) => setForm({ ...form, endDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 uppercase mb-1 block">Reason / Official Order</label>
-                <textarea
-                  rows={2}
-                  placeholder="e.g. Official Leave / OIC designated under Special Order No. 2026-44"
-                  value={form.reason}
-                  onChange={(e) => setForm({ ...form, reason: e.target.value })}
-                  className="w-full p-2.5 border border-slate-300 rounded-lg"
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden p-0.5 shadow-inner">
+                <div
+                  className="h-full rounded-full bg-linear-to-r from-[#0F2962] to-amber-400 transition-all duration-300"
+                  style={{ width: `${assignStep === 1 ? 50 : 100}%` }}
                 />
               </div>
+            </div>
 
-              <div className="pt-3 flex justify-end gap-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsAssignModalOpen(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="px-4 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white font-semibold"
-                >
-                  {isLoading ? "Assigning..." : "Confirm Delegation"}
-                </button>
-              </div>
-            </form>
+            {/* STEP 1: Stakeholders & Unit */}
+            {assignStep === 1 && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (form.delegatorId === form.delegateId) {
+                    setFeedback({ type: "error", message: "Delegator and Appointed Delegate cannot be the same user." });
+                    return;
+                  }
+                  setFeedback(null);
+                  setAssignDirection("forward");
+                  setAssignStep(2);
+                }}
+                key="assign-step-1"
+                className={`space-y-3 text-xs animate-in fade-in ${
+                  assignDirection === "forward" ? "slide-in-from-right-3" : "slide-in-from-left-3"
+                } duration-200`}
+              >
+                <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">
+                    Delegator (Coordinator or Director) *
+                  </label>
+                  <select
+                    value={form.delegatorId}
+                    onChange={(e) => setForm({ ...form, delegatorId: e.target.value })}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white text-slate-900"
+                  >
+                    {coordinatorsAndDirectors.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.firstName} {u.lastName} ({getRoleLabel(u.role)})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">
+                    Appointed Delegate (Acting Signatory) *
+                  </label>
+                  <select
+                    value={form.delegateId}
+                    onChange={(e) => setForm({ ...form, delegateId: e.target.value })}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white text-slate-900"
+                  >
+                    {allEligibleStaff.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.firstName} {u.lastName} ({getRoleLabel(u.role)}) – {u.email}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">Target Department Unit *</label>
+                  <select
+                    value={form.unitId}
+                    onChange={(e) => setForm({ ...form, unitId: e.target.value })}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white text-slate-900"
+                  >
+                    {units.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} ({u.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="pt-2 flex justify-end gap-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAssignModalOpen(false);
+                      setAssignStep(1);
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 font-semibold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  >
+                    <span>Next: Schedule & Details</span>
+                    <Plus className="w-3.5 h-3.5 text-amber-400" />
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* STEP 2: Schedule & Reason */}
+            {assignStep === 2 && (
+              <form
+                onSubmit={handleAssign}
+                key="assign-step-2"
+                className={`space-y-3 text-xs animate-in fade-in ${
+                  assignDirection === "forward" ? "slide-in-from-right-3" : "slide-in-from-left-3"
+                } duration-200`}
+              >
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">Start Date *</label>
+                    <input
+                      type="date"
+                      required
+                      value={form.startDate}
+                      onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">End Date *</label>
+                    <input
+                      type="date"
+                      required
+                      value={form.endDate}
+                      onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">Reason / Special Order</label>
+                  <textarea
+                    rows={2}
+                    placeholder="e.g. Official Leave / Designated OIC under Special Order No. 2026-44"
+                    value={form.reason}
+                    onChange={(e) => setForm({ ...form, reason: e.target.value })}
+                    className="w-full p-2 border border-slate-300 rounded-lg text-slate-900 bg-white"
+                  />
+                </div>
+
+                <div className="pt-2 flex justify-between gap-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAssignDirection("backward");
+                      setAssignStep(1);
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 font-semibold cursor-pointer"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="px-4 py-1.5 rounded-lg bg-linear-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold transition flex items-center gap-1.5 cursor-pointer shadow-md disabled:opacity-50"
+                  >
+                    {isLoading ? "Assigning..." : "Confirm Delegation"}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}

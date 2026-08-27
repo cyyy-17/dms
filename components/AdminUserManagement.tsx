@@ -22,6 +22,7 @@ import {
   AlertCircle,
   X,
   Building,
+  ArrowRight,
 } from "lucide-react";
 import DataTableWrapper from "@/components/DataTableWrapper";
 import { UserRole, UserStatus } from "@prisma/client";
@@ -66,6 +67,8 @@ export default function AdminUserManagement({
 
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createStep, setCreateStep] = useState<1 | 2>(1);
+  const [createDirection, setCreateDirection] = useState<"forward" | "backward">("forward");
   const [editUser, setEditUser] = useState<UserItem | null>(null);
   const [resetPasswordUser, setResetPasswordUser] = useState<UserItem | null>(null);
   const [rejectUser, setRejectUser] = useState<UserItem | null>(null);
@@ -522,100 +525,152 @@ export default function AdminUserManagement({
       </div>
 
       {/* ════════════════════════════════════════════════════════════════════ */}
-      {/* MODAL 1: Direct Employee Provisioning */}
+      {/* MODAL 1: Direct Employee Provisioning (Multi-Step Sliding Wizard) */}
       {/* ════════════════════════════════════════════════════════════════════ */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 border border-slate-200 animate-in fade-in zoom-in-95">
+          <div className="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl space-y-4 border border-slate-200 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-[#0F2962]" />
-                <span>Provision New Employee</span>
-              </h2>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0F2962] flex items-center justify-center font-bold">
+                  <UserPlus className="w-4 h-4" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-slate-900">
+                    Provision New Employee
+                  </h2>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    {createStep === 1 ? "Step 1 of 2: Identity & Email" : "Step 2 of 2: Role & Credentials"}
+                  </span>
+                </div>
+              </div>
               <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                onClick={() => {
+                  setIsCreateModalOpen(false);
+                  setCreateStep(1);
+                }}
+                className="text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateUser} className="space-y-3.5 text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                <div>
-                  <label className="font-bold text-slate-700 uppercase mb-1 block">Title</label>
-                  <input
-                    type="text"
-                    placeholder="Ms. / Dr. / Engr."
-                    value={createForm.title}
-                    onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  />
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="font-bold text-slate-700 uppercase mb-1 block">First Name</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="First Name"
-                    value={createForm.firstName}
-                    onChange={(e) => setCreateForm({ ...createForm, firstName: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  />
-                </div>
+            {/* Stepper Progress Bar */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-[10.5px] font-bold text-slate-500">
+                <span className="uppercase tracking-wider">
+                  {createStep === 1 ? "1. Personal Information" : "2. Access & Security"}
+                </span>
+                <span className="text-[#0F2962] font-mono">{createStep === 1 ? "50%" : "100%"}</span>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                <div>
-                  <label className="font-bold text-slate-700 uppercase mb-1 block">M.I. / Middle</label>
-                  <input
-                    type="text"
-                    placeholder="R. / Mae"
-                    value={createForm.middleName}
-                    onChange={(e) => setCreateForm({ ...createForm, middleName: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 uppercase mb-1 block">Last Name</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Last Name"
-                    value={createForm.lastName}
-                    onChange={(e) => setCreateForm({ ...createForm, lastName: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="font-bold text-slate-700 uppercase mb-1 block">Suffix</label>
-                  <input
-                    type="text"
-                    placeholder="Jr. / PhD / III"
-                    value={createForm.suffix}
-                    onChange={(e) => setCreateForm({ ...createForm, suffix: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-700 uppercase mb-1 block">
-                  Institutional Email (@firstasia.edu.ph)
-                </label>
-                <input
-                  type="email"
-                  required
-                  placeholder="employee@firstasia.edu.ph"
-                  value={createForm.email}
-                  onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden p-0.5 shadow-inner">
+                <div
+                  className="h-full rounded-full bg-linear-to-r from-[#0F2962] to-amber-400 transition-all duration-300"
+                  style={{ width: `${createStep === 1 ? 50 : 100}%` }}
                 />
               </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-3">
+            {/* STEP 1: Personal Details & Contact */}
+            {createStep === 1 && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!createForm.firstName.trim() || !createForm.lastName.trim()) {
+                    setFeedback({ type: "error", message: "First Name and Last Name are required." });
+                    return;
+                  }
+                  if (!createForm.email.trim().toLowerCase().endsWith("@firstasia.edu.ph")) {
+                    setFeedback({ type: "error", message: "Email must end with @firstasia.edu.ph" });
+                    return;
+                  }
+                  setFeedback(null);
+                  setCreateDirection("forward");
+                  setCreateStep(2);
+                }}
+                key="create-step-1"
+                className={`space-y-3 text-xs animate-in fade-in ${
+                  createDirection === "forward" ? "slide-in-from-right-3" : "slide-in-from-left-3"
+                } duration-200`}
+              >
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">Title</label>
+                    <input
+                      type="text"
+                      placeholder="Dr. / Engr."
+                      value={createForm.title}
+                      onChange={(e) => setCreateForm({ ...createForm, title: e.target.value })}
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">
+                      First Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="First name"
+                      value={createForm.firstName}
+                      onChange={(e) => setCreateForm({ ...createForm, firstName: e.target.value })}
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">M.I.</label>
+                    <input
+                      type="text"
+                      placeholder="R."
+                      value={createForm.middleName}
+                      onChange={(e) => setCreateForm({ ...createForm, middleName: e.target.value })}
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">
+                      Last Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Last name"
+                      value={createForm.lastName}
+                      onChange={(e) => setCreateForm({ ...createForm, lastName: e.target.value })}
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">Suffix</label>
+                    <input
+                      type="text"
+                      placeholder="Jr. / III"
+                      value={createForm.suffix}
+                      onChange={(e) => setCreateForm({ ...createForm, suffix: e.target.value })}
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="font-bold text-slate-700 uppercase mb-1 block">
+                  <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">
+                    Institutional Email (@firstasia.edu.ph) *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="employee@firstasia.edu.ph"
+                    value={createForm.email}
+                    onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">
                     Employee ID (Optional)
                   </label>
                   <input
@@ -623,15 +678,47 @@ export default function AdminUserManagement({
                     placeholder="EMP-2026-XXX"
                     value={createForm.employeeId}
                     onChange={(e) => setCreateForm({ ...createForm, employeeId: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
                   />
                 </div>
+
+                <div className="pt-2 flex justify-end gap-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCreateModalOpen(false);
+                      setCreateStep(1);
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 font-semibold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-1.5 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  >
+                    <span>Next: Role & Security</span>
+                    <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {/* STEP 2: Role, Unit & Password */}
+            {createStep === 2 && (
+              <form
+                onSubmit={handleCreateUser}
+                key="create-step-2"
+                className={`space-y-3 text-xs animate-in fade-in ${
+                  createDirection === "forward" ? "slide-in-from-right-3" : "slide-in-from-left-3"
+                } duration-200`}
+              >
                 <div>
-                  <label className="font-bold text-slate-700 uppercase mb-1 block">Assigned Role</label>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">Assigned Role *</label>
                   <select
                     value={createForm.role}
                     onChange={(e) => setCreateForm({ ...createForm, role: e.target.value as UserRole })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white text-slate-900"
                   >
                     <option value="STAFF">Department Staff</option>
                     <option value="COORDINATOR">Unit Coordinator</option>
@@ -639,54 +726,60 @@ export default function AdminUserManagement({
                     <option value="ADMIN">System Administrator</option>
                   </select>
                 </div>
-              </div>
 
-              <div>
-                <label className="font-bold text-slate-700 uppercase mb-1 block">Department Unit</label>
-                <select
-                  value={createForm.unitId}
-                  onChange={(e) => setCreateForm({ ...createForm, unitId: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white"
-                >
-                  <option value="">No Specific Unit (General / Director / Admin)</option>
-                  {units.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name} ({u.code})
-                    </option>
-                  ))}
-                </select>
-              </div>
+                <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">Department Unit</label>
+                  <select
+                    value={createForm.unitId}
+                    onChange={(e) => setCreateForm({ ...createForm, unitId: e.target.value })}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white text-slate-900"
+                  >
+                    <option value="">No Specific Unit (General / Director / Admin)</option>
+                    {units.map((u) => (
+                      <option key={u.id} value={u.id}>
+                        {u.name} ({u.code})
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              <div>
-                <label className="font-bold text-slate-700 uppercase mb-1 block">
-                  Initial Password (Optional — Defaults to Temporary)
-                </label>
-                <input
-                  type="password"
-                  placeholder="Leave blank for FaithSAS2026!Temporary"
-                  value={createForm.password}
-                  onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg"
-                />
-              </div>
+                <div>
+                  <label className="font-bold text-slate-700 uppercase mb-1 block text-[10.5px]">
+                    Initial Password (Optional)
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Defaults to FaithSAS2026!Temporary"
+                    value={createForm.password}
+                    onChange={(e) => setCreateForm({ ...createForm, password: e.target.value })}
+                    className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-slate-900 bg-white"
+                  />
+                  <span className="text-[10px] text-slate-400 mt-0.5 block">
+                    Employee will be prompted to change password on first login.
+                  </span>
+                </div>
 
-              <div className="pt-3 flex justify-end gap-2 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsCreateModalOpen(false)}
-                  className="px-4 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="px-4 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white font-semibold"
-                >
-                  {isLoading ? "Provisioning..." : "Provision & Activate"}
-                </button>
-              </div>
-            </form>
+                <div className="pt-2 flex justify-between gap-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCreateDirection("backward");
+                      setCreateStep(1);
+                    }}
+                    className="px-3.5 py-1.5 rounded-lg border border-slate-300 hover:bg-slate-50 font-semibold cursor-pointer"
+                  >
+                    ← Back
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="px-4 py-1.5 rounded-lg bg-linear-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold transition flex items-center gap-1.5 cursor-pointer shadow-md disabled:opacity-50"
+                  >
+                    {isLoading ? "Provisioning..." : "Provision & Activate"}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
