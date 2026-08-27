@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
 import { getStatusLabel, getStatusBadgeClass, getRoleLabel } from "@/lib/status-labels";
@@ -156,31 +157,45 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
-      {/* Top Welcome Banner with Ambient Glassmorphism & Gold Accent */}
+      {/* Main Welcome Hero Banner */}
       <div className="glass-panel border-gradient-gold rounded-3xl p-5 sm:p-8 border border-white/90 relative overflow-hidden shadow-xl transition-all">
         <div className="absolute top-0 right-0 w-96 h-96 bg-linear-to-bl from-blue-600/15 via-amber-500/10 to-transparent rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0F2962] text-amber-300 text-xs font-black shadow-inner">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Student & Alumni Services (SAS)</span>
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                <span>System Synchronized</span>
-              </span>
+          <div className="flex items-start gap-4">
+            <div className="hidden sm:flex w-14 h-14 rounded-2xl bg-white/95 p-1.5 items-center justify-center border border-amber-400/50 shadow-md shrink-0">
+              <Image
+                src="/images/faith-crest.png"
+                alt="FAITH Crest"
+                width={48}
+                height={48}
+                className="w-auto h-full object-contain"
+              />
             </div>
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0F2962] text-amber-300 text-xs font-black shadow-inner">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Student & Alumni Services (SAS)</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold border border-slate-300">
+                  <span>FAITH Colleges • Tanauan Campus</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-300">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>System Synchronized</span>
+                </span>
+              </div>
 
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
-              Welcome, {user.firstName}
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-600 max-w-xl leading-relaxed font-medium">
-              {user.role === "DIRECTOR" || user.role === "ADMIN"
-                ? "Executive governance portal for department workflows, electronic sign-offs, and compliance auditing."
-                : `Operational repository and sequential workflow queue for ${user.unitName || "Unit"}.`}
-            </p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
+                Welcome, {user.firstName}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-600 max-w-xl leading-relaxed font-medium">
+                {user.role === "DIRECTOR" || user.role === "ADMIN"
+                  ? "Executive governance portal for department workflows, electronic sign-offs, and compliance auditing."
+                  : `Operational repository and sequential workflow queue for ${user.unitName || "Unit"}.`}
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0">

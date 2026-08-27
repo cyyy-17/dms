@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
-  ShieldCheck,
   ArrowRight,
   Lock,
   Building2,
@@ -70,14 +70,22 @@ export default function LandingHeroInteractive({
         <div className="grid lg:grid-cols-12 gap-12 lg:gap-14 items-center">
           {/* Left Column: Hero Copy & Actions */}
           <div className="lg:col-span-7 space-y-7 text-left">
-            {/* Pill Tag */}
+            {/* Pill Tag with FAITH Crest */}
             <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-900/90 border border-blue-500/30 text-blue-300 text-xs font-semibold shadow-inner backdrop-blur-xl">
+              <div className="w-5 h-5 rounded-full bg-white/95 p-0.5 flex items-center justify-center shrink-0 shadow-xs">
+                <Image
+                  src="/images/faith-crest.png"
+                  alt="FAITH"
+                  width={18}
+                  height={18}
+                  className="w-auto h-full object-contain"
+                />
+              </div>
               <span className="flex h-2 w-2 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
               </span>
-              <Lock className="w-3.5 h-3.5 text-amber-400" />
-              <span>Restricted Institutional Access • @firstasia.edu.ph</span>
+              <span>FAITH Colleges SAS • @firstasia.edu.ph Restricted Access</span>
             </div>
 
             {/* Main Heading with Animated Shimmer */}
@@ -90,7 +98,7 @@ export default function LandingHeroInteractive({
 
             {/* Subheading */}
             <p className="text-sm sm:text-lg text-slate-300 leading-relaxed max-w-2xl font-normal">
-              Engineered exclusively for the <strong>Student & Alumni Services (SAS)</strong> department at FAITH Colleges. Delivering zero-overwrite version trees, cryptographic SHA-256 lineage, Smart Anchor vector e-signatures, and automated executive escalation.
+              Engineered exclusively for the <strong>Student & Alumni Services (SAS)</strong> department at First Asia Institute of Technology and Humanities. Delivering zero-overwrite version trees, cryptographic SHA-256 lineage, Smart Anchor vector e-signatures, and automated executive escalation.
             </p>
 
             {/* Action Buttons Matrix */}
@@ -157,18 +165,24 @@ export default function LandingHeroInteractive({
               <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
               <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/10 rounded-full blur-2xl pointer-events-none" />
 
-              {/* Console Header */}
+              {/* Console Header with FAITH Emblem */}
               <div className="flex items-center justify-between border-b border-slate-800/90 pb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-blue-950 border border-blue-500/40 flex items-center justify-center text-amber-400 shadow-md">
-                    <ShieldCheck className="w-5 h-5" />
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/95 p-1 flex items-center justify-center border border-amber-400/40 shadow-md shrink-0">
+                    <Image
+                      src="/images/faith-crest.png"
+                      alt="FAITH Crest"
+                      width={32}
+                      height={32}
+                      className="w-auto h-full object-contain"
+                    />
                   </div>
                   <div>
                     <span className="text-xs font-black text-white block">
-                      Institutional Governance Matrix
+                      FAITH Institutional Governance
                     </span>
                     <span className="text-[11px] text-slate-400 font-medium">
-                      Zero-Trust Access Perimeter • v2.6
+                      Student & Alumni Services • Perimeter v2.6
                     </span>
                   </div>
                 </div>

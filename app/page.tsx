@@ -1,6 +1,7 @@
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import LandingNavbar from "@/components/LandingNavbar";
 import LandingHeroInteractive from "@/components/LandingHeroInteractive";
+import LandingCampusShowcase from "@/components/LandingCampusShowcase";
 import LandingUnitExplorer, { SasUnitItem } from "@/components/LandingUnitExplorer";
 import LandingSignatureShowcase from "@/components/LandingSignatureShowcase";
 import LandingWorkflowRoadmap from "@/components/LandingWorkflowRoadmap";
@@ -213,7 +214,10 @@ export default async function HomePage() {
         {/* 2. Main Hero with Interactive Live Workflow Simulator */}
         <LandingHeroInteractive unitCount={sasUnits.length} liveStats={liveStats} />
 
-        {/* 3. Filterable SAS Department Units Matrix */}
+        {/* 3. Institutional Heritage & Batangas Campus Showcase */}
+        <LandingCampusShowcase />
+
+        {/* 4. Filterable SAS Department Units Matrix */}
         <LandingUnitExplorer units={sasUnits} />
 
         {/* 5. Smart Anchor Vector E-Signature Showcase & Comparison */}

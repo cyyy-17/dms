@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { signOutAction } from "@/actions/auth";
 import { getRoleLabel } from "@/lib/status-labels";
@@ -126,13 +127,19 @@ export default function DashboardSidebar({ user }: SidebarProps) {
   return (
     <aside className="hidden lg:flex w-68 bg-slate-950 text-slate-300 flex-col shrink-0 border-r border-slate-800/80 selection:bg-amber-400 selection:text-slate-950 z-40">
       {/* Brand Header */}
-      <div className="h-18 px-6 flex items-center gap-3.5 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md">
-        <div className="w-10 h-10 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] flex items-center justify-center text-amber-400 font-black text-lg shadow-lg shadow-blue-950/50 border border-blue-400/30 shrink-0">
-          FA
+      <Link href="/dashboard" className="h-18 px-5 flex items-center gap-3 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-md hover:bg-slate-900/60 transition group">
+        <div className="w-10 h-10 rounded-xl bg-white/95 p-1 flex items-center justify-center border border-amber-400/40 shadow-lg shadow-blue-950/60 group-hover:scale-105 transition-transform shrink-0">
+          <Image
+            src="/images/faith-crest.png"
+            alt="FAITH Crest"
+            width={32}
+            height={32}
+            className="w-auto h-full object-contain"
+          />
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <span className="font-extrabold text-white tracking-tight text-sm">
+            <span className="font-extrabold text-white tracking-tight text-sm group-hover:text-amber-300 transition-colors">
               SASDMS
             </span>
             <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-amber-400/15 text-amber-300 border border-amber-400/30">
@@ -143,7 +150,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
             Student & Alumni Services
           </span>
         </div>
-      </div>
+      </Link>
 
       {/* User Profile Card */}
       <div className="p-4 border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md">

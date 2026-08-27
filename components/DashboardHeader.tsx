@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
   PenLine,
@@ -244,8 +245,14 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           <div className="relative flex-1 flex flex-col max-w-xs w-full bg-slate-950 text-slate-200 border-r border-slate-800 shadow-2xl p-5 space-y-6 z-10 animate-in slide-in-from-left duration-200">
             <div className="flex items-center justify-between border-b border-slate-800 pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-[#0F2962] text-amber-400 font-black text-sm flex items-center justify-center border border-blue-400/30">
-                  FA
+                <div className="w-10 h-10 rounded-xl bg-white/95 p-1 flex items-center justify-center border border-amber-400/40 shadow-md shrink-0">
+                  <Image
+                    src="/images/faith-crest.png"
+                    alt="FAITH Crest"
+                    width={32}
+                    height={32}
+                    className="w-auto h-full object-contain"
+                  />
                 </div>
                 <div>
                   <span className="font-black text-white text-sm block">SASDMS</span>

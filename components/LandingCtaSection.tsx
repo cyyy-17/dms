@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, ShieldCheck, Lock } from "lucide-react";
 
 export default function LandingCtaSection() {
@@ -9,15 +10,32 @@ export default function LandingCtaSection() {
       {/* Background Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-200 h-87.5 bg-amber-500/10 blur-[140px] pointer-events-none -z-10 rounded-full" />
 
-      <div className="glass-panel-dark rounded-3xl p-8 sm:p-14 border border-blue-500/30 text-center space-y-7 relative overflow-hidden shadow-2xl backdrop-blur-2xl">
+      <div className="glass-panel-dark rounded-3xl p-8 sm:p-14 border border-blue-500/30 text-center space-y-7 relative overflow-hidden shadow-2xl backdrop-blur-2xl group">
+        {/* Subtle Campus Aerial Backdrop Texture */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <Image
+            src="/images/faith-campus.jpg"
+            alt="FAITH Colleges Campus"
+            fill
+            className="object-cover object-center opacity-15 group-hover:opacity-25 group-hover:scale-105 transition-all duration-700"
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/80 to-slate-950/60" />
+        </div>
+
         {/* Animated Radiant Mesh Gradient Background */}
         <div className="absolute inset-0 bg-linear-to-r from-blue-900/30 via-indigo-900/25 to-amber-500/15 pointer-events-none" />
         <div className="absolute -top-24 -right-24 w-72 h-72 bg-amber-400/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-72 h-72 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Central Emblem Badge */}
-        <div className="relative z-10 mx-auto w-16 h-16 rounded-3xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] border border-blue-400/40 text-amber-400 font-black text-2xl flex items-center justify-center shadow-xl shadow-blue-950/80">
-          FA
+        {/* Central Emblem Badge with FAITH Crest */}
+        <div className="relative z-10 mx-auto w-18 h-18 rounded-3xl bg-white/95 border-2 border-amber-400/60 p-2 flex items-center justify-center shadow-2xl shadow-blue-950/80 transform group-hover:scale-105 transition-transform duration-300">
+          <Image
+            src="/images/faith-crest.png"
+            alt="FAITH Colleges Crest"
+            width={54}
+            height={54}
+            className="w-auto h-full object-contain"
+          />
         </div>
 
         <div className="relative z-10 max-w-2xl mx-auto space-y-3">
@@ -25,7 +43,7 @@ export default function LandingCtaSection() {
             Ready to Sign or Process SAS Documents?
           </h2>
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-            Sign in with your authorized FAITH Colleges account to manage your review queue, endorse department proposals, or inspect real-time audit logs.
+            Sign in with your authorized First Asia Institute of Technology and Humanities account to manage your review queue, endorse department proposals, or inspect real-time audit logs.
           </p>
         </div>
 

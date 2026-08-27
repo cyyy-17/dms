@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import Image from "next/image";
+import { ExternalLink, MapPin } from "lucide-react";
 
 interface LandingFooterProps {
   unitCount?: number;
@@ -15,16 +16,22 @@ export default function LandingFooter({ unitCount, documentCount }: LandingFoote
         {/* Top Tier: Branding & Quick Links */}
         <div className="grid md:grid-cols-12 gap-8 pb-10 border-b border-slate-800/80">
           {/* Brand Col (Span 6) */}
-          <div className="md:col-span-6 space-y-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black flex items-center justify-center text-lg shadow-md border border-blue-500/30">
-                FA
+          <div className="md:col-span-6 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/95 p-1.5 flex items-center justify-center border border-amber-400/50 shadow-lg shrink-0">
+                <Image
+                  src="/images/faith-crest.png"
+                  alt="First Asia Institute of Technology and Humanities Crest"
+                  width={48}
+                  height={48}
+                  className="w-auto h-full object-contain"
+                />
               </div>
               <div>
                 <span className="font-extrabold text-white text-base block tracking-tight">
                   First Asia Institute of Technology and Humanities (FAITH Colleges)
                 </span>
-                <span className="text-slate-400 text-xs block">
+                <span className="text-amber-400 font-mono text-xs block font-semibold">
                   Student & Alumni Services Document Management System (SASDMS)
                 </span>
               </div>
@@ -119,7 +126,10 @@ export default function LandingFooter({ unitCount, documentCount }: LandingFoote
             © {new Date().getFullYear()} FAITH Colleges. All rights reserved. Republic Act 10173 (Data Privacy Act of 2012) Compliant.
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <span>Tanauan City, Batangas 4232, Philippines</span>
+            <span className="flex items-center gap-1">
+              <MapPin className="w-3 h-3 text-amber-400" />
+              <span>Tanauan City, Batangas 4232, Philippines</span>
+            </span>
             <span>•</span>
             <span>SAS Institutional Records Vault</span>
           </div>

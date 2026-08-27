@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Menu, X, ShieldCheck, Activity } from "lucide-react";
 
 interface LandingNavbarProps {
@@ -40,8 +41,15 @@ export default function LandingNavbar({ unitCount = 0 }: LandingNavbarProps) {
         {/* Left: Brand Lockup */}
         <Link href="/" className="flex items-center gap-2.5 sm:gap-3 group min-w-0 shrink">
           <div className="relative shrink-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-linear-to-br from-[#0F2962] via-[#1E40AF] to-[#0A1A3F] flex items-center justify-center text-amber-400 font-black text-base sm:text-lg shadow-md shadow-blue-950/80 border border-blue-400/30 group-hover:scale-105 transition-transform">
-              FA
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white/95 p-1 flex items-center justify-center shadow-lg shadow-blue-950/80 border border-amber-400/40 group-hover:scale-105 group-hover:border-amber-400 transition-all duration-200">
+              <Image
+                src="/images/faith-crest.png"
+                alt="FAITH Colleges Crest"
+                width={36}
+                height={36}
+                className="w-auto h-full object-contain drop-shadow-xs"
+                priority
+              />
             </div>
             <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5 sm:h-3 sm:w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -55,12 +63,12 @@ export default function LandingNavbar({ unitCount = 0 }: LandingNavbarProps) {
                 SASDMS
               </span>
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
-              <span className="text-[11px] font-mono font-semibold text-slate-400 whitespace-nowrap hidden md:inline">
-                Institutional Portal
+              <span className="text-[11px] font-mono font-semibold text-amber-400/90 whitespace-nowrap hidden md:inline">
+                FAITH Colleges
               </span>
             </div>
             <span className="text-[10px] text-slate-400 font-medium truncate max-w-32.5 xs:max-w-50 sm:max-w-none">
-              FAITH Colleges • Student & Alumni Services
+              Student & Alumni Services • Tanauan City
             </span>
           </div>
         </Link>

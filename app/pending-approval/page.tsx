@@ -1,30 +1,47 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Clock, ShieldCheck, Mail, ArrowLeft } from "lucide-react";
 
 export default function PendingApprovalPage() {
   return (
-    <div className="min-h-screen bg-slate-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden selection:bg-amber-400 selection:text-slate-950">
+    <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden selection:bg-amber-400 selection:text-slate-950">
       {/* Background Ambient Glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-162.5 h-100 bg-linear-to-tr from-amber-500/20 via-blue-900/30 to-indigo-900/20 blur-[130px] pointer-events-none rounded-full" />
 
       <div className="sm:mx-auto sm:w-full sm:max-w-lg px-4 sm:px-0 relative z-10">
         <div className="glass-panel rounded-3xl py-8 px-5 sm:py-10 sm:px-11 shadow-2xl border border-white/80 backdrop-blur-2xl text-center space-y-7 transition-all duration-300">
-          <div className="relative mx-auto w-20 h-20">
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white/95 p-1 flex items-center justify-center border border-amber-400/50 shadow-md">
+              <Image
+                src="/images/faith-crest.png"
+                alt="FAITH Colleges Crest"
+                width={36}
+                height={36}
+                className="w-auto h-full object-contain"
+              />
+            </div>
+            <div className="text-left">
+              <span className="text-xs font-black text-slate-900 block">FAITH Colleges</span>
+              <span className="text-[11px] text-slate-500 font-medium">Student & Alumni Services</span>
+            </div>
+          </div>
+
+          <div className="relative mx-auto w-16 h-16">
             <div className="absolute inset-0 rounded-2xl bg-amber-400/20 animate-ping" />
-            <div className="relative w-20 h-20 rounded-2xl bg-linear-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-xl shadow-amber-500/30 border border-amber-300/40">
-              <Clock className="w-10 h-10 animate-pulse" />
+            <div className="relative w-16 h-16 rounded-2xl bg-linear-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-xl shadow-amber-500/30 border border-amber-300/40">
+              <Clock className="w-8 h-8 animate-pulse" />
             </div>
           </div>
 
           <div className="space-y-2.5">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300/60 text-xs font-bold">
-              <span>Status: Pending Review</span>
+              <span>Status: Pending Administrator Review</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Registration Under Review
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-sm mx-auto">
-              Your staff registration has been submitted and is currently awaiting administrator review and role assignment.
+              Your staff registration has been submitted and is currently awaiting administrator review and role assignment by FAITH SAS Administration.
             </p>
           </div>
 
