@@ -735,81 +735,88 @@ export default function DocumentDetailActions({
 
         {/* 2. Active Assigned Signatory Approval Box */}
         {canApprove && (
-          <div className="space-y-5">
-            <div className="p-4 rounded-2xl bg-blue-50/90 border border-blue-200/80">
-              <span className="text-xs font-black text-blue-950 block">
-                It is your turn to review and sign this document
-              </span>
-              <span className="text-xs text-blue-800 block mt-1">
-                Your registered institutional electronic signature will be stamped on approval.
-              </span>
+          <div className="space-y-4 pt-1">
+            {/* Active Turn Alert Banner */}
+            <div className="p-4 rounded-2xl bg-linear-to-r from-blue-50 to-indigo-50/80 border border-blue-200/90 flex items-start gap-3 shadow-2xs">
+              <div className="w-8 h-8 rounded-xl bg-[#0F2962] text-amber-400 flex items-center justify-center shrink-0 shadow-xs font-bold mt-0.5">
+                <PenLine className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="text-xs font-black text-slate-900 block leading-tight">
+                  It is your turn to review and sign this document
+                </span>
+                <span className="text-[11px] text-slate-600 font-medium block mt-1 leading-relaxed">
+                  Your formal sign-off will apply an institutional verification seal, update the cryptographic SHA-256 hash, and route to the next step.
+                </span>
+              </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
-                Reviewer Endorsement & Comments (Mandatory for returns)
+            {/* Reviewer Remarks & Comments Input */}
+            <div className="space-y-1.5">
+              <label className="flex items-center justify-between text-xs font-black text-slate-700 uppercase tracking-wider">
+                <span>Reviewer Endorsement & Remarks</span>
+                <span className="text-[10px] font-normal lowercase text-slate-400">
+                  (mandatory for returns)
+                </span>
               </label>
               <textarea
                 rows={3}
-                placeholder="Enter remarks, endorsements, or line-item revision feedback..."
+                placeholder="Enter remarks, endorsements, or line-item revision feedback for the uploader..."
                 value={comments}
                 onChange={(e) => setComments(e.target.value)}
-                className="block w-full px-4 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                className="block w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-2xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner placeholder:text-slate-400"
               />
             </div>
 
-            {/* E-Signature Status Banner & Precision Stamp Placement */}
-            <div className="p-4 rounded-2xl border flex flex-col gap-3.5 bg-slate-50/80 border-slate-200">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-blue-100 text-[#0F2962] flex items-center justify-center shrink-0 shadow-xs">
-                    <PenLine className="w-4.5 h-4.5" />
-                  </div>
-                  <div>
-                    <span className="text-xs font-bold text-slate-900 block">
-                      {hasSignature ? "Electronic Signature Registered" : "No Signature on File"}
+            {/* Unified E-Signature & Stamp Placement Console */}
+            <div className="p-4 rounded-2xl border border-slate-200/90 bg-slate-50/70 space-y-3 shadow-2xs">
+              {/* Top Row: Signature Status & Quick Config Buttons */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className={`w-2.5 h-2.5 rounded-full shrink-0 ${hasSignature ? "bg-emerald-500 ring-4 ring-emerald-100 animate-pulse" : "bg-amber-400 ring-4 ring-amber-100"}`} />
+                  <div className="truncate">
+                    <span className="text-xs font-black text-slate-900 block leading-tight truncate">
+                      {hasSignature ? "Electronic Signature Ready" : "No Signature on File"}
                     </span>
-                    <span className="text-[11px] text-slate-500 block font-medium">
-                      {hasSignature
-                        ? "Ready to apply cryptographic stamp on approval."
-                        : "Draw or upload your signature before finalizing review."}
+                    <span className="text-[10px] text-slate-500 font-medium block truncate">
+                      {hasSignature ? "Cryptographic token enabled" : "Draw or upload to activate stamp"}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <button
                     type="button"
                     onClick={() => setIsSignaturePadOpen(true)}
-                    className="px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-[#0F2962] font-bold text-xs shadow-xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-[11px] shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
                   >
-                    <PenLine className="w-3.5 h-3.5" />
+                    <PenLine className="w-3 h-3 text-[#0F2962]" />
                     <span>{hasSignature ? "Edit Signature" : "Draw Signature"}</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setIsPlacerModalOpen(true)}
-                    className="px-3 py-1.5 rounded-xl border border-blue-300 bg-blue-50/80 hover:bg-blue-100 text-[#0F2962] font-black text-xs shadow-xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
-                    title="Open precision stamp placement canvas"
+                    className="px-2.5 py-1.5 rounded-xl border border-blue-300 bg-blue-50 hover:bg-blue-100 text-[#0F2962] font-black text-[11px] shadow-2xs transition flex items-center gap-1.5 cursor-pointer"
+                    title="Fine-tune stamp positioning on document canvas"
                   >
-                    <Crosshair className="w-3.5 h-3.5 text-blue-600" />
-                    <span>{customCoordinates ? "Adjust Placement" : "Set Stamp Position"}</span>
+                    <Crosshair className="w-3 h-3 text-blue-600" />
+                    <span>{customCoordinates ? "Adjust Position" : "Set Position"}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Placement Coordinate Feedback Bar */}
-              <div className="flex items-center justify-between pt-2 border-t border-slate-200/60 text-[11px]">
-                <div className="flex items-center gap-1.5 text-slate-600">
+              {/* Middle Row: Live Target Placement Pill */}
+              <div className="px-3 py-1.5 rounded-xl bg-white border border-slate-200/80 flex items-center justify-between gap-2 text-[11px]">
+                <div className="flex items-center gap-1.5 text-slate-600 truncate">
                   <Crosshair className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                   {customCoordinates ? (
-                    <span>
-                      Target: <strong>Page {customCoordinates.page + 1}</strong> (X: {customCoordinates.x}pt, Y: {customCoordinates.y}pt)
+                    <span className="truncate">
+                      Placement: <strong className="text-slate-900 font-mono">Page {customCoordinates.page + 1}</strong> (X: {customCoordinates.x}pt, Y: {customCoordinates.y}pt)
                     </span>
                   ) : (
-                    <span>
-                      Target: <strong className="text-emerald-700">🎯 Smart Auto-Detect Active</strong> (Matches name line & skips blank pages)
+                    <span className="truncate">
+                      Placement: <strong className="text-emerald-800 font-bold">🎯 Smart Auto-Detect</strong> (Anchors above name line)
                     </span>
                   )}
                 </div>
@@ -817,53 +824,66 @@ export default function DocumentDetailActions({
                   <button
                     type="button"
                     onClick={() => setCustomCoordinates(null)}
-                    className="text-[10px] font-bold text-blue-600 hover:text-blue-800 underline cursor-pointer"
+                    className="text-[10px] font-bold text-blue-600 hover:text-blue-800 underline shrink-0 cursor-pointer"
                   >
                     Reset to Auto
                   </button>
                 )}
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <label className="flex items-center gap-2.5 text-xs text-slate-700 font-bold cursor-pointer">
+              {/* Bottom Row: Integrated Stamp Toggle Tile */}
+              <label className={`flex items-start gap-2.5 p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                signatureApplied ? "bg-emerald-50/60 border-emerald-300 text-emerald-950" : "bg-white border-slate-200 text-slate-700"
+              }`}>
                 <input
                   type="checkbox"
                   checked={signatureApplied}
                   onChange={(e) => setSignatureApplied(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-[#0F2962] focus:ring-[#0F2962]"
+                  className="w-4 h-4 mt-0.5 rounded border-slate-300 text-[#0F2962] focus:ring-[#0F2962] shrink-0"
                 />
-                <span>Stamp Electronic Signature on Document & Sign Audit Trail</span>
+                <div className="flex-1 min-w-0">
+                  <span className="text-xs font-black block leading-tight">
+                    Stamp Electronic Signature & Seal on Document
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-medium block mt-0.5">
+                    Embeds institutional verification badge & logs non-repudiation audit hash
+                  </span>
+                </div>
               </label>
             </div>
 
-            <div className="flex flex-wrap gap-3.5 pt-2">
+            {/* Action Command Deck */}
+            <div className="space-y-2.5 pt-1">
+              {/* Hero Approve Action Button */}
               <button
                 onClick={handleApprove}
                 disabled={isLoading}
-                className="px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 px-6 rounded-2xl bg-linear-to-r from-emerald-600 via-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white text-xs font-black shadow-lg shadow-emerald-950/20 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
               >
-                <CheckCircle className="w-4 h-4" />
+                <CheckCircle className="w-4 h-4 text-emerald-200" />
                 <span>Approve & Stamp E-Signature</span>
               </button>
 
-              <button
-                onClick={handleRejectReturn}
-                disabled={isLoading}
-                className="px-5 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
-              >
-                <RotateCcw className="w-4 h-4" />
-                <span>Return for Revision</span>
-              </button>
+              {/* Secondary Actions (Return for Revision / Reject) */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <button
+                  onClick={handleRejectReturn}
+                  disabled={isLoading}
+                  className="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold shadow-xs hover:shadow-md transition-all duration-200 flex items-center justify-center gap-1.5 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Return for Revision</span>
+                </button>
 
-              <button
-                onClick={handleRejectClose}
-                disabled={isLoading}
-                className="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-red-700 border border-red-200 text-xs font-bold transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                <XCircle className="w-4 h-4" />
-                <span>Cancel / Reject</span>
-              </button>
+                <button
+                  onClick={handleRejectClose}
+                  disabled={isLoading}
+                  className="py-2.5 px-3 rounded-xl bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 hover:border-rose-300 text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  <XCircle className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Cancel / Reject</span>
+                </button>
+              </div>
             </div>
           </div>
         )}
