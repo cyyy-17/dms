@@ -159,9 +159,9 @@ export default function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="fixed sm:absolute left-2 right-2 sm:left-auto sm:right-0 top-16 sm:top-auto mt-0 sm:mt-2 sm:w-96 rounded-2xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-w-full">
+        <div className="absolute right-0 top-full mt-2 w-[calc(100vw-1.5rem)] xs:w-88 sm:w-96 rounded-2xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           {/* Header */}
-          <div className="p-3.5 sm:p-4 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between">
+          <div className="p-3.5 sm:p-4 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="text-xs font-black text-slate-900">Notifications</span>
               {unreadCount > 0 && (
@@ -232,19 +232,19 @@ export default function NotificationBell() {
                           markSingleAsRead(item.id);
                           setIsOpen(false);
                         }}
-                        className="block text-xs font-bold text-slate-900 hover:text-[#0F2962] line-clamp-2 leading-snug"
+                        className="block text-xs font-bold text-slate-900 hover:text-[#0F2962] line-clamp-2 leading-snug break-words"
                       >
                         {item.subject}
                       </Link>
 
-                      <div className="flex items-center gap-2 mt-1 text-[10px] text-slate-400">
+                      <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-[10px] text-slate-400">
                         {item.trackingNumber && (
-                          <span className="font-mono font-semibold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
+                          <span className="font-mono font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/80 shrink-0">
                             {item.trackingNumber}
                           </span>
                         )}
                         <span>•</span>
-                        <span>{timeAgo(item.createdAt)}</span>
+                        <span className="whitespace-nowrap">{timeAgo(item.createdAt)}</span>
                       </div>
                     </div>
 
