@@ -25,6 +25,7 @@ import {
   Image as ImageIcon,
   History,
 } from "lucide-react";
+import DataTableWrapper from "@/components/DataTableWrapper";
 
 export interface UserAuditLogItem {
   id: string;
@@ -616,42 +617,44 @@ export default function ProfileClient({ user, auditLogs = [] }: ProfileClientPro
               No recent activity log events recorded for this account.
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-xs">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="bg-slate-50/90 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
-                    <th className="py-3 px-4">Action Event</th>
-                    <th className="py-3 px-4">Target Type</th>
-                    <th className="py-3 px-4">Date & Time</th>
-                    <th className="py-3 px-4 text-right">Details</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                  {auditLogs.map((log) => (
-                    <tr key={log.id} className="hover:bg-blue-50/40 transition-colors">
-                      <td className="py-3 px-4">
-                        <span className="font-mono font-bold text-slate-900 text-[11px]">
-                          {log.action}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
-                          {log.targetType}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-slate-500 text-[11px] whitespace-nowrap">
-                        {new Date(log.createdAt).toLocaleString("en-PH", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
-                      </td>
-                      <td className="py-3 px-4 text-right text-[11px] text-slate-500 max-w-56 truncate font-mono">
-                        {log.details ? JSON.stringify(log.details) : "—"}
-                      </td>
+            <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+              <DataTableWrapper>
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="bg-slate-50/90 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                      <th className="py-3 px-4">Action Event</th>
+                      <th className="py-3 px-4">Target Type</th>
+                      <th className="py-3 px-4">Date & Time</th>
+                      <th className="py-3 px-4 text-right">Details</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                    {auditLogs.map((log) => (
+                      <tr key={log.id} className="hover:bg-blue-50/40 transition-colors">
+                        <td className="py-3 px-4">
+                          <span className="font-mono font-bold text-slate-900 text-[11px]">
+                            {log.action}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
+                            {log.targetType}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-slate-500 text-[11px] whitespace-nowrap">
+                          {new Date(log.createdAt).toLocaleString("en-PH", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </td>
+                        <td className="py-3 px-4 text-right text-[11px] text-slate-500 max-w-56 truncate font-mono">
+                          {log.details ? JSON.stringify(log.details) : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </DataTableWrapper>
             </div>
           )}
         </div>

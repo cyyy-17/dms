@@ -69,6 +69,19 @@ export default function VisualStampPlacerModal({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  const [viewportWidth, setViewportWidth] = useState<number>(620);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== "undefined") {
+        setViewportWidth(Math.min(620, Math.max(280, window.innerWidth - 32)));
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Stamp Dimensions in PDF points (Pure Signature)
   const STAMP_WIDTH = 140;
   const STAMP_HEIGHT = 48;
@@ -278,28 +291,28 @@ export default function VisualStampPlacerModal({
     onClose();
   };
 
-  const baseContainerWidth = 620;
+  const baseContainerWidth = viewportWidth;
   const containerWidthPx = Math.round(baseContainerWidth * zoomScale);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="glass-panel rounded-3xl max-w-5xl w-full h-[94vh] flex flex-col bg-white shadow-2xl border border-white/90 overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="glass-panel rounded-2xl sm:rounded-3xl max-w-5xl w-full h-[94vh] flex flex-col bg-white shadow-2xl border border-white/90 overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/80 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 flex items-center justify-center font-bold shadow-xs">
-              <Crosshair className="w-5 h-5" />
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/80 shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 flex items-center justify-center font-bold shadow-xs shrink-0">
+              <Crosshair className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm sm:text-base font-black text-slate-900">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <h2 className="text-xs sm:text-base font-black text-slate-900 leading-tight">
                   Set Signature & Stamp Location
                 </h2>
-                <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-black border border-blue-200">
+                <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[9.5px] sm:text-[10px] font-black border border-blue-200">
                   1:1 Pixel Placement
                 </span>
               </div>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-[10.5px] sm:text-xs text-slate-500 font-medium hidden xs:block">
                 Click directly on your signature line in the canvas below to position your official stamp.
               </p>
             </div>
@@ -307,17 +320,17 @@ export default function VisualStampPlacerModal({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
+            className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Toolbar & Presets Bar */}
-        <div className="px-6 py-2.5 bg-slate-100/90 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-3 text-xs shrink-0">
+        <div className="px-4 sm:px-6 py-2.5 bg-slate-100/90 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs shrink-0">
           {/* Status Badge */}
           <div className="flex items-center gap-2">
-            <Crosshair className="w-4 h-4 text-[#0F2962]" />
+            <Crosshair className="w-4 h-4 text-[#0F2962] shrink-0" />
             <span className="text-[11px] font-bold text-slate-700">
               Selected: <strong className="font-mono text-[#0F2962]">Page {coords.page + 1} (X: {coords.x}pt, Y: {coords.y}pt)</strong>
             </span>
@@ -357,26 +370,26 @@ export default function VisualStampPlacerModal({
             </div>
 
             {/* Quick Jumps */}
-            <div className="flex items-center gap-1.5 pl-1 border-l border-slate-200">
+            <div className="flex flex-wrap items-center gap-1.5 pl-1 border-l border-slate-200">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quick:</span>
               <button
                 type="button"
                 onClick={() => applyPreset("prepared")}
-                className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-[11px] hover:bg-slate-50 transition shadow-2xs cursor-pointer"
+                className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-[10.5px] sm:text-[11px] hover:bg-slate-50 transition shadow-2xs cursor-pointer"
               >
                 Prepared by
               </button>
               <button
                 type="button"
                 onClick={() => applyPreset("recommending")}
-                className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-[11px] hover:bg-slate-50 transition shadow-2xs cursor-pointer"
+                className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-[10.5px] sm:text-[11px] hover:bg-slate-50 transition shadow-2xs cursor-pointer"
               >
                 Recommending
               </button>
               <button
                 type="button"
                 onClick={() => applyPreset("approved")}
-                className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-[11px] hover:bg-slate-50 transition shadow-2xs cursor-pointer"
+                className="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-lg bg-white border border-slate-300 text-slate-700 font-bold text-[10.5px] sm:text-[11px] hover:bg-slate-50 transition shadow-2xs cursor-pointer"
               >
                 Approved by
               </button>

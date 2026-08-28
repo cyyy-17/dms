@@ -327,7 +327,7 @@ export default function AdminUserManagement({
       {/* Action Bar & Filters */}
       <div className="glass-card rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 flex-1">
-          <div className="relative min-w-56 flex-1">
+          <div className="relative min-w-56 flex-1 w-full sm:w-auto">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
             <input
               type="text"
@@ -341,7 +341,7 @@ export default function AdminUserManagement({
           <select
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value)}
-            className="text-xs font-medium text-slate-900 py-2 px-3 border border-slate-300 rounded-lg bg-white"
+            className="text-xs font-medium text-slate-900 py-2 px-3 border border-slate-300 rounded-lg bg-white w-full sm:w-auto"
           >
             <option value="ALL">All Roles</option>
             <option value="STAFF">Department Staff</option>
@@ -353,7 +353,7 @@ export default function AdminUserManagement({
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs font-medium text-slate-900 py-2 px-3 border border-slate-300 rounded-lg bg-white"
+            className="text-xs font-medium text-slate-900 py-2 px-3 border border-slate-300 rounded-lg bg-white w-full sm:w-auto"
           >
             <option value="ALL">All Account Statuses</option>
             <option value="ACTIVE">Verified Active</option>
@@ -365,7 +365,7 @@ export default function AdminUserManagement({
           <select
             value={unitFilter}
             onChange={(e) => setUnitFilter(e.target.value)}
-            className="text-xs font-medium text-slate-900 py-2 px-3 border border-slate-300 rounded-lg bg-white"
+            className="text-xs font-medium text-slate-900 py-2 px-3 border border-slate-300 rounded-lg bg-white w-full sm:w-auto"
           >
             <option value="ALL">All Units</option>
             {units.map((u) => (
@@ -376,7 +376,7 @@ export default function AdminUserManagement({
           </select>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 self-start md:self-auto">
+        <div className="flex flex-wrap items-center gap-2 shrink-0 self-start md:self-auto">
           <button
             type="button"
             onClick={() => setIsBulkModalOpen(true)}

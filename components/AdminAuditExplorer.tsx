@@ -139,7 +139,7 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
       {/* Action / Filter Bar */}
       <div className="glass-panel rounded-3xl p-4.5 border border-white/90 shadow-sm space-y-3.5">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-          <div className="relative flex-1">
+          <div className="relative flex-1 w-full">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
@@ -150,11 +150,11 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full lg:w-auto">
             <select
               value={actionFilter}
               onChange={(e) => setActionFilter(e.target.value)}
-              className="text-xs py-2.5 px-3.5 bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition shadow-inner text-slate-900 font-bold"
+              className="w-full sm:w-auto text-xs py-2.5 px-3.5 bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition shadow-inner text-slate-900 font-bold"
             >
               <option value="ALL">All Event Actions</option>
               <option value="USER_REGISTER">User Account Registered</option>
@@ -179,11 +179,11 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
               <option value="DELEGATION_REVOKED">Acting Signatory Revoked</option>
             </select>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={exportToCSV}
-                className="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center gap-1.5 cursor-pointer"
+                className="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
                 title="Export filtered records as standard CSV"
               >
                 <Download className="w-3.5 h-3.5" />
@@ -193,7 +193,7 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
               <button
                 type="button"
                 onClick={exportToJSON}
-                className="px-3.5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center gap-1.5 cursor-pointer"
+                className="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center justify-center gap-1.5 cursor-pointer"
                 title="Export full compliance package with audit integrity headers in JSON"
               >
                 <Download className="w-3.5 h-3.5 text-amber-400" />
@@ -204,36 +204,38 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
         </div>
 
         {/* Date Range Sub-Bar */}
-        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100/90 text-xs">
-          <span className="text-slate-500 font-bold">Date Range Filter:</span>
-          <div className="flex items-center gap-2">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs text-slate-800 bg-white"
-            />
-            <span className="text-slate-400 font-bold">to</span>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs text-slate-800 bg-white"
-            />
-            {(startDate || endDate) && (
-              <button
-                type="button"
-                onClick={() => {
-                  setStartDate("");
-                  setEndDate("");
-                }}
-                className="text-[11px] text-blue-700 hover:underline font-bold"
-              >
-                Clear Dates
-              </button>
-            )}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100/90 text-xs">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-slate-500 font-bold">Date Range:</span>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs text-slate-800 bg-white"
+              />
+              <span className="text-slate-400 font-bold text-xs">to</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs text-slate-800 bg-white"
+              />
+              {(startDate || endDate) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStartDate("");
+                    setEndDate("");
+                  }}
+                  className="text-[11px] text-blue-700 hover:underline font-bold cursor-pointer ml-1"
+                >
+                  Clear Dates
+                </button>
+              )}
+            </div>
           </div>
-          <span className="text-slate-400 text-[11px] ml-auto font-mono">
+          <span className="text-slate-400 text-[11px] font-mono">
             {filteredLogs.length} matching event(s)
           </span>
         </div>

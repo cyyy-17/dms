@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { NotificationStatus, NotificationType } from "@prisma/client";
 import { formatHumanDateTime } from "@/lib/status-labels";
+import DataTableWrapper from "@/components/DataTableWrapper";
 
 interface NotificationItem {
   id: string;
@@ -173,11 +174,11 @@ export default function AdminNotificationManagement({
           </select>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 shrink-0 self-start md:self-auto">
           <button
             onClick={handleTriggerDispatch}
             disabled={isLoading}
-            className="px-3.5 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5"
+            className="px-3.5 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5 cursor-pointer"
           >
             <Send className="w-3.5 h-3.5 text-amber-400" />
             <span>Trigger Resend Batch</span>
@@ -186,7 +187,7 @@ export default function AdminNotificationManagement({
           <button
             onClick={handleClearSent}
             disabled={isLoading}
-            className="px-3.5 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5"
+            className="px-3.5 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5 text-slate-500" />
             <span>Purge Delivered</span>
@@ -196,7 +197,7 @@ export default function AdminNotificationManagement({
 
       {/* Notifications Table */}
       <div className="glass-card rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        <DataTableWrapper>
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
@@ -265,7 +266,7 @@ export default function AdminNotificationManagement({
                         <button
                           onClick={() => handleRetry(n.id)}
                           disabled={isLoading}
-                          className="px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] border border-blue-200 inline-flex items-center gap-1"
+                          className="px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-[11px] border border-blue-200 inline-flex items-center gap-1 cursor-pointer"
                         >
                           <RotateCcw className="w-3 h-3" />
                           <span>Retry</span>
@@ -277,7 +278,7 @@ export default function AdminNotificationManagement({
               )}
             </tbody>
           </table>
-        </div>
+        </DataTableWrapper>
       </div>
     </div>
   );

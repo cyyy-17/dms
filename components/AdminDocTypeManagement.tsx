@@ -215,7 +215,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
       {/* Filter / Action Bar */}
       <div className="glass-card rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3 flex-1">
-          <div className="relative min-w-56 flex-1">
+          <div className="relative min-w-56 flex-1 w-full sm:w-auto">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
             <input
               type="text"
@@ -229,7 +229,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white"
+            className="text-xs py-2 px-3 border border-slate-300 rounded-lg bg-white w-full sm:w-auto"
           >
             <option value="ALL">All Statuses</option>
             <option value="ACTIVE">Active Types</option>
@@ -250,7 +250,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
             });
             setIsCreateModalOpen(true);
           }}
-          className="px-4 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5 shrink-0 self-start md:self-auto"
+          className="px-4 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5 shrink-0 self-start md:self-auto cursor-pointer"
         >
           <Plus className="w-4 h-4 text-amber-400" />
           <span>Add Classification Type</span>
@@ -409,7 +409,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="font-bold text-slate-700 uppercase mb-1 block">
                     RA 10173 Retention (Days)
