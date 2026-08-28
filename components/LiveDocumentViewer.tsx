@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getSignedDocumentUrlAction } from "@/actions/documents";
 import {
   FileText,
@@ -65,9 +65,8 @@ export default function LiveDocumentViewer({
     /\.(docx?|xlsx?|pptx?)$/i.test(fileName);
 
   // Fetch or refresh signed document URL with cache-busting
-  const fetchSignedUrl = (showSyncBadge = false) => {
+  const fetchSignedUrl = useCallback((showSyncBadge = false) => {
     if (!storagePath) return;
-    setIsLoading(true);
     setError(null);
 
     getSignedDocumentUrlAction(storagePath)
@@ -93,7 +92,7 @@ export default function LiveDocumentViewer({
       .finally(() => {
         setIsLoading(false);
       });
-  };
+  }, [storagePath]);
 
   // Initial load or prop change (e.g. Server Component revalidation)
   useEffect(() => {
@@ -102,7 +101,6 @@ export default function LiveDocumentViewer({
       return;
     }
 
-    setIsLoading(true);
     getSignedDocumentUrlAction(storagePath)
       .then((res) => {
         if (!isMounted) return;
@@ -135,6 +133,7 @@ export default function LiveDocumentViewer({
     const handleLiveRefresh = (e: Event) => {
       const customEvent = e as CustomEvent<{ documentId?: string }>;
       if (!customEvent.detail?.documentId || customEvent.detail.documentId === documentId) {
+        setIsLoading(true);
         fetchSignedUrl(true);
       }
     };
@@ -143,9 +142,10 @@ export default function LiveDocumentViewer({
     return () => {
       window.removeEventListener("document-live-refresh", handleLiveRefresh);
     };
-  }, [storagePath, documentId]);
+  }, [documentId, fetchSignedUrl]);
 
   const handleReload = () => {
+    setIsLoading(true);
     fetchSignedUrl(true);
   };
 
