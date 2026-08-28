@@ -17,6 +17,7 @@ import {
 import SignaturePadModal from "@/components/SignaturePadModal";
 import VisualStampPlacerModal, { StampCoordinates } from "@/components/VisualStampPlacerModal";
 import CertificateOfAuthenticityModal from "@/components/CertificateOfAuthenticityModal";
+import DocumentChecksumValidatorModal from "@/components/DocumentChecksumValidatorModal";
 import { useOptionalToast } from "@/components/ToastContext";
 import {
   Send,
@@ -41,6 +42,20 @@ import {
   Award,
 } from "lucide-react";
 import { DocumentStatus, UserRole } from "@prisma/client";
+
+const CANNED_APPROVAL_TEMPLATES = [
+  "Approved in accordance with Unit policies and institutional standards.",
+  "Approved subject to standard compliance checks and administrative filing.",
+  "Recommending approval. All documentary attachments verified.",
+  "Approved and endorsed for executive processing.",
+];
+
+const CANNED_REJECTION_TEMPLATES = [
+  "Returned for signatory corrections and required endorsements.",
+  "Returned due to incomplete or missing supporting documentation.",
+  "Returned for budget clearance and account code verification.",
+  "Returned for revisions as discussed during unit coordination.",
+];
 
 interface DocumentDetailActionsProps {
   document: {
@@ -114,6 +129,7 @@ export default function DocumentDetailActions({
   } | null>(null);
   const [copiedHash, setCopiedHash] = useState(false);
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
+  const [isChecksumValidatorOpen, setIsChecksumValidatorOpen] = useState(false);
 
   const handleCopyChecksum = () => {
     if (!document.currentVersion?.sha256Checksum) return;
@@ -745,23 +761,31 @@ export default function DocumentDetailActions({
         )}
 
         {/* Bottom: Action Command Deck */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
           <button
             onClick={handleDownload}
             disabled={downloadLoading}
-            className="py-2.5 px-4 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
+            className="py-2.5 px-3 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1.5 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
           >
             <Download className="w-4 h-4 text-amber-400" />
-            <span>{downloadLoading ? "Generating Link..." : "Download Signed File"}</span>
+            <span>{downloadLoading ? "Generating..." : "Download File"}</span>
           </button>
 
           <button
             onClick={handleVerifyChecksum}
             disabled={isVerifyingChecksum}
-            className="py-2.5 px-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold shadow-2xs hover:shadow-xs transition-all duration-200 flex items-center justify-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
+            className="py-2.5 px-3 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold shadow-2xs hover:shadow-xs transition-all duration-200 flex items-center justify-center gap-1.5 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
           >
             <ShieldCheck className="w-4 h-4 text-emerald-600" />
-            <span>{isVerifyingChecksum ? "Hashing Binary..." : "Verify Hash Integrity"}</span>
+            <span>{isVerifyingChecksum ? "Hashing..." : "Verify Vault Hash"}</span>
+          </button>
+
+          <button
+            onClick={() => setIsChecksumValidatorOpen(true)}
+            className="py-2.5 px-3 rounded-xl bg-white hover:bg-blue-50 border border-blue-200 text-[#0F2962] text-xs font-bold shadow-2xs hover:shadow-xs transition-all duration-200 flex items-center justify-center gap-1.5 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
+          >
+            <Fingerprint className="w-4 h-4 text-blue-600" />
+            <span>Check Local File</span>
           </button>
         </div>
 
@@ -914,6 +938,19 @@ export default function DocumentDetailActions({
                 onChange={(e) => setComments(e.target.value)}
                 className="block w-full px-3.5 py-2.5 text-xs bg-white border border-slate-300 rounded-2xl focus:ring-2 focus:ring-[#0F2962] focus:border-[#0F2962] transition-all shadow-inner placeholder:text-slate-400"
               />
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                <span className="text-[10px] text-slate-400 font-bold self-center mr-1">Quick Templates:</span>
+                {CANNED_APPROVAL_TEMPLATES.map((tmpl, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setComments(tmpl)}
+                    className="px-2 py-0.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#0F2962] text-[10px] font-semibold transition cursor-pointer border border-blue-100"
+                  >
+                    {tmpl.length > 35 ? tmpl.slice(0, 32) + "..." : tmpl}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Unified E-Signature & Mandatory Stamp Placement Console */}
@@ -1263,6 +1300,19 @@ export default function DocumentDetailActions({
                 className="block w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-300 rounded-2xl focus:bg-white focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all shadow-inner placeholder:text-slate-400"
                 autoFocus
               />
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
+                <span className="text-[10px] text-slate-400 font-bold self-center mr-1">Quick Reasons:</span>
+                {CANNED_REJECTION_TEMPLATES.map((tmpl, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setComments(tmpl)}
+                    className="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 text-[10px] font-semibold transition cursor-pointer border border-amber-200"
+                  >
+                    {tmpl.length > 35 ? tmpl.slice(0, 32) + "..." : tmpl}
+                  </button>
+                ))}
+              </div>
               <p className="text-[11px] text-slate-500 font-medium">
                 The uploader will receive these remarks directly in their notifications and document dashboard.
               </p>
@@ -1367,6 +1417,15 @@ export default function DocumentDetailActions({
           uploader: (document as { uploader?: { firstName: string; lastName: string; email: string } }).uploader || { firstName: "Faculty", lastName: "Member", email: "" },
           currentVersion: document.currentVersion,
         }}
+      />
+
+      {/* Document Local Checksum Validator Modal */}
+      <DocumentChecksumValidatorModal
+        isOpen={isChecksumValidatorOpen}
+        onClose={() => setIsChecksumValidatorOpen(false)}
+        expectedChecksum={document.currentVersion?.sha256Checksum || ""}
+        documentTitle={(document as { title?: string }).title || document.trackingNumber}
+        trackingNumber={document.trackingNumber}
       />
     </div>
   );

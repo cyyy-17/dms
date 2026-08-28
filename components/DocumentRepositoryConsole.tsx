@@ -7,6 +7,7 @@ import CopyTrackingButton from "@/components/CopyTrackingButton";
 import DataTableWrapper from "@/components/DataTableWrapper";
 import { useStarredDocuments } from "@/hooks/useStarredDocuments";
 import ExpiryCalendarView from "@/components/ExpiryCalendarView";
+import DocumentQuickPreviewModal, { QuickPreviewDoc } from "@/components/DocumentQuickPreviewModal";
 import {
   FileText,
   Search,
@@ -18,6 +19,11 @@ import {
   Download,
   X,
   Star,
+  Eye,
+  CheckSquare,
+  Square,
+  Copy,
+  Check,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
 
@@ -88,6 +94,9 @@ export default function DocumentRepositoryConsole({
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [onlyEscalated, setOnlyEscalated] = useState(false);
   const [onlyStarred, setOnlyStarred] = useState(false);
+  const [previewDoc, setPreviewDoc] = useState<QuickPreviewDoc | null>(null);
+  const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(new Set());
+  const [copiedBatch, setCopiedBatch] = useState(false);
 
   const hasActiveFilters =
     searchQuery.trim() !== "" ||
@@ -148,6 +157,58 @@ export default function DocumentRepositoryConsole({
       return true;
     });
   }, [initialDocuments, searchQuery, selectedUnit, selectedDocType, selectedStatus, onlyEscalated, onlyStarred, isStarred]);
+
+  const toggleSelectDoc = (id: string) => {
+    setSelectedDocIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedDocIds.size === filteredDocuments.length) {
+      setSelectedDocIds(new Set());
+    } else {
+      setSelectedDocIds(new Set(filteredDocuments.map((d) => d.id)));
+    }
+  };
+
+  const handleExportSelectedCsv = () => {
+    const selected = filteredDocuments.filter((d) => selectedDocIds.has(d.id));
+    if (selected.length === 0) return;
+    const headers = ["Tracking Number", "Title", "Unit", "Type", "Status", "Escalated", "Uploader", "Created At"];
+    const rows = selected.map((d) => [
+      d.trackingNumber,
+      `"${d.title.replace(/"/g, '""')}"`,
+      d.unit?.code || "GENERAL",
+      d.documentType?.name || "General",
+      d.status,
+      d.isEscalated ? "YES" : "NO",
+      d.uploader ? `${d.uploader.firstName} ${d.uploader.lastName}` : "Staff",
+      new Date(d.createdAt).toISOString(),
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `SASDMS_Selected_${selected.length}_Docs_${new Date().toISOString().substring(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleCopySelectedTrackingNumbers = () => {
+    const selected = filteredDocuments.filter((d) => selectedDocIds.has(d.id));
+    if (selected.length === 0) return;
+    const text = selected.map((d) => d.trackingNumber).join("\n");
+    navigator.clipboard.writeText(text);
+    setCopiedBatch(true);
+    setTimeout(() => setCopiedBatch(false), 2000);
+  };
 
   // Export to CSV
   const handleExportCsv = () => {
@@ -404,7 +465,21 @@ export default function DocumentRepositoryConsole({
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50/90 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200/80">
-                  <th className="py-3.5 px-6">Tracking Number</th>
+                  <th className="py-3.5 pl-4 pr-2 w-10 text-center">
+                    <button
+                      type="button"
+                      onClick={toggleSelectAll}
+                      className="p-1 rounded hover:bg-slate-200 transition cursor-pointer text-slate-600"
+                      title={selectedDocIds.size === filteredDocuments.length ? "Deselect All" : "Select All"}
+                    >
+                      {selectedDocIds.size === filteredDocuments.length && filteredDocuments.length > 0 ? (
+                        <CheckSquare className="w-4 h-4 text-[#0F2962]" />
+                      ) : (
+                        <Square className="w-4 h-4 text-slate-400" />
+                      )}
+                    </button>
+                  </th>
+                  <th className="py-3.5 px-4">Tracking Number</th>
                   <th className="py-3.5 px-6">Title & Type</th>
                   <th className="py-3.5 px-6">Unit</th>
                   <th className="py-3.5 px-6">Uploader</th>
@@ -416,9 +491,28 @@ export default function DocumentRepositoryConsole({
               <tbody className="divide-y divide-slate-100/90 bg-white/60">
                 {filteredDocuments.map((doc) => {
                   const starred = isStarred(doc.id);
+                  const isSelected = selectedDocIds.has(doc.id);
                   return (
-                    <tr key={doc.id} className="hover:bg-blue-50/40 transition-colors duration-150">
-                      <td className="py-4 px-6">
+                    <tr
+                      key={doc.id}
+                      className={`transition-colors duration-150 ${
+                        isSelected ? "bg-blue-50/80" : "hover:bg-blue-50/40"
+                      }`}
+                    >
+                      <td className="py-4 pl-4 pr-2 text-center">
+                        <button
+                          type="button"
+                          onClick={() => toggleSelectDoc(doc.id)}
+                          className="p-1 rounded hover:bg-slate-100 transition cursor-pointer text-slate-600"
+                        >
+                          {isSelected ? (
+                            <CheckSquare className="w-4 h-4 text-[#0F2962]" />
+                          ) : (
+                            <Square className="w-4 h-4 text-slate-300 hover:text-slate-500" />
+                          )}
+                        </button>
+                      </td>
+                      <td className="py-4 px-4">
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
@@ -483,12 +577,44 @@ export default function DocumentRepositoryConsole({
                       {formatHumanDate(doc.createdAt)}
                     </td>
                     <td className="py-4 px-6 text-right">
-                      <Link
-                        href={`/dashboard/documents/${doc.id}`}
-                        className="px-3.5 py-1.5 rounded-xl border border-slate-300/90 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block hover:-translate-y-0.5 active:scale-98"
-                      >
-                        Open Details
-                      </Link>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPreviewDoc({
+                              id: doc.id,
+                              trackingNumber: doc.trackingNumber,
+                              title: doc.title,
+                              status: doc.status,
+                              createdAt: doc.createdAt,
+                              expiryDate: doc.expiryDate,
+                              unit: doc.unit || { code: "GEN", name: "General Administration" },
+                              documentType: doc.documentType || { code: "DOC", name: "Standard Document" },
+                              uploader: doc.uploader
+                                ? { firstName: doc.uploader.firstName, lastName: doc.uploader.lastName, email: "" }
+                                : { firstName: "Staff", lastName: "Member", email: "" },
+                              currentVersion: doc.currentVersion
+                                ? {
+                                    versionNumber: doc.currentVersion.versionNumber,
+                                    fileName: doc.currentVersion.fileName,
+                                    sha256Checksum: "",
+                                  }
+                                : null,
+                            })
+                          }
+                          className="p-1.5 rounded-xl border border-slate-200 hover:bg-blue-50 hover:text-[#0F2962] text-slate-500 transition cursor-pointer"
+                          title="Quick Preview"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
+
+                        <Link
+                          href={`/dashboard/documents/${doc.id}`}
+                          className="px-3.5 py-1.5 rounded-xl border border-slate-300/90 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block hover:-translate-y-0.5 active:scale-98"
+                        >
+                          Open
+                        </Link>
+                      </div>
                     </td>
                     </tr>
                   );
@@ -575,6 +701,53 @@ export default function DocumentRepositoryConsole({
         })}
       </div>
     )}
+      {/* Floating Batch Selection Command Deck */}
+      {selectedDocIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700/80 backdrop-blur-xl flex items-center gap-3.5 text-xs animate-in slide-in-from-bottom-4 duration-200">
+          <div className="flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full bg-[#0F2962] text-amber-400 font-black flex items-center justify-center text-[10px]">
+              {selectedDocIds.size}
+            </span>
+            <span className="font-bold">Selected</span>
+          </div>
+
+          <div className="h-4 w-px bg-slate-700" />
+
+          <button
+            type="button"
+            onClick={handleExportSelectedCsv}
+            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5 text-blue-400" />
+            <span>Export CSV</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleCopySelectedTrackingNumbers}
+            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition flex items-center gap-1.5 cursor-pointer"
+          >
+            {copiedBatch ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-400" />}
+            <span>{copiedBatch ? "Copied!" : "Copy IDs"}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSelectedDocIds(new Set())}
+            className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition cursor-pointer ml-1"
+            title="Clear Selection"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Quick Preview Modal */}
+      <DocumentQuickPreviewModal
+        isOpen={!!previewDoc}
+        onClose={() => setPreviewDoc(null)}
+        document={previewDoc}
+      />
     </div>
   );
 }

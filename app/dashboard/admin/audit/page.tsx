@@ -3,6 +3,7 @@ import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import AdminAuditExplorer from "@/components/AdminAuditExplorer";
 import AdminHealthWidget from "@/components/AdminHealthWidget";
+import ApprovalVelocityWidget from "@/components/ApprovalVelocityWidget";
 import { ShieldCheck } from "lucide-react";
 import { AuditAction } from "@prisma/client";
 
@@ -60,6 +61,8 @@ export default async function AdminAuditPage() {
       </div>
 
       <AdminHealthWidget />
+
+      <ApprovalVelocityWidget />
 
       <AdminAuditExplorer logs={auditLogs} />
     </div>

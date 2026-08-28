@@ -1,8 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createDocumentAction, AssignedSignatoryStep } from "@/actions/documents";
+import {
+  createDocumentAction,
+  checkDuplicateDocumentAction,
+  AssignedSignatoryStep,
+} from "@/actions/documents";
 import { getDocTypeTemplateDownloadUrlAction } from "@/actions/templates";
 import {
   UploadCloud,
@@ -83,6 +87,33 @@ export default function DocumentUploadForm({
   const [isHashing, setIsHashing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
+
+  useEffect(() => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle || trimmedTitle.length < 4 || !unitId) {
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const res = await checkDuplicateDocumentAction(trimmedTitle, unitId);
+        if (res.isDuplicate && res.existingDocument) {
+          setDuplicateWarning(
+            `Notice: An active document with matching title "${res.existingDocument.title}" (${res.existingDocument.trackingNumber} - ${res.existingDocument.status}) is already recorded in this unit.`
+          );
+        } else {
+          setDuplicateWarning(null);
+        }
+      } catch {
+        // Ignore network glitch
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [title, unitId]);
+
+  const activeDuplicateWarning = title.trim().length >= 4 ? duplicateWarning : null;
 
   const selectedDocType = docTypes.find((d) => d.id === documentTypeId);
   const selectedUnit = units.find((u) => u.id === unitId);
@@ -496,6 +527,12 @@ export default function DocumentUploadForm({
               onChange={(e) => setTitle(e.target.value)}
               className="block w-full px-3.5 py-2 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner placeholder:text-slate-400"
             />
+            {activeDuplicateWarning && (
+              <div className="mt-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2 animate-in fade-in">
+                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                <span className="leading-tight">{activeDuplicateWarning}</span>
+              </div>
+            )}
           </div>
 
           <div>

@@ -3,6 +3,12 @@
  * Compliant with institutional review turnaround targets for Unit Coordinators and Directors.
  */
 
+export const SLA_CONFIG = {
+  COORDINATOR_HOURS: 48,
+  DIRECTOR_HOURS: 72,
+  APPROACHING_THRESHOLD_HOURS: 24,
+} as const;
+
 export interface SlaEvaluation {
   status: "ON_TRACK" | "APPROACHING" | "OVERDUE";
   hoursRemaining: number;

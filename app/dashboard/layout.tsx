@@ -7,6 +7,7 @@ import IdleSessionLock from "@/components/IdleSessionLock";
 import CommandPalette from "@/components/CommandPalette";
 import OnboardingTour from "@/components/OnboardingTour";
 import KeyboardShortcutsModal from "@/components/KeyboardShortcutsModal";
+import NetworkStatusBanner from "@/components/NetworkStatusBanner";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { ToastProvider } from "@/components/ToastContext";
 
@@ -36,6 +37,7 @@ export default async function DashboardLayout({
             </ErrorBoundary>
           </main>
         </div>
+        <NetworkStatusBanner />
         <SessionTimeoutManager />
         <IdleSessionLock
           userEmail={user.email}

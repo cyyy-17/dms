@@ -96,7 +96,7 @@ export default function AdminHealthWidget() {
               <span className="text-[10px] font-bold text-emerald-700">Latency</span>
             </div>
             <span className="text-[10px] text-slate-400 block font-medium">
-              Pool Status: <strong className="text-slate-700">{data.dbStatus}</strong>
+              Pool Status: <strong className="text-slate-700">{data.dbStatus}</strong> • <strong className="text-blue-700">{data.totalAuditEvents || 0}</strong> Audits
             </span>
           </div>
 
@@ -111,7 +111,7 @@ export default function AdminHealthWidget() {
             </div>
             <div className="flex items-baseline gap-1.5">
               <span className="text-lg font-black font-mono text-slate-900">{data.totalDocuments}</span>
-              <span className="text-[10px] font-bold text-purple-700">Files</span>
+              <span className="text-[10px] font-bold text-purple-700">Files ({data.totalVersions || data.totalDocuments} Versions)</span>
             </div>
             <span className="text-[10px] text-slate-400 block font-medium">
               Supabase Private Bucket: <strong className="text-emerald-700">Online</strong>
@@ -154,7 +154,7 @@ export default function AdminHealthWidget() {
               <span className="text-[10px] font-bold text-teal-700">RAM</span>
             </div>
             <span className="text-[10px] text-slate-400 block font-medium">
-              Registered Users: <strong className="text-slate-700">{data.totalUsers}</strong>
+              Users: <strong className="text-slate-700">{data.totalUsers}</strong> • Signatures: <strong className="text-emerald-700">{data.totalSignatures || 0}</strong>
             </span>
           </div>
         </div>

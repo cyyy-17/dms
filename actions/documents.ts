@@ -912,3 +912,52 @@ export async function quickSearchLiveAction(query: string): Promise<{
   }
 }
 
+/**
+ * Check if an active document with a matching title already exists in the selected unit
+ */
+export async function checkDuplicateDocumentAction(
+  title: string,
+  unitId: string
+): Promise<{
+  isDuplicate: boolean;
+  existingDocument?: {
+    id: string;
+    trackingNumber: string;
+    title: string;
+    status: string;
+  } | null;
+}> {
+  const normalizedTitle = title.trim();
+  if (!normalizedTitle || normalizedTitle.length < 3 || !unitId) {
+    return { isDuplicate: false };
+  }
+
+  if (!isDatabaseConfigured) {
+    return { isDuplicate: false };
+  }
+
+  try {
+    const existing = await prisma.document.findFirst({
+      where: {
+        unitId,
+        title: { equals: normalizedTitle, mode: "insensitive" },
+        isArchived: false,
+      },
+      select: {
+        id: true,
+        trackingNumber: true,
+        title: true,
+        status: true,
+      },
+    });
+
+    return {
+      isDuplicate: !!existing,
+      existingDocument: existing || null,
+    };
+  } catch (error) {
+    console.error("[CHECK_DUPLICATE_ERROR]", error);
+    return { isDuplicate: false };
+  }
+}
+

@@ -149,6 +149,14 @@ export default function CommandPalette() {
         href: "/dashboard/admin/documents-override",
         keywords: ["admin", "force approve", "archive", "reassign"],
       },
+      {
+        id: "admin-settings",
+        title: "Admin: System Parameters & Governance",
+        category: "Admin",
+        icon: SlidersHorizontal,
+        href: "/dashboard/admin/settings",
+        keywords: ["admin", "settings", "sla", "rules", "domain", "parameters"],
+      },
     ],
     []
   );

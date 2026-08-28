@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -24,6 +24,9 @@ import {
   BellRing,
   LogOut,
   User,
+  Volume2,
+  VolumeX,
+  Sliders,
 } from "lucide-react";
 import { signOutAction } from "@/actions/auth";
 import { getRoleLabel } from "@/lib/status-labels";
@@ -32,6 +35,19 @@ import dynamic from "next/dynamic";
 const SignaturePadModal = dynamic(() => import("@/components/SignaturePadModal"), { ssr: false });
 const QuickSearchModal = dynamic(() => import("@/components/QuickSearchModal"), { ssr: false });
 import NotificationBell from "@/components/NotificationBell";
+
+function subscribeToAudioPreference(callback: () => void) {
+  window.addEventListener("storage", callback);
+  return () => window.removeEventListener("storage", callback);
+}
+
+function getAudioSnapshot() {
+  return typeof window !== "undefined" ? localStorage.getItem("sasdms_audio_muted") === "true" : false;
+}
+
+function getServerAudioSnapshot() {
+  return false;
+}
 
 interface DashboardHeaderProps {
   user: {
@@ -51,6 +67,18 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const [isQuickSearchOpen, setIsQuickSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const isAudioMuted = useSyncExternalStore(
+    subscribeToAudioPreference,
+    getAudioSnapshot,
+    getServerAudioSnapshot
+  );
+
+  const toggleAudio = () => {
+    const next = !isAudioMuted;
+    localStorage.setItem("sasdms_audio_muted", String(next));
+    window.dispatchEvent(new Event("storage"));
+  };
 
   const isAdmin = user.role === "ADMIN";
 
@@ -102,6 +130,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
       "documents-override": "Governance State Overrides",
       audit: "RA 10173 Audit Explorer",
       notifications: "System Notifications Queue",
+      settings: "System Governance Parameters",
     };
 
     if (routeMap[last]) return routeMap[last];
@@ -143,6 +172,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
     { label: "Document Overrides", href: "/dashboard/admin/documents-override", icon: Wrench },
     { label: "RA 10173 Audit Explorer", href: "/dashboard/admin/audit", icon: ShieldCheck },
     { label: "System Notifications", href: "/dashboard/admin/notifications", icon: BellRing },
+    { label: "System Parameters", href: "/dashboard/admin/settings", icon: Sliders },
   ];
 
   return (
@@ -199,6 +229,21 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
           {/* In-App Notification Center */}
           <NotificationBell />
+
+          {/* Audio Notification Cues Toggle */}
+          <button
+            type="button"
+            onClick={toggleAudio}
+            className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition cursor-pointer border border-transparent hover:border-slate-200 hidden sm:flex items-center justify-center"
+            title={isAudioMuted ? "Notification chimes muted (Click to enable)" : "Notification chimes enabled (Click to mute)"}
+            aria-label="Toggle audio alerts"
+          >
+            {isAudioMuted ? (
+              <VolumeX className="w-4 h-4 text-slate-400" />
+            ) : (
+              <Volume2 className="w-4 h-4 text-[#0F2962]" />
+            )}
+          </button>
 
           {/* Quick Approvals Action Shortcut */}
           <Link

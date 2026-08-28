@@ -12,6 +12,9 @@ export interface SystemDiagnostics {
   failedNotifications: number;
   totalUsers: number;
   totalDocuments: number;
+  totalVersions: number;
+  totalSignatures: number;
+  totalAuditEvents: number;
   memoryUsageMb: number;
   timestamp: string;
 }
@@ -37,6 +40,9 @@ export async function getSystemDiagnosticsAction(): Promise<{
         failedNotifications: 0,
         totalUsers: 1,
         totalDocuments: 0,
+        totalVersions: 0,
+        totalSignatures: 0,
+        totalAuditEvents: 0,
         memoryUsageMb: Math.round(process.memoryUsage().rss / (1024 * 1024)),
         timestamp: new Date().toISOString(),
       },
@@ -48,12 +54,16 @@ export async function getSystemDiagnosticsAction(): Promise<{
     await prisma.$queryRaw`SELECT 1`;
     const dbLatencyMs = Date.now() - start;
 
-    const [pendingNotifs, failedNotifs, totalUsers, totalDocs] = await Promise.all([
-      prisma.notificationQueue.count({ where: { status: NotificationStatus.PENDING } }),
-      prisma.notificationQueue.count({ where: { status: NotificationStatus.FAILED } }),
-      prisma.user.count(),
-      prisma.document.count(),
-    ]);
+    const [pendingNotifs, failedNotifs, totalUsers, totalDocs, totalVers, totalSigs, totalAudits] =
+      await Promise.all([
+        prisma.notificationQueue.count({ where: { status: NotificationStatus.PENDING } }),
+        prisma.notificationQueue.count({ where: { status: NotificationStatus.FAILED } }),
+        prisma.user.count(),
+        prisma.document.count(),
+        prisma.documentVersion.count(),
+        prisma.approvalAction.count({ where: { signatureApplied: true } }),
+        prisma.auditLog.count(),
+      ]);
 
     const mem = process.memoryUsage();
     const memoryUsageMb = Math.round(mem.rss / (1024 * 1024));
@@ -68,6 +78,9 @@ export async function getSystemDiagnosticsAction(): Promise<{
         failedNotifications: failedNotifs,
         totalUsers,
         totalDocuments: totalDocs,
+        totalVersions: totalVers,
+        totalSignatures: totalSigs,
+        totalAuditEvents: totalAudits,
         memoryUsageMb,
         timestamp: new Date().toISOString(),
       },

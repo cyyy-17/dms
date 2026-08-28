@@ -20,6 +20,40 @@ interface ToastContextValue {
 
 const ToastContext = createContext<ToastContextValue | undefined>(undefined);
 
+function playNotificationChime(type: ToastType) {
+  if (typeof window === "undefined") return;
+  try {
+    const isAudioMuted = localStorage.getItem("sasdms_audio_muted") === "true";
+    if (isAudioMuted) return;
+
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    const freq = type === "error" ? 260 : type === "warning" ? 440 : 587.33;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    if (type === "success") {
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12);
+    }
+
+    gain.gain.setValueAtTime(0.03, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.2);
+  } catch {
+    // Ignore autoplay restriction
+  }
+}
+
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
@@ -32,6 +66,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       const newToast: ToastItem = { id, title, message, type, duration };
 
+      playNotificationChime(type);
       setToasts((prev) => [...prev.slice(-4), newToast]); // Keep up to 5 toasts
 
       if (duration > 0) {
