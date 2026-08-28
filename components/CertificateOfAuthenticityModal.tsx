@@ -16,7 +16,7 @@ import {
   Hash,
   Lock,
 } from "lucide-react";
-import { formatHumanDate, formatHumanDateTime, getStatusLabel } from "@/lib/status-labels";
+import { formatHumanDateTime, getStatusLabel } from "@/lib/status-labels";
 
 const emptySubscribe = () => () => {};
 
