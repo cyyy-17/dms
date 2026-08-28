@@ -86,7 +86,7 @@ export default function CertificateOfAuthenticityModal({
 
         {/* Certificate Printable Body */}
         <div className="flex-1 overflow-y-auto p-2 sm:p-4">
-          <div className="p-4 sm:p-8 sm:p-10 space-y-5 sm:space-y-6 bg-white text-slate-900 border-2 sm:border-8 border-slate-100/90 rounded-2xl print:border-4 print:m-0 print:p-8">
+          <div className="p-4 sm:p-8 space-y-5 sm:space-y-6 bg-white text-slate-900 border-2 sm:border-8 border-slate-100/90 rounded-2xl print:border-4 print:m-0 print:p-8">
             {/* Institutional Header */}
             <div className="text-center border-b-2 border-slate-900 pb-4 sm:pb-5 space-y-1">
               <p className="text-[9px] sm:text-[10px] font-black tracking-widest text-[#0F2962] uppercase">
