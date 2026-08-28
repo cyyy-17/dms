@@ -159,9 +159,16 @@ export default function NotificationBell() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-[calc(100vw-1.5rem)] xs:w-88 sm:w-96 rounded-2xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-          {/* Header */}
-          <div className="p-3.5 sm:p-4 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between gap-2">
+        <>
+          {/* Mobile backdrop to easily dismiss on tap outside */}
+          <div
+            className="fixed inset-0 z-40 sm:hidden bg-slate-950/20 backdrop-blur-2xs"
+            onClick={() => setIsOpen(false)}
+          />
+
+          <div className="fixed inset-x-3.5 top-17 sm:top-auto sm:inset-x-auto sm:right-0 sm:mt-2 sm:absolute w-auto sm:w-96 rounded-2xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            {/* Header */}
+            <div className="p-3.5 sm:p-4 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="text-xs font-black text-slate-900">Notifications</span>
               {unreadCount > 0 && (
@@ -269,7 +276,8 @@ export default function NotificationBell() {
             </Link>
           </div>
         </div>
-      )}
-    </div>
-  );
+      </>
+    )}
+  </div>
+);
 }
