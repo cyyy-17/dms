@@ -173,6 +173,7 @@ export default async function DashboardPage() {
                 alt="FAITH Crest"
                 width={48}
                 height={48}
+                priority
                 className="w-auto h-full object-contain"
               />
             </div>

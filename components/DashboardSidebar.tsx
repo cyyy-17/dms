@@ -134,6 +134,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
             alt="FAITH Crest"
             width={32}
             height={32}
+            priority
             className="w-auto h-full object-contain"
           />
         </div>
