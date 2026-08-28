@@ -236,7 +236,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                 </span>
               )}
             </div>
-            <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900 tracking-tight break-words">
+            <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900 tracking-tight wrap-break-word">
               {doc.title}
             </h1>
           </div>
