@@ -52,63 +52,65 @@ export default function CertificateOfAuthenticityModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200 print:p-0 print:bg-white print:static">
+    <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200 print:p-0 print:bg-white print:static">
       <div
-        className="glass-panel rounded-3xl max-w-2xl w-full border border-white/90 bg-white shadow-2xl overflow-hidden flex flex-col my-8 print:shadow-none print:border-none print:m-0 print:max-w-none print:w-full"
+        className="glass-panel rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[92vh] border border-white/90 bg-white shadow-2xl overflow-hidden flex flex-col print:shadow-none print:border-none print:m-0 print:max-w-none print:w-full print:max-h-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Top Actions (Hidden in Print) */}
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/90 print:hidden">
-          <div className="flex items-center gap-2">
-            <Award className="w-5 h-5 text-[#0F2962]" />
-            <span className="text-xs font-black text-slate-900 uppercase tracking-wider">
-              Institutional Certificate of Authenticity
+        {/* Modal Top Actions (Sticky, Hidden in Print) */}
+        <div className="p-3 sm:p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/95 shrink-0 print:hidden">
+          <div className="flex items-center gap-2 min-w-0">
+            <Award className="w-4 h-4 sm:w-5 sm:h-5 text-[#0F2962] shrink-0" />
+            <span className="text-[11px] sm:text-xs font-black text-slate-900 uppercase tracking-wider truncate">
+              Certificate of Authenticity
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={handlePrint}
-              className="px-3.5 py-1.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+              className="px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Print Slip</span>
+              <span className="hidden xs:inline">Print Slip</span>
             </button>
             <button
               onClick={onClose}
               className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
+              aria-label="Close certificate modal"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
 
         {/* Certificate Printable Body */}
-        <div className="p-8 sm:p-10 space-y-6 bg-white text-slate-900 border-8 border-slate-100/80 m-4 rounded-2xl print:border-4 print:m-0 print:p-8">
-          {/* Institutional Header */}
-          <div className="text-center border-b-2 border-slate-900 pb-5 space-y-1">
-            <p className="text-[10px] font-black tracking-widest text-[#0F2962] uppercase">
-              Republic of the Philippines • Commission on Higher Education
-            </p>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight">
-              First Asia Institute of Technology and Humanities
-            </h1>
-            <p className="text-xs font-bold text-slate-600">
-              Student Affairs and Services Document Management System (SASDMS)
-            </p>
-            <div className="pt-2">
-              <span className="inline-block px-4 py-1 rounded-full bg-slate-900 text-amber-300 font-mono text-[10px] font-black uppercase tracking-widest">
-                Official Electronic Verification Certificate
-              </span>
+        <div className="flex-1 overflow-y-auto p-2 sm:p-4">
+          <div className="p-4 sm:p-8 sm:p-10 space-y-5 sm:space-y-6 bg-white text-slate-900 border-2 sm:border-8 border-slate-100/90 rounded-2xl print:border-4 print:m-0 print:p-8">
+            {/* Institutional Header */}
+            <div className="text-center border-b-2 border-slate-900 pb-4 sm:pb-5 space-y-1">
+              <p className="text-[9px] sm:text-[10px] font-black tracking-widest text-[#0F2962] uppercase">
+                Republic of the Philippines • Commission on Higher Education
+              </p>
+              <h1 className="text-base sm:text-2xl font-black text-slate-900 uppercase tracking-tight leading-tight">
+                First Asia Institute of Technology and Humanities
+              </h1>
+              <p className="text-[11px] sm:text-xs font-bold text-slate-600">
+                Student Affairs and Services Document Management System (SASDMS)
+              </p>
+              <div className="pt-2">
+                <span className="inline-block px-3 sm:px-4 py-1 rounded-full bg-slate-900 text-amber-300 font-mono text-[9px] sm:text-[10px] font-black uppercase tracking-widest">
+                  Official Electronic Verification Certificate
+                </span>
+              </div>
             </div>
-          </div>
 
-          {/* Certificate Description */}
-          <p className="text-xs text-slate-600 text-center leading-relaxed">
-            This certifies that the record described below has completed the mandatory institutional review, 
-            sequential coordinator and executive approval workflow, and complies with the data integrity safeguards of 
-            <strong className="text-slate-900 font-bold"> Republic Act No. 10173 (Data Privacy Act of 2012)</strong>.
-          </p>
+            {/* Certificate Description */}
+            <p className="text-[11px] sm:text-xs text-slate-600 text-center leading-relaxed">
+              This certifies that the record described below has completed the mandatory institutional review, 
+              sequential coordinator and executive approval workflow, and complies with the data integrity safeguards of 
+              <strong className="text-slate-900 font-bold"> Republic Act No. 10173 (Data Privacy Act of 2012)</strong>.
+            </p>
 
           {/* Document Summary Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
@@ -202,14 +204,15 @@ export default function CertificateOfAuthenticityModal({
             </div>
           )}
 
-          {/* Statutory Footer */}
-          <div className="pt-4 border-t border-slate-200 text-center space-y-1 text-[10px] text-slate-500">
-            <p className="font-mono">
-              Certificate Generated: {new Date().toUTCString()} • SASDMS Security Vault
-            </p>
-            <p className="text-[9px]">
-              This document is an electronically generated institutional verification slip. Tampering or unauthorized alteration is strictly prohibited under Philippine Law.
-            </p>
+            {/* Statutory Footer */}
+            <div className="pt-4 border-t border-slate-200 text-center space-y-1 text-[10px] text-slate-500">
+              <p className="font-mono">
+                Certificate Generated: {new Date().toUTCString()} • SASDMS Security Vault
+              </p>
+              <p className="text-[9px]">
+                This document is an electronically generated institutional verification slip. Tampering or unauthorized alteration is strictly prohibited under Philippine Law.
+              </p>
+            </div>
           </div>
         </div>
       </div>
