@@ -19,6 +19,7 @@ import {
 import { formatFileSize } from "@/lib/status-labels";
 
 interface LiveDocumentViewerProps {
+  documentId?: string;
   documentTitle: string;
   trackingNumber: string;
   storagePath: string | null;
@@ -29,6 +30,7 @@ interface LiveDocumentViewerProps {
 }
 
 export default function LiveDocumentViewer({
+  documentId,
   documentTitle,
   trackingNumber,
   storagePath,
@@ -103,7 +105,14 @@ export default function LiveDocumentViewer({
     if (!storagePath) return;
     setDownloadLoading(true);
     try {
-      if (signedUrl) {
+      if (documentId && typeof window !== "undefined") {
+        const a = window.document.createElement("a");
+        a.href = `/api/documents/${documentId}/download`;
+        a.download = fileName || "document.pdf";
+        window.document.body.appendChild(a);
+        a.click();
+        window.document.body.removeChild(a);
+      } else if (signedUrl) {
         window.open(signedUrl, "_blank");
       } else {
         const res = await getSignedDocumentUrlAction(storagePath);
@@ -116,7 +125,7 @@ export default function LiveDocumentViewer({
     } catch {
       setError("Download error.");
     } finally {
-      setDownloadLoading(false);
+      setTimeout(() => setDownloadLoading(false), 1200);
     }
   };
 

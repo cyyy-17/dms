@@ -31,6 +31,7 @@ import dynamic from "next/dynamic";
 
 const SignaturePadModal = dynamic(() => import("@/components/SignaturePadModal"), { ssr: false });
 const QuickSearchModal = dynamic(() => import("@/components/QuickSearchModal"), { ssr: false });
+import NotificationBell from "@/components/NotificationBell";
 
 interface DashboardHeaderProps {
   user: {
@@ -196,14 +197,17 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             <Search className="w-4 h-4" />
           </button>
 
-          {/* Quick Notification / Action Shortcut */}
+          {/* In-App Notification Center */}
+          <NotificationBell />
+
+          {/* Quick Approvals Action Shortcut */}
           <Link
             href="/dashboard/approvals"
-            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962]"
+            className="hidden sm:flex p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition items-center gap-1.5 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962]"
             title="View sequential approval action items"
           >
-            <BellRing className="w-3.5 h-3.5 text-[#0F2962]" />
-            <span className="hidden sm:inline">Approvals</span>
+            <CheckSquare className="w-3.5 h-3.5 text-[#0F2962]" />
+            <span>Approvals</span>
           </Link>
 
           <button

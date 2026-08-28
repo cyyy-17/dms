@@ -24,15 +24,6 @@ const UNIT_METADATA_MAP: Record<
     sampleDocs: string[];
   }
 > = {
-  GCO: {
-    badge: "Confidentiality High",
-    color: "from-blue-500/20 to-blue-600/5 text-blue-400 border-blue-500/30",
-    category: "counseling",
-    sla: "< 24h SLA",
-    confidentiality: "Maximum",
-    desc: "Confidential student intake profiles, psychological evaluations, graduation clearances, and counselor endorsement slips.",
-    sampleDocs: ["Student Psychological Intake", "Counselor Case Notes", "Graduation Guidance Clearance", "Crisis Intervention Referral"],
-  },
   GUIDANCE: {
     badge: "Counseling & Psych",
     color: "from-blue-500/20 to-blue-600/5 text-blue-400 border-blue-500/30",
@@ -41,15 +32,6 @@ const UNIT_METADATA_MAP: Record<
     confidentiality: "Maximum",
     desc: "Counseling documentation, intake assessments, peer facilitator programs, and psycho-educational modules.",
     sampleDocs: ["Intake Assessment", "Peer Facilitator Program", "Counselor Endorsement", "Student Psychological Profile"],
-  },
-  AAPO: {
-    badge: "Partnership MOAs",
-    color: "from-amber-500/20 to-amber-600/5 text-amber-400 border-amber-500/30",
-    category: "career",
-    sla: "< 48h SLA",
-    confidentiality: "High",
-    desc: "Industry MOA agreements, alumni tracer reports, graduate networking clearances, and institutional partnership charters.",
-    sampleDocs: ["Corporate MOA Partnership", "Alumni Tracer Verification", "Graduate Placement Release", "Homecoming Charter"],
   },
   ALUMNI: {
     badge: "Alumni Relations",
@@ -60,15 +42,6 @@ const UNIT_METADATA_MAP: Record<
     desc: "Alumni registry, homecoming event documentation, alumni tracer studies, and chapter engagements.",
     sampleDocs: ["Alumni Chapter Charter", "Tracer Study Verification", "Homecoming Sponsorship Agreement", "Graduate Database Release"],
   },
-  SOA: {
-    badge: "Event Permits",
-    color: "from-purple-500/20 to-purple-600/5 text-purple-400 border-purple-500/30",
-    category: "student_life",
-    sla: "< 24h SLA",
-    confidentiality: "Standard",
-    desc: "Accreditation charters, campus activity proposals, off-campus event permits, and student council budget requisitions.",
-    sampleDocs: ["Student Org Re-Accreditation", "Off-Campus Event Permit", "Council Budget Liquidation", "Activity Safety Protocol"],
-  },
   ACTIVITIES: {
     badge: "Student Org Charters",
     color: "from-purple-500/20 to-purple-600/5 text-purple-400 border-purple-500/30",
@@ -77,15 +50,6 @@ const UNIT_METADATA_MAP: Record<
     confidentiality: "Standard",
     desc: "Accredited student organizations, event proposals, campus permits, and activity liquidations.",
     sampleDocs: ["Org Recognition Charter", "Campus Activity Permit", "Fundraiser Authorization", "Year-End Financial Audit"],
-  },
-  SFA: {
-    badge: "Grants & Vouchers",
-    color: "from-emerald-500/20 to-emerald-600/5 text-emerald-400 border-emerald-500/30",
-    category: "student_life",
-    sla: "< 24h SLA",
-    confidentiality: "High",
-    desc: "Academic grant applications, third-party sponsor MOAs, financial aid validation vouchers, and donor audit covenants.",
-    sampleDocs: ["Institutional Grant Application", "Third-Party Sponsor MOU", "Tuition Discount Voucher", "Donor Billing Roster"],
   },
   SCHOLARSHIPS: {
     badge: "Scholarships & Aid",
@@ -96,15 +60,6 @@ const UNIT_METADATA_MAP: Record<
     desc: "Institutional grants, government assistance endorsements, donor memoranda, and billing rosters.",
     sampleDocs: ["Government Aid Endorsement", "Academic Scholarship Contract", "Grant Certification", "Tuition Voucher"],
   },
-  DSW: {
-    badge: "Compliance Logs",
-    color: "from-rose-500/20 to-rose-600/5 text-rose-400 border-rose-500/30",
-    category: "governance",
-    sla: "< 12h SLA",
-    confidentiality: "Maximum",
-    desc: "Incident resolution logs, behavioral clearances, student handbook notices, and official inquiry proceedings.",
-    sampleDocs: ["Behavioral Clearance Notice", "Incident Inquiry Minutes", "Student Handbook Violation Log", "Good Moral Endorsement"],
-  },
   DISCIPLINE: {
     badge: "Student Discipline",
     color: "from-rose-500/20 to-rose-600/5 text-rose-400 border-rose-500/30",
@@ -114,15 +69,6 @@ const UNIT_METADATA_MAP: Record<
     desc: "Student handbook enforcement, incident investigations, clearance clearances, and character formation.",
     sampleDocs: ["Disciplinary Inquiry Docket", "Parent Conference Notice", "Behavioral Rehabilitation Plan", "Clearance Certificate"],
   },
-  CSIR: {
-    badge: "OJT Agreements",
-    color: "from-indigo-500/20 to-indigo-600/5 text-indigo-400 border-indigo-500/30",
-    category: "career",
-    sla: "< 24h SLA",
-    confidentiality: "High",
-    desc: "On-the-Job Training (OJT) memorandums, employer internship endorsements, student placement releases, and company profiles.",
-    sampleDocs: ["OJT Student-Company Agreement", "Host Training Establishment Endorsement", "Practicum Performance Certificate", "Employer Accreditation"],
-  },
   CAREER: {
     badge: "Placement & OJT",
     color: "from-indigo-500/20 to-indigo-600/5 text-indigo-400 border-indigo-500/30",
@@ -131,15 +77,6 @@ const UNIT_METADATA_MAP: Record<
     confidentiality: "High",
     desc: "Industry partnerships, internship agreements, on-campus recruitments, and graduate placement.",
     sampleDocs: ["Industry Partnership Agreement", "Internship Endorsement", "Placement Clearance", "Campus Recruitment Charter"],
-  },
-  CEE: {
-    badge: "Outreach Charters",
-    color: "from-teal-500/20 to-teal-600/5 text-teal-400 border-teal-500/30",
-    category: "governance",
-    sla: "< 48h SLA",
-    confidentiality: "Standard",
-    desc: "Community outreach agreements, barangay LGU permits, volunteer service records, and social responsibility accreditations.",
-    sampleDocs: ["Barangay LGU Community MOU", "Institutional Outreach Proposal", "Faculty/Student Volunteer Service Log", "Impact Assessment Report"],
   },
   EXTENSION: {
     badge: "Community Extension",

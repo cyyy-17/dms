@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import DashboardHeader from "@/components/DashboardHeader";
 import SessionTimeoutManager from "@/components/SessionTimeoutManager";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { ToastProvider } from "@/components/ToastContext";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +27,9 @@ export default async function DashboardLayout({
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <DashboardHeader user={user} />
           <main className="flex-1 overflow-y-auto">
-            {children}
+            <ErrorBoundary>
+              {children}
+            </ErrorBoundary>
           </main>
         </div>
         <SessionTimeoutManager />

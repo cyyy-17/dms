@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   submitDocumentForReviewAction,
   createDocumentVersionAction,
-  getSignedDocumentUrlAction,
   withdrawDocumentAction,
   verifyDocumentChecksumAction,
   AssignedSignatoryStep,
@@ -151,25 +150,23 @@ export default function DocumentDetailActions({
       (flow.length === 0 && (isCoordinator || isDirector)));
 
   const handleDownload = async () => {
-    if (!document.currentVersion?.storagePath) return;
+    if (!document.id) return;
     setDownloadLoading(true);
     setError(null);
 
     try {
-      const res = await getSignedDocumentUrlAction(
-        document.currentVersion.storagePath,
-        document.id,
-        "DOWNLOAD"
-      );
-      if (res.success && res.signedUrl) {
-        window.open(res.signedUrl, "_blank");
-      } else {
-        setError(res.error || "Failed to generate signed download link.");
+      if (typeof window !== "undefined") {
+        const a = window.document.createElement("a");
+        a.href = `/api/documents/${document.id}/download`;
+        a.download = document.currentVersion?.fileName || "document.pdf";
+        window.document.body.appendChild(a);
+        a.click();
+        window.document.body.removeChild(a);
       }
     } catch {
-      setError("Error downloading file.");
+      setError("Error downloading watermarked file.");
     } finally {
-      setDownloadLoading(false);
+      setTimeout(() => setDownloadLoading(false), 1500);
     }
   };
 

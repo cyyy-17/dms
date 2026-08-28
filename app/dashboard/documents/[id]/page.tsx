@@ -4,6 +4,7 @@ import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
 import DocumentDetailActions from "@/components/DocumentDetailActions";
 import LiveDocumentViewer from "@/components/LiveDocumentViewer";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import {
   getStatusLabel,
   getStatusBadgeClass,
@@ -202,15 +203,14 @@ export default async function DocumentDetailPage({ params }: PageProps) {
 
   return (
     <div className="p-6 lg:p-8 space-y-6 max-w-6xl mx-auto w-full">
-      {/* Back link */}
+      {/* Breadcrumbs Navigation */}
       <div>
-        <Link
-          href="/dashboard/documents"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-[#0F2962] transition"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to Repository</span>
-        </Link>
+        <Breadcrumbs
+          items={[
+            { label: "Document Repository", href: "/dashboard/documents" },
+            { label: doc.trackingNumber },
+          ]}
+        />
       </div>
 
       {/* Header Banner & Live Pipeline Progress Stepper */}
@@ -425,6 +425,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
           {/* Live Document Viewer & Stream */}
           {doc.currentVersion && (
             <LiveDocumentViewer
+              documentId={doc.id}
               documentTitle={doc.title}
               trackingNumber={doc.trackingNumber}
               storagePath={doc.currentVersion.storagePath}

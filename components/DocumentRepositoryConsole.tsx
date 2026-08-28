@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getStatusLabel, getStatusBadgeClass, formatHumanDate } from "@/lib/status-labels";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
 import DataTableWrapper from "@/components/DataTableWrapper";
+import { useStarredDocuments } from "@/hooks/useStarredDocuments";
 import {
   FileText,
   Search,
@@ -15,6 +16,7 @@ import {
   List,
   Download,
   X,
+  Star,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
 
@@ -77,19 +79,22 @@ export default function DocumentRepositoryConsole({
   documentTypes,
   isDirectorOrAdmin,
 }: DocumentRepositoryConsoleProps) {
+  const { isStarred, toggleStar, starredCount } = useStarredDocuments();
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUnit, setSelectedUnit] = useState<string>("ALL");
   const [selectedDocType, setSelectedDocType] = useState<string>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
   const [onlyEscalated, setOnlyEscalated] = useState(false);
+  const [onlyStarred, setOnlyStarred] = useState(false);
 
   const hasActiveFilters =
     searchQuery.trim() !== "" ||
     selectedUnit !== "ALL" ||
     selectedDocType !== "ALL" ||
     selectedStatus !== "ALL" ||
-    onlyEscalated;
+    onlyEscalated ||
+    onlyStarred;
 
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -97,11 +102,17 @@ export default function DocumentRepositoryConsole({
     setSelectedDocType("ALL");
     setSelectedStatus("ALL");
     setOnlyEscalated(false);
+    setOnlyStarred(false);
   };
 
   // Filtered documents
   const filteredDocuments = useMemo(() => {
     return initialDocuments.filter((doc) => {
+      // Starred filter
+      if (onlyStarred && !isStarred(doc.id)) {
+        return false;
+      }
+
       // Search term
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -135,7 +146,7 @@ export default function DocumentRepositoryConsole({
 
       return true;
     });
-  }, [initialDocuments, searchQuery, selectedUnit, selectedDocType, selectedStatus, onlyEscalated]);
+  }, [initialDocuments, searchQuery, selectedUnit, selectedDocType, selectedStatus, onlyEscalated, onlyStarred, isStarred]);
 
   // Export to CSV
   const handleExportCsv = () => {
@@ -227,6 +238,28 @@ export default function DocumentRepositoryConsole({
 
           <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
             <button
+              type="button"
+              onClick={() => setOnlyStarred(!onlyStarred)}
+              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap ${
+                onlyStarred
+                  ? "bg-amber-500 text-slate-950 font-black shadow-amber-500/30"
+                  : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
+              }`}
+              title="Filter to your starred / pinned documents"
+            >
+              <Star className={`w-3.5 h-3.5 ${onlyStarred ? "fill-slate-950 text-slate-950" : "text-amber-500"}`} />
+              <span>Starred</span>
+              {starredCount > 0 && (
+                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                  onlyStarred ? "bg-slate-950 text-amber-400" : "bg-amber-100 text-amber-900"
+                }`}>
+                  {starredCount}
+                </span>
+              )}
+            </button>
+
+            <button
+              type="button"
               onClick={() => setOnlyEscalated(!onlyEscalated)}
               className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap ${
                 onlyEscalated
@@ -366,18 +399,28 @@ export default function DocumentRepositoryConsole({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100/90 bg-white/60">
-                {filteredDocuments.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-blue-50/40 transition-colors duration-150">
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-1.5">
-                        <CopyTrackingButton trackingNumber={doc.trackingNumber} />
-                        {doc.currentVersion && (
-                          <span className="px-1.5 py-0.5 rounded-md bg-blue-100/80 text-blue-800 text-[10px] font-bold">
-                            v{doc.currentVersion.versionNumber}
-                          </span>
-                        )}
-                      </div>
-                    </td>
+                {filteredDocuments.map((doc) => {
+                  const starred = isStarred(doc.id);
+                  return (
+                    <tr key={doc.id} className="hover:bg-blue-50/40 transition-colors duration-150">
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => toggleStar(doc.id)}
+                            className="p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer text-slate-400 hover:text-amber-500"
+                            title={starred ? "Unpin document" : "Pin/Star document"}
+                          >
+                            <Star className={`w-3.5 h-3.5 ${starred ? "fill-amber-400 text-amber-500" : ""}`} />
+                          </button>
+                          <CopyTrackingButton trackingNumber={doc.trackingNumber} />
+                          {doc.currentVersion && (
+                            <span className="px-1.5 py-0.5 rounded-md bg-blue-100/80 text-blue-800 text-[10px] font-bold">
+                              v{doc.currentVersion.versionNumber}
+                            </span>
+                          )}
+                        </div>
+                      </td>
                     <td className="py-4 px-6">
                       <span className="font-bold text-slate-900 block truncate max-w-xs">
                         {doc.title}
@@ -432,8 +475,9 @@ export default function DocumentRepositoryConsole({
                         Open Details
                       </Link>
                     </td>
-                  </tr>
-                ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </DataTableWrapper>
@@ -452,7 +496,17 @@ export default function DocumentRepositoryConsole({
               >
                 <div className="space-y-3.5">
                   <div className="flex items-center justify-between">
-                    <CopyTrackingButton trackingNumber={doc.trackingNumber} />
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleStar(doc.id)}
+                        className="p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer text-slate-400 hover:text-amber-500"
+                        title={isStarred(doc.id) ? "Unpin document" : "Pin/Star document"}
+                      >
+                        <Star className={`w-3.5 h-3.5 ${isStarred(doc.id) ? "fill-amber-400 text-amber-500" : ""}`} />
+                      </button>
+                      <CopyTrackingButton trackingNumber={doc.trackingNumber} />
+                    </div>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
                       {getStatusLabel(doc.status)}
                     </span>
