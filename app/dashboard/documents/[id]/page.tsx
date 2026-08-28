@@ -437,6 +437,8 @@ export default async function DocumentDetailPage({ params }: PageProps) {
               fileSize={doc.currentVersion.fileSize}
               mimeType={doc.currentVersion.mimeType}
               versionNumber={doc.currentVersion.versionNumber}
+              sha256Checksum={doc.currentVersion.sha256Checksum}
+              updatedAt={doc.updatedAt.toISOString()}
             />
           )}
 

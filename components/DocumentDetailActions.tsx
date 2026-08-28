@@ -251,6 +251,9 @@ export default function DocumentDetailActions({
             type: "info",
           });
         }
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("document-live-refresh", { detail: { documentId: document.id } }));
+        }
         router.refresh();
       }
     } catch {
@@ -276,6 +279,9 @@ export default function DocumentDetailActions({
             message: "Document entered sequential signatory pipeline.",
             type: "success",
           });
+        }
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("document-live-refresh", { detail: { documentId: document.id } }));
         }
         router.refresh();
       }
@@ -333,6 +339,9 @@ export default function DocumentDetailActions({
             type: "success",
           });
         }
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("document-live-refresh", { detail: { documentId: document.id } }));
+        }
         router.refresh();
       }
     } catch {
@@ -388,6 +397,9 @@ export default function DocumentDetailActions({
             type: "warning",
           });
         }
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("document-live-refresh", { detail: { documentId: document.id } }));
+        }
         router.refresh();
       }
     } catch {
@@ -442,6 +454,9 @@ export default function DocumentDetailActions({
             message: "Terminal status recorded and document closed.",
             type: "error",
           });
+        }
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("document-live-refresh", { detail: { documentId: document.id } }));
         }
         router.refresh();
       }
@@ -515,6 +530,9 @@ export default function DocumentDetailActions({
       } else {
         setSuccessMessage("New immutable version uploaded successfully!");
         setShowVersionModal(false);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("document-live-refresh", { detail: { documentId: document.id } }));
+        }
         router.refresh();
       }
     } catch {

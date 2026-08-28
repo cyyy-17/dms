@@ -15,6 +15,7 @@ import {
   FileCode,
   Sparkles,
   Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import { formatFileSize } from "@/lib/status-labels";
 
@@ -27,6 +28,8 @@ interface LiveDocumentViewerProps {
   fileSize: number;
   mimeType: string;
   versionNumber: number;
+  sha256Checksum?: string;
+  updatedAt?: string;
 }
 
 export default function LiveDocumentViewer({
@@ -38,6 +41,8 @@ export default function LiveDocumentViewer({
   fileSize,
   mimeType,
   versionNumber,
+  sha256Checksum,
+  updatedAt,
 }: LiveDocumentViewerProps) {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,6 +50,8 @@ export default function LiveDocumentViewer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(true);
   const [downloadLoading, setDownloadLoading] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [isLiveSynced, setIsLiveSynced] = useState(false);
 
   const isPdf = mimeType.includes("pdf") || fileName.toLowerCase().endsWith(".pdf");
   const isImage =
@@ -57,18 +64,56 @@ export default function LiveDocumentViewer({
     mimeType.includes("spreadsheet") ||
     /\.(docx?|xlsx?|pptx?)$/i.test(fileName);
 
+  // Fetch or refresh signed document URL with cache-busting
+  const fetchSignedUrl = (showSyncBadge = false) => {
+    if (!storagePath) return;
+    setIsLoading(true);
+    setError(null);
+
+    getSignedDocumentUrlAction(storagePath)
+      .then((res) => {
+        if (res.success && res.signedUrl) {
+          const cacheBuster = `t=${Date.now()}`;
+          const urlWithCacheBuster = res.signedUrl.includes("?")
+            ? `${res.signedUrl}&${cacheBuster}`
+            : `${res.signedUrl}?${cacheBuster}`;
+          setSignedUrl(urlWithCacheBuster);
+          setRefreshKey((prev) => prev + 1);
+          if (showSyncBadge) {
+            setIsLiveSynced(true);
+            setTimeout(() => setIsLiveSynced(false), 4000);
+          }
+        } else {
+          setError(res.error || "Unable to generate secure document stream.");
+        }
+      })
+      .catch(() => {
+        setError("Network error loading document stream.");
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  // Initial load or prop change (e.g. Server Component revalidation)
   useEffect(() => {
     let isMounted = true;
     if (!storagePath || !isPreviewOpen) {
       return;
     }
 
+    setIsLoading(true);
     getSignedDocumentUrlAction(storagePath)
       .then((res) => {
         if (!isMounted) return;
         if (res.success && res.signedUrl) {
-          setSignedUrl(res.signedUrl);
+          const cacheBuster = `t=${Date.now()}`;
+          const urlWithCacheBuster = res.signedUrl.includes("?")
+            ? `${res.signedUrl}&${cacheBuster}`
+            : `${res.signedUrl}?${cacheBuster}`;
+          setSignedUrl(urlWithCacheBuster);
           setError(null);
+          setRefreshKey((prev) => prev + 1);
         } else {
           setError(res.error || "Unable to generate secure document stream.");
         }
@@ -83,22 +128,25 @@ export default function LiveDocumentViewer({
     return () => {
       isMounted = false;
     };
-  }, [storagePath, isPreviewOpen]);
+  }, [storagePath, isPreviewOpen, sha256Checksum, updatedAt, versionNumber]);
+
+  // Global event listener for instant live document refresh (dispatched when approved/signed/updated)
+  useEffect(() => {
+    const handleLiveRefresh = (e: Event) => {
+      const customEvent = e as CustomEvent<{ documentId?: string }>;
+      if (!customEvent.detail?.documentId || customEvent.detail.documentId === documentId) {
+        fetchSignedUrl(true);
+      }
+    };
+
+    window.addEventListener("document-live-refresh", handleLiveRefresh);
+    return () => {
+      window.removeEventListener("document-live-refresh", handleLiveRefresh);
+    };
+  }, [storagePath, documentId]);
 
   const handleReload = () => {
-    if (!storagePath) return;
-    setIsLoading(true);
-    setError(null);
-    getSignedDocumentUrlAction(storagePath)
-      .then((res) => {
-        if (res.success && res.signedUrl) {
-          setSignedUrl(res.signedUrl);
-        } else {
-          setError(res.error || "Unable to generate secure document stream.");
-        }
-      })
-      .catch(() => setError("Network error loading document stream."))
-      .finally(() => setIsLoading(false));
+    fetchSignedUrl(true);
   };
 
   const handleDownload = async () => {
@@ -153,13 +201,19 @@ export default function LiveDocumentViewer({
             <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="font-extrabold text-xs sm:text-sm text-slate-900 truncate block">
                 {fileName}
               </span>
               <span className="px-2 py-0.5 rounded-md bg-blue-100/90 text-blue-800 text-[10px] font-black border border-blue-200 shrink-0">
                 v{versionNumber}
               </span>
+              {isLiveSynced && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-300 text-[10px] font-black animate-in fade-in zoom-in duration-200 shrink-0">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                  <span>Live Stream Synced</span>
+                </span>
+              )}
             </div>
             <span className="text-[10px] sm:text-[11px] text-slate-500 block font-mono font-medium mt-0.5 truncate">
               {trackingNumber} • {formatFileSize(fileSize)}
@@ -176,6 +230,15 @@ export default function LiveDocumentViewer({
           >
             {isPreviewOpen ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-blue-600" />}
             <span>{isPreviewOpen ? "Hide" : "Live View"}</span>
+          </button>
+
+          <button
+            onClick={handleReload}
+            disabled={isLoading}
+            className="p-1.5 sm:p-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 transition-all shadow-xs cursor-pointer hover:-translate-y-0.5 disabled:opacity-50"
+            title="Refresh Live Document Stream"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${isLoading ? "animate-spin text-blue-600" : ""}`} />
           </button>
 
           {signedUrl && (
@@ -247,6 +310,7 @@ export default function LiveDocumentViewer({
             <>
               {isPdf && (
                 <iframe
+                  key={`pdf-${refreshKey}-${signedUrl}`}
                   src={`${signedUrl}#toolbar=1&navpanes=0&scrollbar=1`}
                   title={documentTitle}
                   className="w-full h-full border-0 bg-white"
@@ -257,6 +321,7 @@ export default function LiveDocumentViewer({
                 <div className="w-full h-full p-6 flex items-center justify-center overflow-auto">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
+                    key={`img-${refreshKey}-${signedUrl}`}
                     src={signedUrl}
                     alt={documentTitle}
                     className="max-h-full max-w-full object-contain rounded-2xl shadow-2xl border border-slate-800 bg-white"
