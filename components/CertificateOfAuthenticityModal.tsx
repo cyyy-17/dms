@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import {
   Printer,
@@ -10,6 +10,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { formatHumanDate, formatHumanDateTime, getStatusLabel } from "@/lib/status-labels";
+
+const emptySubscribe = () => () => {};
 
 export interface CertificateDocumentInfo {
   id: string;
@@ -47,20 +49,20 @@ export default function CertificateOfAuthenticityModal({
   document,
   approvalActions = [],
 }: CertificateOfAuthenticityModalProps) {
-  const [mounted, setMounted] = useState(false);
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !isMounted) return null;
 
   const handlePrint = () => {
     window.print();
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200 print:p-0 print:bg-white print:static">
+    <div className="fixed inset-0 z-100 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200 print:p-0 print:bg-white print:static">
       <div
         className="glass-panel rounded-2xl sm:rounded-3xl max-w-2xl w-full max-h-[92vh] border border-white/90 bg-white shadow-2xl overflow-hidden flex flex-col print:shadow-none print:border-none print:m-0 print:max-w-none print:w-full print:max-h-none"
         onClick={(e) => e.stopPropagation()}

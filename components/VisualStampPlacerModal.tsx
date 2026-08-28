@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+
+const emptySubscribe = () => () => {};
 import {
   X,
   CheckCircle2,
@@ -70,11 +72,11 @@ export default function VisualStampPlacerModal({
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
 
   const [viewportWidth, setViewportWidth] = useState<number>(620);
 
@@ -223,7 +225,7 @@ export default function VisualStampPlacerModal({
     };
   }, [isOpen, pdfUrl, currentPage]);
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !isMounted) return null;
 
   // Handle clicking on the document canvas to position the stamp
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -302,7 +304,7 @@ export default function VisualStampPlacerModal({
   const containerWidthPx = Math.round(baseContainerWidth * zoomScale);
 
   return createPortal(
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-100 flex items-center justify-center p-2 sm:p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
       <div className="glass-panel rounded-2xl sm:rounded-3xl max-w-5xl w-full h-[94vh] flex flex-col bg-white shadow-2xl border border-white/90 overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Header */}
         <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/80 shrink-0">
