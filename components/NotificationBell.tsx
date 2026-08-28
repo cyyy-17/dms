@@ -232,7 +232,7 @@ export default function NotificationBell() {
                           markSingleAsRead(item.id);
                           setIsOpen(false);
                         }}
-                        className="block text-xs font-bold text-slate-900 hover:text-[#0F2962] line-clamp-2 leading-snug break-words"
+                        className="block text-xs font-bold text-slate-900 hover:text-[#0F2962] line-clamp-2 leading-snug wrap-break-word"
                       >
                         {item.subject}
                       </Link>
