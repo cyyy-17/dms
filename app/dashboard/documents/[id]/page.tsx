@@ -632,20 +632,20 @@ export default async function DocumentDetailPage({ params }: PageProps) {
           />
 
           {/* Sequential Approval Timeline */}
-          <div className="glass-card rounded-2xl p-6 border border-slate-200 space-y-4">
+          <div className="glass-card rounded-2xl p-4 sm:p-6 border border-slate-200 space-y-4 min-w-0 w-full">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2 flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-emerald-600" />
               <span>Sequential Approval & Audit Timeline</span>
             </h2>
 
-            <div className="space-y-4 relative before:absolute before:inset-0 before:left-3.5 before:w-0.5 before:bg-slate-200">
+            <div className="space-y-4 relative before:absolute before:inset-0 before:left-3 sm:before:left-3.5 before:w-0.5 before:bg-slate-200">
               {doc.approvalActions.length === 0 ? (
                 <p className="text-xs text-slate-400 py-2">No review actions recorded yet.</p>
               ) : (
                 doc.approvalActions.map((action) => (
-                  <div key={action.id} className="relative flex items-start gap-4 text-xs">
+                  <div key={action.id} className="relative flex items-start gap-2.5 sm:gap-4 text-xs min-w-0">
                     <div
-                      className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-white shrink-0 shadow-sm z-10 ${
+                      className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center font-bold text-white shrink-0 shadow-sm z-10 text-[10px] sm:text-xs ${
                         action.action === ApprovalActionType.SUBMIT
                           ? "bg-blue-600"
                           : action.action === ApprovalActionType.COORDINATOR_APPROVE
@@ -660,37 +660,37 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                       ✓
                     </div>
 
-                    <div className="flex-1 bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-900">
+                    <div className="flex-1 min-w-0 bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5 overflow-hidden">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <span className="font-bold text-slate-900 leading-snug wrap-break-word">
                           {getActionLabel(action.action)} by {action.actor.firstName}{" "}
                           {action.actor.lastName} ({getRoleLabel(action.actorRole)})
                         </span>
-                        <span className="text-[10px] text-slate-400 font-mono">
+                        <span className="text-[10px] text-slate-400 font-mono shrink-0">
                           {formatHumanDateTime(action.createdAt)}
                         </span>
                       </div>
 
                       {action.comments && (
-                        <p className="text-xs text-slate-700 bg-white p-2 rounded border border-slate-200/80 mt-1">
+                        <p className="text-xs text-slate-700 bg-white p-2 rounded border border-slate-200/80 mt-1 wrap-break-word">
                           {action.comments}
                         </p>
                       )}
 
                       {action.signatureApplied && (
-                        <div className="mt-2.5 p-3 rounded-xl bg-linear-to-r from-blue-50/80 via-indigo-50/50 to-emerald-50/70 border border-blue-200/90 text-[11px] space-y-1.5 shadow-2xs">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5 font-black text-[#0F2962]">
-                              <PenLine className="w-3.5 h-3.5 text-[#0F2962]" />
-                              <span>FAITH COLLEGES • SAS VERIFIED STAMP</span>
+                        <div className="mt-2.5 p-2.5 sm:p-3 rounded-xl bg-linear-to-r from-blue-50/80 via-indigo-50/50 to-emerald-50/70 border border-blue-200/90 text-[11px] space-y-1.5 shadow-2xs min-w-0 w-full overflow-hidden">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
+                            <div className="flex items-center gap-1.5 font-black text-[#0F2962] min-w-0">
+                              <PenLine className="w-3.5 h-3.5 text-[#0F2962] shrink-0" />
+                              <span className="truncate text-[10px] sm:text-[11px]">FAITH COLLEGES • SAS VERIFIED STAMP</span>
                             </div>
-                            <span className="font-mono text-[9px] font-black text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-2 py-0.5 rounded-full">
+                            <span className="font-mono text-[9px] font-black text-emerald-800 bg-emerald-100/90 border border-emerald-300 px-2 py-0.5 rounded-full shrink-0 self-start sm:self-auto">
                               ✓ AUTHENTICATED
                             </span>
                           </div>
-                          <div className="flex items-center justify-between text-[10px] text-slate-600 font-mono pt-0.5">
-                            <span>Signer: <strong>{action.actor.firstName} {action.actor.lastName}</strong></span>
-                            <span>Direct In-Document Alpha Blend</span>
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-0.5 sm:gap-1 text-[10px] text-slate-600 font-mono pt-0.5">
+                            <span className="truncate">Signer: <strong>{action.actor.firstName} {action.actor.lastName}</strong></span>
+                            <span className="text-slate-500 text-[9px] sm:text-[10px]">Direct In-Document Alpha Blend</span>
                           </div>
                           <div className="text-[9px] font-mono text-slate-500 truncate block">
                             Security Token: ID: SAS-{action.id.substring(0, 14).toUpperCase()} • PST Certified
