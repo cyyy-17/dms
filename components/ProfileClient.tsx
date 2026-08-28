@@ -148,21 +148,20 @@ export default function ProfileClient({ user, auditLogs = [] }: ProfileClientPro
 
   // Load signature preview when tab is active
   useEffect(() => {
+    let isMounted = true;
     if (activeTab === "signature" && user.signaturePath && !signaturePreviewUrl) {
-      let isMounted = true;
-      setIsLoadingPreview(true);
       getSignedSignatureUrlAction(user.signaturePath).then((res) => {
         if (isMounted) {
-          setIsLoadingPreview(false);
           if (res.success && res.signedUrl) {
             setSignaturePreviewUrl(res.signedUrl);
           }
+          setIsLoadingPreview(false);
         }
       });
-      return () => {
-        isMounted = false;
-      };
     }
+    return () => {
+      isMounted = false;
+    };
   }, [activeTab, user.signaturePath, signaturePreviewUrl]);
 
   // Handle Save Profile Details
@@ -211,15 +210,15 @@ export default function ProfileClient({ user, auditLogs = [] }: ProfileClientPro
     setIsUpdatingPassword(true);
 
     const res = await updateUserPasswordAction({
-        currentPassword: currentPassword,
-        newPassword: newPassword,
-        confirmPassword: confirmPassword
+      currentPassword: currentPassword,
+      newPassword: newPassword,
+      confirmPassword: confirmPassword,
     });
 
     if (res.success) {
       setPasswordSuccess("Password updated successfully! Session invalidated. Redirecting to sign in...");
       setTimeout(() => {
-        window.location.href = "/login?password_updated=true";
+        router.push("/login?password_updated=true");
       }, 1500);
     } else {
       setIsUpdatingPassword(false);
@@ -588,6 +587,7 @@ export default function ProfileClient({ user, auditLogs = [] }: ProfileClientPro
                     <span>Loading cryptographic signature stream...</span>
                   </div>
                 ) : signaturePreviewUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={signaturePreviewUrl} alt="Registered Signature Preview" className="max-h-full max-w-full object-contain filter drop-shadow-xs" />
                 ) : (
                   <span className="text-xs text-slate-400 font-medium">Signature encrypted in private storage vault.</span>
