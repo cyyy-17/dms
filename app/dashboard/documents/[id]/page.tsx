@@ -258,8 +258,8 @@ export default async function DocumentDetailPage({ params }: PageProps) {
             : Math.max(15, Math.min(95, Math.round(((currentStep - 0.5) / totalSteps) * 100)));
 
           return (
-            <div className="p-4.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
-              <div className="flex items-center justify-between text-xs">
+            <div className="p-4 sm:p-4.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
                 <span className="font-extrabold uppercase tracking-wider text-slate-600">
                   Sequential Review Pipeline Progress
                 </span>
@@ -423,9 +423,9 @@ export default async function DocumentDetailPage({ params }: PageProps) {
       })()}
 
       {/* Grid: Details & Actions */}
-      <div className="grid lg:grid-cols-12 gap-6">
+      <div className="grid lg:grid-cols-12 gap-6 min-w-0 w-full">
         {/* Left Column: Live Document Preview, Metadata & History */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-6 min-w-0 w-full">
           {/* Live Document Viewer & Stream */}
           {doc.currentVersion && (
             <LiveDocumentViewer
@@ -706,7 +706,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
         </div>
 
         {/* Right Column: Interactive Actions */}
-        <div className="lg:col-span-5">
+        <div className="lg:col-span-5 min-w-0 w-full">
           <div className="sticky top-20">
             <DocumentDetailActions
               document={{

@@ -140,66 +140,66 @@ export default function LiveDocumentViewer({
 
   return (
     <div
-      className={`glass-panel rounded-3xl border border-white/90 overflow-hidden shadow-lg transition-all duration-300 ${
+      className={`glass-panel rounded-2xl sm:rounded-3xl border border-white/90 overflow-hidden shadow-lg transition-all duration-300 w-full max-w-full min-w-0 ${
         isFullscreen
-          ? "fixed inset-0 z-50 rounded-none bg-slate-950/95 flex flex-col p-6 backdrop-blur-2xl"
+          ? "fixed inset-0 z-50 rounded-none bg-slate-950/95 flex flex-col p-4 sm:p-6 backdrop-blur-2xl"
           : "space-y-0"
       }`}
     >
       {/* Viewer Top Action Bar */}
-      <div className="p-4 sm:p-5 bg-white/80 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5">
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-2xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 flex items-center justify-center font-bold shadow-md shrink-0 border border-blue-400/30">
-            <FileText className="w-5 h-5" />
+      <div className="p-3.5 sm:p-5 bg-white/80 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 flex items-center justify-center font-bold shadow-md shrink-0 border border-blue-400/30">
+            <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-xs sm:text-sm text-slate-900 truncate block">
                 {fileName}
               </span>
-              <span className="px-2 py-0.5 rounded-md bg-blue-100/90 text-blue-800 text-[10px] font-black border border-blue-200">
+              <span className="px-2 py-0.5 rounded-md bg-blue-100/90 text-blue-800 text-[10px] font-black border border-blue-200 shrink-0">
                 v{versionNumber}
               </span>
             </div>
-            <span className="text-[11px] text-slate-500 block font-mono font-medium mt-0.5">
+            <span className="text-[10px] sm:text-[11px] text-slate-500 block font-mono font-medium mt-0.5 truncate">
               {trackingNumber} • {formatFileSize(fileSize)}
             </span>
           </div>
         </div>
 
         {/* Action Controls */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
+        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 shrink-0">
           <button
             onClick={() => setIsPreviewOpen(!isPreviewOpen)}
-            className="px-3.5 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer hover:-translate-y-0.5"
+            className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer hover:-translate-y-0.5"
             title={isPreviewOpen ? "Collapse Live Preview" : "Expand Live Preview"}
           >
             {isPreviewOpen ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-blue-600" />}
-            <span>{isPreviewOpen ? "Hide Preview" : "Live View Document"}</span>
+            <span>{isPreviewOpen ? "Hide" : "Live View"}</span>
           </button>
 
           {signedUrl && (
             <button
               onClick={() => window.open(signedUrl, "_blank")}
-              className="p-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 transition-all shadow-xs cursor-pointer hover:-translate-y-0.5"
+              className="p-1.5 sm:p-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 transition-all shadow-xs cursor-pointer hover:-translate-y-0.5"
               title="Open in new browser tab"
             >
-              <ExternalLink className="w-4 h-4" />
+              <ExternalLink className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           )}
 
           <button
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 transition-all shadow-xs cursor-pointer hover:-translate-y-0.5"
+            className="p-1.5 sm:p-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-600 transition-all shadow-xs cursor-pointer hover:-translate-y-0.5"
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Live View"}
           >
-            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            {isFullscreen ? <Minimize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> : <Maximize2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
           </button>
 
           <button
             onClick={handleDownload}
             disabled={downloadLoading}
-            className="px-4 py-2 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
+            className="px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-1.5 hover:-translate-y-0.5 active:scale-98 cursor-pointer disabled:opacity-50"
           >
             <Download className="w-3.5 h-3.5 text-amber-400" />
             <span>{downloadLoading ? "Signing..." : "Download"}</span>
@@ -210,7 +210,7 @@ export default function LiveDocumentViewer({
       {/* Live Preview Display Body */}
       {isPreviewOpen && (
         <div
-          className={`relative bg-slate-950 overflow-hidden flex items-center justify-center transition-all ${
+          className={`relative bg-slate-950 overflow-hidden flex items-center justify-center transition-all w-full max-w-full ${
             isFullscreen ? "flex-1 w-full rounded-2xl mt-4 border border-slate-800" : "h-96 sm:h-130 lg:h-160"
           }`}
         >

@@ -40,26 +40,26 @@ export default function DocumentTimelineView({
   isEscalated,
 }: DocumentTimelineViewProps) {
   return (
-    <div className="glass-panel rounded-3xl p-6 border border-white/90 bg-white/90 shadow-sm space-y-6">
-      <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0F2962] flex items-center justify-center font-bold border border-blue-100 shadow-xs">
+    <div className="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-white/90 bg-white/90 shadow-sm space-y-5 sm:space-y-6 w-full max-w-full min-w-0">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-blue-50 text-[#0F2962] flex items-center justify-center font-bold border border-blue-100 shadow-xs shrink-0">
             <Sparkles className="w-4 h-4 text-[#0F2962]" />
           </div>
-          <div>
+          <div className="min-w-0">
             <h3 className="text-sm font-black text-slate-900 tracking-tight">Document Lifecycle Timeline</h3>
-            <p className="text-[11px] text-slate-500 font-medium">
+            <p className="text-[11px] text-slate-500 font-medium truncate">
               Chronological sequential milestones and review actions
             </p>
           </div>
         </div>
 
-        <span className="text-[11px] font-mono font-bold text-slate-400">
+        <span className="text-[11px] font-mono font-bold text-slate-400 shrink-0">
           {approvalActions.length + 1} Milestone{approvalActions.length === 0 ? "" : "s"}
         </span>
       </div>
 
-      <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200">
+      <div className="relative pl-6 space-y-5 sm:space-y-6 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200">
         {/* Milestone 1: Initial Ingestion */}
         <div className="relative group">
           <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-[#0F2962] border-2 border-white text-white flex items-center justify-center shadow-xs">
