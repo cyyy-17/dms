@@ -206,7 +206,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 max-w-6xl mx-auto w-full">
+    <div className="p-3.5 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 max-w-6xl mx-auto w-full">
       {/* Breadcrumbs Navigation */}
       <div>
         <Breadcrumbs
@@ -218,10 +218,10 @@ export default async function DocumentDetailPage({ params }: PageProps) {
       </div>
 
       {/* Header Banner & Live Pipeline Progress Stepper */}
-      <div className="glass-card rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-sm space-y-6">
+      <div className="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 lg:p-7 border border-slate-200 shadow-sm space-y-5 sm:space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-2">
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               <CopyTrackingButton trackingNumber={doc.trackingNumber} />
               <span
                 className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ${getStatusBadgeClass(
@@ -236,7 +236,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                 </span>
               )}
             </div>
-            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-lg sm:text-2xl font-extrabold text-slate-900 tracking-tight break-words">
               {doc.title}
             </h1>
           </div>
@@ -441,7 +441,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
           )}
 
           {/* Metadata Card */}
-          <div className="glass-card rounded-2xl p-6 border border-slate-200 space-y-4">
+          <div className="glass-card rounded-2xl p-4 sm:p-6 border border-slate-200 space-y-4">
             <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2">
               Document Specifications
             </h2>
@@ -511,13 +511,13 @@ export default async function DocumentDetailPage({ params }: PageProps) {
           </div>
 
           {/* Institutional Cryptographic Integrity & RA 10173 Compliance Box */}
-          <div className="glass-panel border-gradient-gold rounded-2xl p-6 border border-white/90 space-y-4 shadow-sm bg-linear-to-br from-white via-slate-50/50 to-amber-50/20">
-            <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+          <div className="glass-panel border-gradient-gold rounded-2xl p-4 sm:p-6 border border-white/90 space-y-4 shadow-sm bg-linear-to-br from-white via-slate-50/50 to-amber-50/20">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-slate-200/80 pb-3">
               <h2 className="text-xs font-black uppercase tracking-wider text-slate-900 flex items-center gap-2">
-                <Fingerprint className="w-4.5 h-4.5 text-[#0F2962]" />
-                <span>Cryptographic Proof of Integrity & Privacy (RA 10173)</span>
+                <Fingerprint className="w-4.5 h-4.5 text-[#0F2962] shrink-0" />
+                <span className="leading-snug">Cryptographic Proof of Integrity & Privacy (RA 10173)</span>
               </h2>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-300">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-300 shrink-0 self-start sm:self-auto">
                 <ShieldCheck className="w-3 h-3 text-emerald-600" />
                 <span>Verified Authentic</span>
               </span>
@@ -525,12 +525,12 @@ export default async function DocumentDetailPage({ params }: PageProps) {
 
             <div className="space-y-3 text-xs">
               <div className="p-3 rounded-xl bg-slate-900 text-slate-200 font-mono text-[11px] space-y-1.5 shadow-inner">
-                <div className="flex items-center justify-between text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                <div className="flex flex-wrap items-center justify-between gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                   <span className="flex items-center gap-1">
                     <Lock className="w-3 h-3 text-amber-400" />
                     <span>Active Version SHA-256 Checksum</span>
                   </span>
-                  <span className="text-amber-400">Zero Overwrite</span>
+                  <span className="text-amber-400 font-bold">Zero Overwrite</span>
                 </div>
                 <span className="text-amber-300 font-black break-all block selection:bg-amber-400 selection:text-slate-900">
                   {doc.currentVersion?.sha256Checksum || "SHA256_UNSET_PRE_MIGRATION"}
@@ -558,8 +558,8 @@ export default async function DocumentDetailPage({ params }: PageProps) {
           </div>
 
           {/* Version History Drawer */}
-          <div className="glass-card rounded-2xl p-6 border border-slate-200 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <div className="glass-card rounded-2xl p-4 sm:p-6 border border-slate-200 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-2">
               <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
                 <GitBranch className="w-4 h-4 text-blue-600" />
                 <span>Immutable Version History (Zero Overwrite)</span>
