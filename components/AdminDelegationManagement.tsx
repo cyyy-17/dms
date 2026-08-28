@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { assignDelegationAction, revokeDelegationAction } from "@/actions/admin";
+import { batchRevokeExpiredDelegationsAction } from "@/actions/delegations";
 import {
   FileCheck2,
   Plus,
@@ -12,9 +13,24 @@ import {
   X,
   UserCheck,
   Calendar,
+  Clock,
+  ShieldAlert,
 } from "lucide-react";
 import DataTableWrapper from "@/components/DataTableWrapper";
 import { getRoleLabel, formatHumanDate } from "@/lib/status-labels";
+
+function subscribeToNow(callback: () => void) {
+  const interval = setInterval(callback, 60000);
+  return () => clearInterval(interval);
+}
+
+function getNowSnapshot() {
+  return Date.now();
+}
+
+function getServerSnapshot() {
+  return 0;
+}
 
 interface DelegationItem {
   id: string;
@@ -94,22 +110,26 @@ export default function AdminDelegationManagement({
 
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const currentTime = useSyncExternalStore(subscribeToNow, getNowSnapshot, getServerSnapshot);
 
-  const filteredDelegations = delegations.filter((d) => {
-    const matchesSearch =
-      `${d.delegator.firstName} ${d.delegator.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      `${d.delegate.firstName} ${d.delegate.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.unit.code.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredDelegations = useMemo(() => {
+    const nowDate = currentTime > 0 ? new Date(currentTime) : new Date(0);
+    return delegations.filter((d) => {
+      const matchesSearch =
+        `${d.delegator.firstName} ${d.delegator.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        `${d.delegate.firstName} ${d.delegate.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        d.unit.code.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const isCurrentlyActive = d.isActive && new Date(d.endDate) >= new Date();
-    const matchesStatus =
-      statusFilter === "ALL" ||
-      (statusFilter === "ACTIVE" && isCurrentlyActive) ||
-      (statusFilter === "REVOKED" && !d.isActive) ||
-      (statusFilter === "EXPIRED" && d.isActive && new Date(d.endDate) < new Date());
+      const isCurrentlyActive = d.isActive && (currentTime === 0 || new Date(d.endDate) >= nowDate);
+      const matchesStatus =
+        statusFilter === "ALL" ||
+        (statusFilter === "ACTIVE" && isCurrentlyActive) ||
+        (statusFilter === "REVOKED" && !d.isActive) ||
+        (statusFilter === "EXPIRED" && d.isActive && currentTime > 0 && new Date(d.endDate) < nowDate);
 
-    return matchesSearch && matchesStatus;
-  });
+      return matchesSearch && matchesStatus;
+    });
+  }, [delegations, searchQuery, statusFilter, currentTime]);
 
   const handleAssign = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,6 +173,54 @@ export default function AdminDelegationManagement({
     }
   };
 
+  const handleBatchRevokeExpired = async () => {
+    setIsLoading(true);
+    setFeedback(null);
+
+    const res = await batchRevokeExpiredDelegationsAction();
+    setIsLoading(false);
+    if (res.success) {
+      setFeedback({
+        type: "success",
+        message: `Successfully revoked ${res.revokedCount} expired delegation(s).`,
+      });
+      router.refresh();
+    } else {
+      setFeedback({ type: "error", message: res.error || "Failed to batch revoke expired delegations." });
+    }
+  };
+
+  const { activeCount, expiring72hCount, expiredCount } = useMemo(() => {
+    if (currentTime === 0) {
+      return {
+        activeCount: delegations.filter((d) => d.isActive).length,
+        expiring72hCount: 0,
+        expiredCount: 0,
+      };
+    }
+
+    const nowDate = new Date(currentTime);
+    let active = 0;
+    let expiring = 0;
+    let expired = 0;
+
+    delegations.forEach((d) => {
+      const end = new Date(d.endDate);
+      if (d.isActive) {
+        if (end >= nowDate) {
+          active++;
+          if (end.getTime() - currentTime <= 72 * 3600 * 1000) {
+            expiring++;
+          }
+        } else {
+          expired++;
+        }
+      }
+    });
+
+    return { activeCount: active, expiring72hCount: expiring, expiredCount: expired };
+  }, [delegations, currentTime]);
+
   return (
     <div className="space-y-6">
       {/* Toast Feedback */}
@@ -172,11 +240,53 @@ export default function AdminDelegationManagement({
             )}
             <span>{feedback.message}</span>
           </div>
-          <button onClick={() => setFeedback(null)} className="text-slate-400 hover:text-slate-600">
+          <button onClick={() => setFeedback(null)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
+
+      {/* Summary Metrics Bar */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+            <UserCheck className="w-3.5 h-3.5 text-blue-600" />
+            <span>Active Delegations</span>
+          </span>
+          <p className="text-xl font-black text-slate-900 font-mono">{activeCount}</p>
+          <span className="text-[10px] text-slate-500 font-medium block">Authorized acting signatories</span>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-1">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1">
+            <Clock className="w-3.5 h-3.5 text-amber-700" />
+            <span>Expiring in &lt; 72 Hours</span>
+          </span>
+          <p className="text-xl font-black text-amber-900 font-mono">{expiring72hCount}</p>
+          <span className="text-[10px] text-amber-700 font-bold block">72h auto-warning window</span>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-slate-200/80 shadow-xs space-y-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-rose-800 flex items-center gap-1">
+              <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
+              <span>Expired (Pending Cleanup)</span>
+            </span>
+            {expiredCount > 0 && (
+              <button
+                type="button"
+                onClick={handleBatchRevokeExpired}
+                disabled={isLoading}
+                className="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 hover:bg-rose-200 text-rose-700 transition cursor-pointer"
+              >
+                Revoke All ({expiredCount})
+              </button>
+            )}
+          </div>
+          <p className="text-xl font-black text-rose-900 font-mono">{expiredCount}</p>
+          <span className="text-[10px] text-slate-500 font-medium block">Past statutory validity date</span>
+        </div>
+      </div>
 
       {/* Filter / Action Bar */}
       <div className="glass-card rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">

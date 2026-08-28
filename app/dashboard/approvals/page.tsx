@@ -3,6 +3,7 @@ import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
 import { getStatusLabel, getStatusBadgeClass, formatHumanDate } from "@/lib/status-labels";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
+import { calculateSlaStatus } from "@/lib/sla";
 import {
   CheckSquare,
   AlertTriangle,
@@ -16,6 +17,7 @@ import {
   GitBranch,
   FilePlus2,
   FileText,
+  Clock,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
 
@@ -205,11 +207,13 @@ export default async function ApprovalQueuePage() {
         </div>
       ) : (
         <div className="grid gap-4">
-          {pendingDocs.map((doc) => (
+          {pendingDocs.map((doc) => {
+            const sla = calculateSlaStatus(doc.createdAt, doc.status === "PENDING_DIRECTOR" ? 72 : 48);
+            return (
             <div
               key={doc.id}
               className={`glass-panel glass-panel-interactive rounded-3xl p-6 sm:p-7 border transition duration-200 bg-white flex flex-col lg:flex-row lg:items-center justify-between gap-6 ${
-                doc.isEscalated ? "border-rose-300 bg-rose-50/30" : "border-white/90"
+                doc.isEscalated || sla.isOverdue ? "border-rose-300 bg-rose-50/30" : "border-white/90"
               }`}
             >
               <div className="space-y-3.5 flex-1 min-w-0">
@@ -217,6 +221,13 @@ export default async function ApprovalQueuePage() {
                   <CopyTrackingButton trackingNumber={doc.trackingNumber} />
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
                     {getStatusLabel(doc.status)}
+                  </span>
+                  <span
+                    className={`inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full ${sla.badgeClass}`}
+                    title={`Review SLA Target (${doc.status === "PENDING_DIRECTOR" ? "72h" : "48h"})`}
+                  >
+                    <Clock className="w-3 h-3" />
+                    <span>{sla.label}</span>
                   </span>
                   {doc.currentSignatoryId === user.id && (
                     <span className="inline-flex items-center gap-1 text-[10px] font-black text-blue-900 bg-blue-100 border border-blue-300 px-2.5 py-0.5 rounded-full shadow-xs animate-pulse">
@@ -298,7 +309,8 @@ export default async function ApprovalQueuePage() {
                 </Link>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

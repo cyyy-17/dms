@@ -41,12 +41,36 @@ export default async function ProfilePage() {
     totalReturned: 0,
   };
 
+  let userAuditLogs: Array<{
+    id: string;
+    action: string;
+    targetType: string;
+    targetId: string | null;
+    createdAt: Date;
+    ipAddress: string | null;
+    details: unknown;
+  }> = [];
+
   if (isDatabaseConfigured) {
     try {
-      const [uploaded, pendingSign, returned] = await Promise.all([
+      const [uploaded, pendingSign, returned, dbAuditLogs] = await Promise.all([
         prisma.document.count({ where: { uploaderId: user.id } }),
         prisma.document.count({ where: { currentSignatoryId: user.id } }),
         prisma.document.count({ where: { uploaderId: user.id, status: DocumentStatus.REJECTED_RETURNED } }),
+        prisma.auditLog.findMany({
+          where: { actorId: user.id },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+          select: {
+            id: true,
+            action: true,
+            targetType: true,
+            targetId: true,
+            createdAt: true,
+            ipAddress: true,
+            details: true,
+          },
+        }),
       ]);
 
       const approved = await prisma.document.count({
@@ -54,6 +78,7 @@ export default async function ProfilePage() {
       });
 
       myStats = { totalUploaded: uploaded, totalApproved: approved, totalPendingMySign: pendingSign, totalReturned: returned };
+      userAuditLogs = dbAuditLogs as unknown as typeof userAuditLogs;
     } catch {
       // keep defaults
     }
@@ -147,7 +172,7 @@ export default async function ProfilePage() {
 
         {/* Right: Comprehensive Self Profile Client */}
         <div className="lg:col-span-8 space-y-6">
-          <ProfileClient user={user} />
+          <ProfileClient user={user} auditLogs={userAuditLogs} />
         </div>
       </div>
     </div>

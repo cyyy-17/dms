@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import AdminDocumentOverrideManagement from "@/components/AdminDocumentOverrideManagement";
+import AdminRetentionSimulator from "@/components/AdminRetentionSimulator";
 import { Wrench } from "lucide-react";
 import { DocumentStatus, ApprovalLevel } from "@prisma/client";
 
@@ -59,6 +60,8 @@ export default async function AdminDocumentsOverridePage() {
           Emergency state overrides, administrative unlocking of deadlocked reviews, and RA 10173 statutory compliance archival.
         </p>
       </div>
+
+      <AdminRetentionSimulator />
 
       <AdminDocumentOverrideManagement documents={documents} />
     </div>

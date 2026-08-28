@@ -100,9 +100,54 @@ export async function GET(req: NextRequest) {
     alertsSent++;
   }
 
+  // Check Delegations Expiring within 72h
+  const threshold72h = addDays(today, 3);
+  const expiringDelegations = await prisma.delegateSignatory.findMany({
+    where: {
+      isActive: true,
+      endDate: {
+        gte: today,
+        lte: threshold72h,
+      },
+    },
+    include: {
+      delegator: true,
+      delegate: true,
+      unit: true,
+    },
+  });
+
+  let delegationAlertsSent = 0;
+  for (const delegation of expiringDelegations) {
+    const hoursRemaining = Math.max(
+      1,
+      Math.round((delegation.endDate.getTime() - today.getTime()) / (1000 * 60 * 60))
+    );
+    const daysRemaining = Math.ceil(hoursRemaining / 24);
+
+    await queueNotification({
+      recipientId: delegation.delegatorId,
+      recipientEmail: delegation.delegator.email,
+      type: "DOCUMENT_EXPIRY_WARNING",
+      subject: `SASDMS Notice: Signatory Delegation Expiring in ${daysRemaining <= 1 ? `${hoursRemaining} Hours` : `${daysRemaining} Days`}`,
+      templateName: "delegation-expiry-alert",
+      payload: {
+        delegationId: delegation.id,
+        unitName: delegation.unit.name,
+        delegateName: `${delegation.delegate.firstName} ${delegation.delegate.lastName}`,
+        endDate: delegation.endDate,
+        hoursRemaining,
+      },
+    });
+
+    delegationAlertsSent++;
+  }
+
   return NextResponse.json({
     success: true,
     expiringDocumentsCount: expiringDocs.length,
-    alertsDispatched: alertsSent,
+    documentAlertsDispatched: alertsSent,
+    expiringDelegationsCount: expiringDelegations.length,
+    delegationAlertsDispatched: delegationAlertsSent,
   });
 }

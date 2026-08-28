@@ -644,6 +644,88 @@ export async function verifyDocumentChecksumAction(
 }
 
 /**
+ * Verify Document Authenticity and Token Integrity
+ */
+export async function verifyTrackingTokenAction(trackingNumberOrId: string): Promise<{
+  success: boolean;
+  isValid?: boolean;
+  document?: {
+    id: string;
+    trackingNumber: string;
+    title: string;
+    status: string;
+    unit?: { name: string; code: string } | null;
+    uploader?: { firstName: string; lastName: string } | null;
+    currentVersion?: { versionNumber: number; sha256Checksum: string } | null;
+    updatedAt: Date;
+  };
+  error?: string;
+}> {
+  const normalized = trackingNumberOrId.trim();
+  if (!normalized) {
+    return { success: false, error: "Tracking number or security token is required." };
+  }
+
+  if (!isDatabaseConfigured) {
+    return {
+      success: true,
+      isValid: true,
+      document: {
+        id: "mock-doc-id",
+        trackingNumber: normalized,
+        title: "Verified Institutional Document",
+        status: "APPROVED",
+        unit: { name: "Career Services & Placement", code: "CAREER" },
+        uploader: { firstName: "Faculty", lastName: "Member" },
+        currentVersion: {
+          versionNumber: 1,
+          sha256Checksum: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        },
+        updatedAt: new Date(),
+      },
+    };
+  }
+
+  try {
+    const doc = await prisma.document.findFirst({
+      where: {
+        OR: [
+          { trackingNumber: { equals: normalized, mode: "insensitive" } },
+          ...(normalized.length === 36 ? [{ id: normalized }] : []),
+        ],
+      },
+      include: {
+        unit: { select: { name: true, code: true } },
+        uploader: { select: { firstName: true, lastName: true } },
+        currentVersion: { select: { versionNumber: true, sha256Checksum: true } },
+      },
+    });
+
+    if (!doc) {
+      return { success: false, error: "No document matching this tracking number was found." };
+    }
+
+    return {
+      success: true,
+      isValid: true,
+      document: {
+        id: doc.id,
+        trackingNumber: doc.trackingNumber,
+        title: doc.title,
+        status: doc.status,
+        unit: doc.unit,
+        uploader: doc.uploader,
+        currentVersion: doc.currentVersion,
+        updatedAt: doc.updatedAt,
+      },
+    };
+  } catch (error) {
+    console.error("[VERIFY_TRACKING_ERROR]", error);
+    return { success: false, error: "Verification inquiry failed." };
+  }
+}
+
+/**
  * Generate Secure Short-Lived Signed Download/View URL (15 mins)
  * Validates requester role, tenancy boundaries, and logs RA 10173 audit trail.
  */

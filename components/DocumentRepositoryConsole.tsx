@@ -6,6 +6,7 @@ import { getStatusLabel, getStatusBadgeClass, formatHumanDate } from "@/lib/stat
 import CopyTrackingButton from "@/components/CopyTrackingButton";
 import DataTableWrapper from "@/components/DataTableWrapper";
 import { useStarredDocuments } from "@/hooks/useStarredDocuments";
+import ExpiryCalendarView from "@/components/ExpiryCalendarView";
 import {
   FileText,
   Search,
@@ -80,7 +81,7 @@ export default function DocumentRepositoryConsole({
   isDirectorOrAdmin,
 }: DocumentRepositoryConsoleProps) {
   const { isStarred, toggleStar, starredCount } = useStarredDocuments();
-  const [viewMode, setViewMode] = useState<"table" | "grid">("table");
+  const [viewMode, setViewMode] = useState<"table" | "grid" | "calendar">("table");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUnit, setSelectedUnit] = useState<string>("ALL");
   const [selectedDocType, setSelectedDocType] = useState<string>("ALL");
@@ -273,6 +274,7 @@ export default function DocumentRepositoryConsole({
 
             <div className="border-l border-slate-200 pl-2.5 flex items-center gap-1.5">
               <button
+                type="button"
                 onClick={() => setViewMode("table")}
                 className={`p-2 rounded-xl transition-all cursor-pointer ${
                   viewMode === "table" ? "bg-[#0F2962] text-white shadow-xs" : "text-slate-500 hover:bg-slate-100 bg-white border border-slate-200"
@@ -282,6 +284,7 @@ export default function DocumentRepositoryConsole({
                 <List className="w-4 h-4" />
               </button>
               <button
+                type="button"
                 onClick={() => setViewMode("grid")}
                 className={`p-2 rounded-xl transition-all cursor-pointer ${
                   viewMode === "grid" ? "bg-[#0F2962] text-white shadow-xs" : "text-slate-500 hover:bg-slate-100 bg-white border border-slate-200"
@@ -289,6 +292,16 @@ export default function DocumentRepositoryConsole({
                 title="Grid View"
               >
                 <LayoutGrid className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("calendar")}
+                className={`p-2 rounded-xl transition-all cursor-pointer ${
+                  viewMode === "calendar" ? "bg-[#0F2962] text-white shadow-xs" : "text-slate-500 hover:bg-slate-100 bg-white border border-slate-200"
+                }`}
+                title="Expiry Calendar View"
+              >
+                <Calendar className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -382,6 +395,8 @@ export default function DocumentRepositoryConsole({
             </button>
           )}
         </div>
+      ) : viewMode === "calendar" ? (
+        <ExpiryCalendarView documents={filteredDocuments} />
       ) : viewMode === "table" ? (
         /* TABLE VIEW */
         <div className="glass-panel rounded-3xl border border-white/90 overflow-hidden shadow-sm">

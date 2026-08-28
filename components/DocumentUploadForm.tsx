@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createDocumentAction, AssignedSignatoryStep } from "@/actions/documents";
+import { getDocTypeTemplateDownloadUrlAction } from "@/actions/templates";
 import {
   UploadCloud,
   ShieldCheck,
@@ -17,6 +18,7 @@ import {
   Building2,
   Users,
   Loader2,
+  FileDown,
 } from "lucide-react";
 import { getRoleLabel, formatFileSize } from "@/lib/status-labels";
 
@@ -124,6 +126,32 @@ export default function DocumentUploadForm({
       setError("Failed to compute cryptographic file checksum.");
     } finally {
       setIsHashing(false);
+    }
+  };
+
+  const [isCheckingTemplate, setIsCheckingTemplate] = useState(false);
+
+  const handleDownloadTemplate = async () => {
+    const selectedDocType = docTypes.find((d) => d.id === documentTypeId);
+    if (!selectedDocType) return;
+    setIsCheckingTemplate(true);
+    setError(null);
+    try {
+      const res = await getDocTypeTemplateDownloadUrlAction(selectedDocType.code);
+      if (res.success && res.downloadUrl && typeof window !== "undefined") {
+        const a = window.document.createElement("a");
+        a.href = res.downloadUrl;
+        a.download = `${selectedDocType.code}_template.pdf`;
+        window.document.body.appendChild(a);
+        a.click();
+        window.document.body.removeChild(a);
+      } else {
+        setError(`No official blank template is uploaded yet for ${selectedDocType.name}.`);
+      }
+    } catch {
+      setError("Failed to retrieve document template.");
+    } finally {
+      setIsCheckingTemplate(false);
     }
   };
 
@@ -417,6 +445,24 @@ export default function DocumentUploadForm({
                   </option>
                 ))}
               </select>
+
+              <div className="flex items-center justify-between pt-1.5 px-0.5">
+                <span className="text-[10px] text-slate-500 font-medium">Standard template</span>
+                <button
+                  type="button"
+                  onClick={handleDownloadTemplate}
+                  disabled={isCheckingTemplate}
+                  className="text-[11px] font-bold text-[#0F2962] hover:text-blue-700 flex items-center gap-1 cursor-pointer hover:underline disabled:opacity-50"
+                  title="Download blank official template for this document classification"
+                >
+                  {isCheckingTemplate ? (
+                    <Loader2 className="w-3 h-3 animate-spin text-[#0F2962]" />
+                  ) : (
+                    <FileDown className="w-3 h-3 text-blue-600" />
+                  )}
+                  <span>Download Blank PDF</span>
+                </button>
+              </div>
             </div>
 
             <div>

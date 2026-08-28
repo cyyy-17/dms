@@ -23,8 +23,10 @@ import {
   X,
   Building,
   ArrowRight,
+  FileSpreadsheet,
 } from "lucide-react";
 import DataTableWrapper from "@/components/DataTableWrapper";
+import AdminBulkUserModal from "@/components/AdminBulkUserModal";
 import { UserRole, UserStatus } from "@prisma/client";
 import { getRoleLabel } from "@/lib/status-labels";
 
@@ -67,6 +69,7 @@ export default function AdminUserManagement({
 
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [createStep, setCreateStep] = useState<1 | 2>(1);
   const [createDirection, setCreateDirection] = useState<"forward" | "backward">("forward");
   const [editUser, setEditUser] = useState<UserItem | null>(null);
@@ -373,13 +376,26 @@ export default function AdminUserManagement({
           </select>
         </div>
 
-        <button
-          onClick={() => setIsCreateModalOpen(true)}
-          className="px-4 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5 shrink-0 self-start md:self-auto cursor-pointer"
-        >
-          <UserPlus className="w-4 h-4 text-amber-400" />
-          <span>Provision Employee</span>
-        </button>
+        <div className="flex items-center gap-2 shrink-0 self-start md:self-auto">
+          <button
+            type="button"
+            onClick={() => setIsBulkModalOpen(true)}
+            className="px-3.5 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+            title="Import users in batch from a spreadsheet CSV"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span>Bulk Import (CSV)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="px-4 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <UserPlus className="w-4 h-4 text-amber-400" />
+            <span>Provision Employee</span>
+          </button>
+        </div>
       </div>
 
       {/* Users Table */}
@@ -1105,6 +1121,16 @@ export default function AdminUserManagement({
           </div>
         </div>
       )}
+
+      {/* Bulk User Provisioning Modal */}
+      <AdminBulkUserModal
+        isOpen={isBulkModalOpen}
+        onClose={() => setIsBulkModalOpen(false)}
+        onSuccess={() => {
+          setIsBulkModalOpen(false);
+          router.refresh();
+        }}
+      />
     </div>
   );
 }

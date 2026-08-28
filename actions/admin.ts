@@ -923,6 +923,63 @@ export async function adminArchiveDocumentAction(params: {
   }
 }
 
+export async function batchArchiveDocumentsAction(params: {
+  documentIds: string[];
+  disposalReason: string;
+}): Promise<{ success: boolean; count?: number; error?: string }> {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    return { success: false, error: "Unauthorized. Admin role required." };
+  }
+
+  if (!params.disposalReason || params.disposalReason.trim().length < 5) {
+    return {
+      success: false,
+      error: "Mandatory: A valid RA 10173 archival justification is required.",
+    };
+  }
+
+  if (params.documentIds.length === 0) {
+    return { success: true, count: 0 };
+  }
+
+  if (!isDatabaseConfigured) {
+    return { success: true, count: params.documentIds.length };
+  }
+
+  try {
+    const result = await prisma.document.updateMany({
+      where: { id: { in: params.documentIds } },
+      data: {
+        status: DocumentStatus.ARCHIVED,
+        isArchived: true,
+        archivedAt: new Date(),
+      },
+    });
+
+    await logAuditEvent({
+      actorId: currentUser.id,
+      unitId: currentUser.unitId,
+      action: "DOCUMENT_ARCHIVE",
+      targetType: "DOCUMENT",
+      targetId: `${result.count}_DOCUMENTS`,
+      details: {
+        actionType: "BATCH_ARCHIVAL",
+        archivedCount: result.count,
+        documentIds: params.documentIds,
+        disposalReason: params.disposalReason,
+      },
+    });
+
+    revalidatePath("/dashboard/documents");
+    revalidatePath("/dashboard/admin/documents-override");
+    return { success: true, count: result.count };
+  } catch (error) {
+    console.error("[BATCH_ARCHIVE_ERROR]", error);
+    return { success: false, error: "Failed to batch archive documents." };
+  }
+}
+
 /**
  * Admin action to replace an assigned signatory in a document's sequential flow
  */
@@ -1103,3 +1160,153 @@ export async function clearNotificationQueueAction(onlySent: boolean = true): Pr
     return { success: false, error: err instanceof Error ? err.message : "Failed to clear notifications." };
   }
 }
+
+export interface BulkUserPayload {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  suffix?: string;
+  title?: string;
+  email: string;
+  employeeId?: string;
+  role: UserRole;
+  unitCode: string;
+  password?: string;
+}
+
+export async function bulkCreateUsersAction(rows: BulkUserPayload[]): Promise<{
+  success: boolean;
+  createdCount: number;
+  failedCount: number;
+  errors: Array<{ email: string; message: string }>;
+}> {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || currentUser.role !== "ADMIN") {
+    return {
+      success: false,
+      createdCount: 0,
+      failedCount: rows.length,
+      errors: [{ email: "all", message: "Unauthorized. Admin privileges required." }],
+    };
+  }
+
+  if (!isDatabaseConfigured) {
+    return { success: true, createdCount: rows.length, failedCount: 0, errors: [] };
+  }
+
+  let createdCount = 0;
+  const errors: Array<{ email: string; message: string }> = [];
+
+  // Fetch all active units for lookup
+  const units = await prisma.unit.findMany({ where: { isActive: true } });
+  const unitMap = new Map<string, string>();
+  for (const u of units) {
+    unitMap.set(u.code.toUpperCase(), u.id);
+  }
+
+  for (const row of rows) {
+    const normalizedEmail = row.email.trim().toLowerCase();
+
+    try {
+      // 1. Resolve Unit
+      const unitId = unitMap.get(row.unitCode.trim().toUpperCase());
+      if (!unitId) {
+        errors.push({
+          email: normalizedEmail,
+          message: `Department unit code '${row.unitCode}' does not exist or is inactive.`,
+        });
+        continue;
+      }
+
+      // 2. Check duplicate in Prisma
+      const existing = await prisma.user.findUnique({
+        where: { email: normalizedEmail },
+      });
+      if (existing) {
+        errors.push({
+          email: normalizedEmail,
+          message: "An account with this email already exists in the system.",
+        });
+        continue;
+      }
+
+      // 3. Create in Supabase Auth
+      const tempPassword = row.password || "Password123!";
+      const { data: authResult, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        email: normalizedEmail,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
+          firstName: row.firstName.trim(),
+          lastName: row.lastName.trim(),
+        },
+      });
+
+      let userId = authResult?.user?.id;
+      if (authError || !userId) {
+        // If already in Supabase Auth, try to retrieve ID
+        if (authError?.message?.toLowerCase().includes("already registered") || authError?.message?.toLowerCase().includes("already exists")) {
+          const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
+          const found = listData.users.find((u) => u.email?.toLowerCase() === normalizedEmail);
+          if (found) {
+            userId = found.id;
+          } else {
+            errors.push({ email: normalizedEmail, message: authError.message });
+            continue;
+          }
+        } else {
+          errors.push({ email: normalizedEmail, message: authError?.message || "Auth creation failed." });
+          continue;
+        }
+      }
+
+      // 4. Create in Prisma with ACTIVE status
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (prisma.user.create as any)({
+        data: {
+          id: userId,
+          email: normalizedEmail,
+          firstName: row.firstName.trim(),
+          middleName: row.middleName?.trim() || null,
+          lastName: row.lastName.trim(),
+          suffix: row.suffix?.trim() || null,
+          title: row.title?.trim() || null,
+          employeeId: row.employeeId?.trim() || null,
+          role: row.role,
+          status: UserStatus.ACTIVE,
+          unitId,
+        },
+      });
+
+      await logAuditEvent({
+        actorId: currentUser.id,
+        unitId,
+        action: "USER_ROLE_CHANGE",
+        targetType: "USER",
+        targetId: userId,
+        details: {
+          actionType: "BULK_USER_PROVISIONED",
+          email: normalizedEmail,
+          role: row.role,
+          unitCode: row.unitCode,
+        },
+      });
+
+      createdCount++;
+    } catch (err: unknown) {
+      errors.push({
+        email: normalizedEmail,
+        message: err instanceof Error ? err.message : "Failed to provision user.",
+      });
+    }
+  }
+
+  revalidatePath("/dashboard/admin/users");
+  return {
+    success: createdCount > 0,
+    createdCount,
+    failedCount: errors.length,
+    errors,
+  };
+}
+

@@ -16,6 +16,7 @@ import {
 } from "@/actions/approvals";
 import SignaturePadModal from "@/components/SignaturePadModal";
 import VisualStampPlacerModal, { StampCoordinates } from "@/components/VisualStampPlacerModal";
+import CertificateOfAuthenticityModal from "@/components/CertificateOfAuthenticityModal";
 import { useOptionalToast } from "@/components/ToastContext";
 import {
   Send,
@@ -37,6 +38,7 @@ import {
   FileText,
   Copy,
   Check,
+  Award,
 } from "lucide-react";
 import { DocumentStatus, UserRole } from "@prisma/client";
 
@@ -111,6 +113,7 @@ export default function DocumentDetailActions({
     calculated: string;
   } | null>(null);
   const [copiedHash, setCopiedHash] = useState(false);
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
 
   const handleCopyChecksum = () => {
     if (!document.currentVersion?.sha256Checksum) return;
@@ -1092,14 +1095,25 @@ export default function DocumentDetailActions({
 
         {/* 4. Fully Approved */}
         {document.status === DocumentStatus.APPROVED && (
-          <div className="p-4.5 rounded-2xl bg-emerald-50/90 border border-emerald-200 flex items-center gap-3.5 text-emerald-950 text-xs shadow-xs">
-            <ShieldCheck className="w-6 h-6 text-emerald-600 shrink-0" />
-            <div>
-              <span className="font-black text-sm block">This document is fully approved and cryptographically sealed.</span>
-              <span className="text-emerald-800 block mt-0.5">
-                All sequential electronic signatures have been embedded and the SHA-256 digest is locked.
-              </span>
+          <div className="space-y-3">
+            <div className="p-4.5 rounded-2xl bg-emerald-50/90 border border-emerald-200 flex items-center gap-3.5 text-emerald-950 text-xs shadow-xs">
+              <ShieldCheck className="w-6 h-6 text-emerald-600 shrink-0" />
+              <div>
+                <span className="font-black text-sm block">This document is fully approved and cryptographically sealed.</span>
+                <span className="text-emerald-800 block mt-0.5">
+                  All sequential electronic signatures have been embedded and the SHA-256 digest is locked.
+                </span>
+              </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setIsCertModalOpen(true)}
+              className="w-full py-3 px-4 rounded-2xl bg-[#0F2962] hover:bg-[#091a42] text-amber-300 font-black text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 active:scale-98"
+            >
+              <Award className="w-4 h-4 text-amber-400" />
+              <span>Generate & Print Certificate of Authenticity</span>
+            </button>
           </div>
         )}
       </div>
@@ -1337,6 +1351,23 @@ export default function DocumentDetailActions({
           </div>
         </div>
       )}
+
+      {/* Certificate of Authenticity Printable Modal */}
+      <CertificateOfAuthenticityModal
+        isOpen={isCertModalOpen}
+        onClose={() => setIsCertModalOpen(false)}
+        document={{
+          id: document.id,
+          trackingNumber: document.trackingNumber,
+          title: (document as { title?: string }).title || document.trackingNumber,
+          status: document.status,
+          createdAt: (document as { createdAt?: Date }).createdAt || new Date(),
+          updatedAt: (document as { updatedAt?: Date }).updatedAt || new Date(),
+          unit: (document as { unit?: { name: string; code: string } | null }).unit || null,
+          uploader: (document as { uploader?: { firstName: string; lastName: string; email: string } }).uploader || { firstName: "Faculty", lastName: "Member", email: "" },
+          currentVersion: document.currentVersion,
+        }}
+      />
     </div>
   );
 }

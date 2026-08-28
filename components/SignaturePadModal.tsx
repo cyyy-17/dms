@@ -156,9 +156,10 @@ export default function SignaturePadModal({
 
     if (res.success && res.signaturePath) {
       if (showToast) {
+        const hashSnippet = res.signatureHash ? ` (SHA-256: ${res.signatureHash.slice(0, 8)}…)` : "";
         showToast({
-          title: "E-Signature Saved",
-          message: "Your official cryptographic signature is active and ready for document approval workflows.",
+          title: "E-Signature Saved & Verified",
+          message: `Your official signature is active and cryptographically registered${hashSnippet}.`,
           type: "success",
           duration: 4000,
         });
@@ -368,6 +369,14 @@ export default function SignaturePadModal({
             </div>
           </div>
         )}
+
+        {/* Security / Integrity Notice */}
+        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-[11px] text-slate-600 font-medium">
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <span>
+            Protected with <strong>SHA-256 cryptographic checksum</strong> and non-repudiation logging (RA 10173).
+          </span>
+        </div>
 
         {/* Footer Actions */}
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200/80">

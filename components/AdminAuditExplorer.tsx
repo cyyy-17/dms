@@ -28,8 +28,14 @@ interface AuditLogItem {
 export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [actionFilter, setActionFilter] = useState("ALL");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const filteredLogs = logs.filter((log) => {
+    const logDate = new Date(log.createdAt);
+    if (startDate && logDate < new Date(`${startDate}T00:00:00`)) return false;
+    if (endDate && logDate > new Date(`${endDate}T23:59:59`)) return false;
+
     const matchesSearch =
       log.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
       log.targetType.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -43,34 +49,97 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
   });
 
   const exportToCSV = () => {
-    const headers = ["Timestamp (ISO)", "Action", "Actor Name", "Actor Email", "Target Type", "Target ID / Tracking #", "IP Address", "Details"];
+    if (typeof window === "undefined") return;
+    const headers = [
+      "Timestamp (ISO)",
+      "Action",
+      "Actor Name",
+      "Actor Email",
+      "Target Type",
+      "Target ID / Tracking #",
+      "IP Address",
+      "Details",
+    ];
     const rows = filteredLogs.map((l) => [
       new Date(l.createdAt).toISOString(),
       l.action,
-      l.actor ? `${l.actor.firstName} ${l.actor.lastName}` : "System",
-      l.actor ? l.actor.email : "system@firstasia.edu.ph",
-      l.targetType,
-      l.document ? l.document.trackingNumber : (l.targetId || "N/A"),
-      l.ipAddress || "127.0.0.1",
+      l.actor ? `"${l.actor.firstName} ${l.actor.lastName}"` : '"System Automated Worker"',
+      l.actor ? `"${l.actor.email}"` : '"system@firstasia.edu.ph"',
+      `"${l.targetType}"`,
+      l.document ? `"${l.document.trackingNumber}"` : `"${l.targetId || "N/A"}"`,
+      `"${l.ipAddress || "127.0.0.1"}"`,
       `"${JSON.stringify(l.details).replace(/"/g, '""')}"`,
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `SASDMS_Audit_Trail_${new Date().toISOString().split("T")[0]}.csv`);
-    document.body.appendChild(link);
+    const csvContent = [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = window.document.createElement("a");
+    link.href = url;
+    link.download = `SASDMS_Compliance_Audit_Trail_${new Date().toISOString().split("T")[0]}.csv`;
+    window.document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    window.document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const exportToJSON = () => {
+    if (typeof window === "undefined") return;
+    const exportPayload = {
+      institution: "First Asia Institute of Technology and Humanities",
+      system: "Student Affairs and Services Document Management System (SASDMS)",
+      governanceFramework: "Republic Act No. 10173 (Data Privacy Act of 2012)",
+      exportTimestamp: new Date().toISOString(),
+      recordCount: filteredLogs.length,
+      filtersApplied: {
+        searchQuery: searchQuery || null,
+        actionFilter,
+        startDate: startDate || null,
+        endDate: endDate || null,
+      },
+      auditRecords: filteredLogs.map((l) => ({
+        id: l.id,
+        timestamp: new Date(l.createdAt).toISOString(),
+        action: l.action,
+        actionLabel: getActionLabel(l.action),
+        targetType: l.targetType,
+        targetId: l.targetId,
+        trackingNumber: l.document?.trackingNumber || null,
+        documentTitle: l.document?.title || null,
+        actor: l.actor
+          ? {
+              fullName: `${l.actor.firstName} ${l.actor.lastName}`,
+              email: l.actor.email,
+            }
+          : {
+              fullName: "System Automated Worker",
+              email: "system@firstasia.edu.ph",
+            },
+        ipAddress: l.ipAddress,
+        userAgent: l.userAgent,
+        details: l.details,
+      })),
+    };
+
+    const blob = new Blob([JSON.stringify(exportPayload, null, 2)], {
+      type: "application/json;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = window.document.createElement("a");
+    link.href = url;
+    link.download = `SASDMS_Audit_Report_${new Date().toISOString().split("T")[0]}.json`;
+    window.document.body.appendChild(link);
+    link.click();
+    window.document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto w-full">
       {/* Action / Filter Bar */}
-      <div className="glass-panel rounded-3xl p-4.5 border border-white/90 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 flex-1">
-          <div className="relative min-w-64 flex-1">
+      <div className="glass-panel rounded-3xl p-4.5 border border-white/90 shadow-sm space-y-3.5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
@@ -81,42 +150,93 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
             />
           </div>
 
-          <select
-            value={actionFilter}
-            onChange={(e) => setActionFilter(e.target.value)}
-            className="text-xs py-2.5 px-3.5 bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition shadow-inner text-slate-900 font-bold"
-          >
-            <option value="ALL">All Event Actions</option>
-            <option value="USER_REGISTER">User Account Registered</option>
-            <option value="USER_APPROVE">Account Verified & Approved</option>
-            <option value="USER_REJECT">Registration Request Denied</option>
-            <option value="USER_SUSPEND">Account Suspended</option>
-            <option value="USER_ROLE_CHANGE">Role / Unit Reassigned</option>
-            <option value="DOCUMENT_CREATE">Document Ingested into Vault</option>
-            <option value="DOCUMENT_VERSION_UPLOAD">New Version Attached</option>
-            <option value="DOCUMENT_VIEW">Document Inspected (View)</option>
-            <option value="DOCUMENT_DOWNLOAD">Document PDF Exported (Download)</option>
-            <option value="DOCUMENT_SUBMIT">Submitted for Sequential Review</option>
-            <option value="DOCUMENT_APPROVE_COORDINATOR">Approved by Unit Coordinator</option>
-            <option value="DOCUMENT_APPROVE_DIRECTOR">Executive Approval by Director</option>
-            <option value="DOCUMENT_REJECT_RETURN">Returned for Author Revision</option>
-            <option value="DOCUMENT_REJECT_CLOSE">Permanently Terminated / Closed</option>
-            <option value="DOCUMENT_AUTO_ESCALATE">Auto-Escalated to Director</option>
-            <option value="DOCUMENT_ARCHIVE">RA 10173 Compliance Archival</option>
-            <option value="DOCUMENT_EXPIRY_ALERT">Document Expiry Alert Dispatched</option>
-            <option value="DOCUMENT_PURGE">Automated Retention Cleanup</option>
-            <option value="DELEGATION_ASSIGNED">Acting Signatory Delegated</option>
-            <option value="DELEGATION_REVOKED">Acting Signatory Revoked</option>
-          </select>
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={actionFilter}
+              onChange={(e) => setActionFilter(e.target.value)}
+              className="text-xs py-2.5 px-3.5 bg-white/90 border border-slate-300/90 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition shadow-inner text-slate-900 font-bold"
+            >
+              <option value="ALL">All Event Actions</option>
+              <option value="USER_REGISTER">User Account Registered</option>
+              <option value="USER_APPROVE">Account Verified & Approved</option>
+              <option value="USER_REJECT">Registration Request Denied</option>
+              <option value="USER_SUSPEND">Account Suspended</option>
+              <option value="USER_ROLE_CHANGE">Role / Unit Reassigned</option>
+              <option value="DOCUMENT_CREATE">Document Ingested into Vault</option>
+              <option value="DOCUMENT_VERSION_UPLOAD">New Version Attached</option>
+              <option value="DOCUMENT_VIEW">Document Inspected (View)</option>
+              <option value="DOCUMENT_DOWNLOAD">Document PDF Exported (Download)</option>
+              <option value="DOCUMENT_SUBMIT">Submitted for Sequential Review</option>
+              <option value="DOCUMENT_APPROVE_COORDINATOR">Approved by Unit Coordinator</option>
+              <option value="DOCUMENT_APPROVE_DIRECTOR">Executive Approval by Director</option>
+              <option value="DOCUMENT_REJECT_RETURN">Returned for Author Revision</option>
+              <option value="DOCUMENT_REJECT_CLOSE">Permanently Terminated / Closed</option>
+              <option value="DOCUMENT_AUTO_ESCALATE">Auto-Escalated to Director</option>
+              <option value="DOCUMENT_ARCHIVE">RA 10173 Compliance Archival</option>
+              <option value="DOCUMENT_EXPIRY_ALERT">Document Expiry Alert Dispatched</option>
+              <option value="DOCUMENT_PURGE">Automated Retention Cleanup</option>
+              <option value="DELEGATION_ASSIGNED">Acting Signatory Delegated</option>
+              <option value="DELEGATION_REVOKED">Acting Signatory Revoked</option>
+            </select>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={exportToCSV}
+                className="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center gap-1.5 cursor-pointer"
+                title="Export filtered records as standard CSV"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export CSV</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={exportToJSON}
+                className="px-3.5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-bold shadow-xs hover:shadow-md transition flex items-center gap-1.5 cursor-pointer"
+                title="Export full compliance package with audit integrity headers in JSON"
+              >
+                <Download className="w-3.5 h-3.5 text-amber-400" />
+                <span>Compliance JSON</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <button
-          onClick={exportToCSV}
-          className="px-4.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2 shrink-0 self-start md:self-auto cursor-pointer hover:-translate-y-0.5"
-        >
-          <Download className="w-3.5 h-3.5" />
-          <span>Export Audit Log (CSV)</span>
-        </button>
+        {/* Date Range Sub-Bar */}
+        <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-100/90 text-xs">
+          <span className="text-slate-500 font-bold">Date Range Filter:</span>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs text-slate-800 bg-white"
+            />
+            <span className="text-slate-400 font-bold">to</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="px-3 py-1.5 rounded-lg border border-slate-300 text-xs text-slate-800 bg-white"
+            />
+            {(startDate || endDate) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setStartDate("");
+                  setEndDate("");
+                }}
+                className="text-[11px] text-blue-700 hover:underline font-bold"
+              >
+                Clear Dates
+              </button>
+            )}
+          </div>
+          <span className="text-slate-400 text-[11px] ml-auto font-mono">
+            {filteredLogs.length} matching event(s)
+          </span>
+        </div>
       </div>
 
       {/* Audit Log Table */}

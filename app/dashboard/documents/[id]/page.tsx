@@ -5,6 +5,8 @@ import DocumentDetailActions from "@/components/DocumentDetailActions";
 import LiveDocumentViewer from "@/components/LiveDocumentViewer";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import DocumentVersionDiffTrigger from "@/components/DocumentVersionDiffTrigger";
+import DocumentTimelineView from "@/components/DocumentTimelineView";
 import {
   getStatusLabel,
   getStatusBadgeClass,
@@ -66,6 +68,8 @@ interface DocumentDetail {
   isEscalated: boolean;
   effectiveDate: Date | null;
   expiryDate: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
   uploaderId: string;
   unitId: string;
   signatoryFlow?: unknown;
@@ -560,9 +564,15 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                 <GitBranch className="w-4 h-4 text-blue-600" />
                 <span>Immutable Version History (Zero Overwrite)</span>
               </h2>
-              <span className="text-xs text-slate-400 font-medium">
-                {doc.versions.length} Version(s)
-              </span>
+              <div className="flex items-center gap-2.5">
+                <DocumentVersionDiffTrigger
+                  versions={doc.versions}
+                  trackingNumber={doc.trackingNumber}
+                />
+                <span className="text-xs text-slate-400 font-medium font-mono">
+                  {doc.versions.length} Version(s)
+                </span>
+              </div>
             </div>
 
             <div className="space-y-3">
@@ -611,6 +621,15 @@ export default async function DocumentDetailPage({ params }: PageProps) {
               ))}
             </div>
           </div>
+
+          {/* Visual Lifecycle Timeline */}
+          <DocumentTimelineView
+            status={doc.status}
+            createdAt={doc.createdAt}
+            uploader={doc.uploader}
+            approvalActions={doc.approvalActions}
+            isEscalated={doc.isEscalated}
+          />
 
           {/* Sequential Approval Timeline */}
           <div className="glass-card rounded-2xl p-6 border border-slate-200 space-y-4">

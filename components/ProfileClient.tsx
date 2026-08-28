@@ -23,7 +23,18 @@ import {
   Save,
   KeyRound,
   Image as ImageIcon,
+  History,
 } from "lucide-react";
+
+export interface UserAuditLogItem {
+  id: string;
+  action: string;
+  targetType: string;
+  targetId: string | null;
+  createdAt: Date;
+  ipAddress: string | null;
+  details: unknown;
+}
 
 interface ProfileClientProps {
   user: {
@@ -40,13 +51,14 @@ interface ProfileClientProps {
     unitCode: string | null;
     signaturePath: string | null;
   };
+  auditLogs?: UserAuditLogItem[];
 }
 
-export default function ProfileClient({ user }: ProfileClientProps) {
+export default function ProfileClient({ user, auditLogs = [] }: ProfileClientProps) {
   const router = useRouter();
 
   // Navigation tab
-  const [activeTab, setActiveTab] = useState<"details" | "security" | "signature">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "security" | "signature" | "activity">("details");
 
   // Profile Details State
   const [firstName, setFirstName] = useState(user.firstName);
@@ -198,7 +210,7 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         <button
           type="button"
           onClick={() => setActiveTab("signature")}
-          className={`flex-1 min-w-32.5 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 min-w-28 py-2.5 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
             activeTab === "signature"
               ? "bg-white text-[#0F2962] shadow-sm font-extrabold"
               : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
@@ -206,6 +218,19 @@ export default function ProfileClient({ user }: ProfileClientProps) {
         >
           <PenLine className="w-4 h-4" />
           <span>E-Signature</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("activity")}
+          className={`flex-1 min-w-28 py-2.5 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            activeTab === "activity"
+              ? "bg-white text-[#0F2962] shadow-sm font-extrabold"
+              : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
+          }`}
+        >
+          <History className="w-4 h-4" />
+          <span>My Activity</span>
         </button>
       </div>
 
@@ -568,6 +593,67 @@ export default function ProfileClient({ user }: ProfileClientProps) {
               router.refresh();
             }}
           />
+        </div>
+      )}
+
+      {/* TAB 4: PERSONAL AUDIT ACTIVITY LOG */}
+      {activeTab === "activity" && (
+        <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-white/90 bg-white/90 shadow-sm space-y-5 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-black text-slate-900">My Activity & Security Log</h2>
+              <p className="text-xs text-slate-500 font-medium mt-0.5">
+                Your recent actions and compliance trail under RA 10173 governance.
+              </p>
+            </div>
+            <span className="text-[11px] font-mono font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-xl">
+              {auditLogs.length} Recent Events
+            </span>
+          </div>
+
+          {auditLogs.length === 0 ? (
+            <div className="p-8 text-center text-slate-400 text-xs rounded-2xl bg-slate-50 border border-slate-200/80">
+              No recent activity log events recorded for this account.
+            </div>
+          ) : (
+            <div className="overflow-x-auto rounded-2xl border border-slate-200/80 bg-white shadow-xs">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="bg-slate-50/90 text-slate-400 font-bold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                    <th className="py-3 px-4">Action Event</th>
+                    <th className="py-3 px-4">Target Type</th>
+                    <th className="py-3 px-4">Date & Time</th>
+                    <th className="py-3 px-4 text-right">Details</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+                  {auditLogs.map((log) => (
+                    <tr key={log.id} className="hover:bg-blue-50/40 transition-colors">
+                      <td className="py-3 px-4">
+                        <span className="font-mono font-bold text-slate-900 text-[11px]">
+                          {log.action}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-bold">
+                          {log.targetType}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-slate-500 text-[11px] whitespace-nowrap">
+                        {new Date(log.createdAt).toLocaleString("en-PH", {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        })}
+                      </td>
+                      <td className="py-3 px-4 text-right text-[11px] text-slate-500 max-w-56 truncate font-mono">
+                        {log.details ? JSON.stringify(log.details) : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>

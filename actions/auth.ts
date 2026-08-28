@@ -9,6 +9,7 @@ import { INSTITUTION_EMAIL_DOMAIN } from "@/lib/constants";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import crypto from "crypto";
 
 export interface RegisterInput {
   email: string;
@@ -282,6 +283,7 @@ export async function signOutAction() {
 export async function saveUserSignatureAction(base64DataUrl: string): Promise<{
   success: boolean;
   signaturePath?: string;
+  signatureHash?: string;
   error?: string;
 }> {
   const currentUser = await getAuthenticatedUser();
@@ -292,6 +294,7 @@ export async function saveUserSignatureAction(base64DataUrl: string): Promise<{
   try {
     const base64Data = base64DataUrl.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, "base64");
+    const signatureHash = crypto.createHash("sha256").update(buffer).digest("hex");
     const filename = `signatures/${currentUser.id}/sig_${Date.now()}.png`;
 
     const { error: uploadError } = await supabaseAdmin.storage
@@ -318,12 +321,17 @@ export async function saveUserSignatureAction(base64DataUrl: string): Promise<{
         action: "USER_ROLE_CHANGE",
         targetType: "USER",
         targetId: currentUser.id,
-        details: { actionType: "SIGNATURE_UPDATED", signaturePath: filename },
+        details: {
+          actionType: "SIGNATURE_UPDATED",
+          signaturePath: filename,
+          signatureHash,
+          byteLength: buffer.length,
+        },
       });
     }
 
     revalidatePath("/dashboard", "layout");
-    return { success: true, signaturePath: filename };
+    return { success: true, signaturePath: filename, signatureHash };
   } catch (err: unknown) {
     console.error("[SAVE_SIGNATURE_ERROR]", err);
     return { success: false, error: err instanceof Error ? err.message : "Failed to save signature." };

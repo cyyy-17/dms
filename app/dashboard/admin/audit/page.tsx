@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import AdminAuditExplorer from "@/components/AdminAuditExplorer";
+import AdminHealthWidget from "@/components/AdminHealthWidget";
 import { ShieldCheck } from "lucide-react";
 import { AuditAction } from "@prisma/client";
 
@@ -57,6 +58,8 @@ export default async function AdminAuditPage() {
           Immutable event ledger tracking every document ingestion, download, approval, and administrative intervention.
         </p>
       </div>
+
+      <AdminHealthWidget />
 
       <AdminAuditExplorer logs={auditLogs} />
     </div>

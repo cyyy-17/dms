@@ -7,6 +7,7 @@ import {
   updateDocumentTypeAction,
   toggleDocumentTypeStatusAction,
 } from "@/actions/admin";
+import { uploadDocTypeTemplateAction } from "@/actions/templates";
 import {
   FileCode2,
   Plus,
@@ -17,6 +18,7 @@ import {
   X,
   ShieldCheck,
   Calendar,
+  FileUp,
 } from "lucide-react";
 import DataTableWrapper from "@/components/DataTableWrapper";
 import { ApprovalLevel } from "@prisma/client";
@@ -62,6 +64,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
     isActive: true,
   });
 
+  const [templateFile, setTemplateFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
@@ -92,10 +95,24 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
       isActive: form.isActive,
     });
 
-    setIsLoading(false);
     if (res.success) {
+      if (templateFile) {
+        try {
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(templateFile);
+          });
+          await uploadDocTypeTemplateAction(form.code, base64, templateFile.name);
+        } catch {
+          console.error("Template upload failed");
+        }
+      }
+
       setFeedback({ type: "success", message: `Document type '${form.code}' created successfully.` });
       setIsCreateModalOpen(false);
+      setTemplateFile(null);
       setForm({
         code: "",
         name: "",
@@ -109,6 +126,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
     } else {
       setFeedback({ type: "error", message: res.error || "Failed to create document type." });
     }
+    setIsLoading(false);
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -128,14 +146,29 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
       isActive: form.isActive,
     });
 
-    setIsLoading(false);
     if (res.success) {
+      if (templateFile) {
+        try {
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(templateFile);
+          });
+          await uploadDocTypeTemplateAction(form.code, base64, templateFile.name);
+        } catch {
+          console.error("Template upload failed");
+        }
+      }
+
       setFeedback({ type: "success", message: `Document type '${form.code}' updated successfully.` });
       setEditingType(null);
+      setTemplateFile(null);
       router.refresh();
     } else {
       setFeedback({ type: "error", message: res.error || "Failed to update document type." });
     }
+    setIsLoading(false);
   };
 
   const handleToggleStatus = async (docType: DocTypeItem) => {
@@ -420,6 +453,22 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
                     </label>
                   </div>
                 </div>
+              </div>
+
+              <div>
+                <label className="font-bold text-slate-700 uppercase mb-1 flex items-center gap-1.5">
+                  <FileUp className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Official Blank Template PDF (Optional)</span>
+                </label>
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={(e) => setTemplateFile(e.target.files?.[0] || null)}
+                  className="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-[#0F2962] hover:file:bg-blue-100 cursor-pointer"
+                />
+                <span className="text-[10px] text-slate-400 mt-1 block">
+                  Staff can download this official template directly from the document creation wizard.
+                </span>
               </div>
 
               <div className="pt-3 flex justify-end gap-2 border-t border-slate-100">
