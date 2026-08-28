@@ -61,7 +61,12 @@ interface DocumentDetailActionsProps {
   document: {
     id: string;
     trackingNumber: string;
+    title?: string;
     status: DocumentStatus;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    unit?: { name: string; code: string } | null;
+    uploader?: { firstName: string; lastName: string; email: string };
     uploaderId: string;
     unitId: string;
     isEscalated: boolean;
@@ -77,6 +82,12 @@ interface DocumentDetailActionsProps {
       fileName: string;
       sha256Checksum: string;
     } | null;
+    approvalActions?: Array<{
+      id: string;
+      action: string;
+      createdAt: Date | string;
+      actor: { firstName: string; lastName: string; email: string };
+    }>;
   };
   currentUser: {
     id: string;
@@ -1424,14 +1435,15 @@ export default function DocumentDetailActions({
         document={{
           id: document.id,
           trackingNumber: document.trackingNumber,
-          title: (document as { title?: string }).title || document.trackingNumber,
+          title: document.title || document.trackingNumber,
           status: document.status,
-          createdAt: (document as { createdAt?: Date }).createdAt || new Date(),
-          updatedAt: (document as { updatedAt?: Date }).updatedAt || new Date(),
-          unit: (document as { unit?: { name: string; code: string } | null }).unit || null,
-          uploader: (document as { uploader?: { firstName: string; lastName: string; email: string } }).uploader || { firstName: "Faculty", lastName: "Member", email: "" },
+          createdAt: document.createdAt || new Date(),
+          updatedAt: document.updatedAt || new Date(),
+          unit: document.unit || null,
+          uploader: document.uploader || { firstName: "Faculty", lastName: "Member", email: "" },
           currentVersion: document.currentVersion,
         }}
+        approvalActions={document.approvalActions || []}
       />
 
       {/* Document Local Checksum Validator Modal */}

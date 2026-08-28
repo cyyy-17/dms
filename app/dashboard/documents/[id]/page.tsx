@@ -713,8 +713,13 @@ export default async function DocumentDetailPage({ params }: PageProps) {
             <DocumentDetailActions
               document={{
                 id: doc.id,
+                title: doc.title,
                 trackingNumber: doc.trackingNumber,
                 status: doc.status,
+                createdAt: doc.createdAt,
+                updatedAt: doc.updatedAt,
+                unit: doc.unit,
+                uploader: doc.uploader,
                 uploaderId: doc.uploaderId,
                 unitId: doc.unitId,
                 isEscalated: doc.isEscalated,
@@ -724,6 +729,7 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                 currentSignatoryId: doc.currentSignatoryId,
                 currentSignatoryIndex: doc.currentSignatoryIndex,
                 currentSignatory: doc.currentSignatory,
+                approvalActions: doc.approvalActions,
               }}
               currentUser={currentUser}
             />
