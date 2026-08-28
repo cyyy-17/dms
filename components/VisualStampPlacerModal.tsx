@@ -495,19 +495,19 @@ export default function VisualStampPlacerModal({
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 bg-white border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
-          <div className="text-xs text-slate-600">
+        <div className="px-4 sm:px-6 py-3.5 sm:py-4 bg-white border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+          <div className="text-xs text-slate-600 text-center sm:text-left">
             <span className="font-bold text-slate-800">Target Coordinates: </span>
             <span className="font-mono text-slate-500">
               Page {coords.page + 1} (X: {coords.x}pt, Y: {coords.y}pt)
             </span>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-col-reverse sm:flex-row items-center gap-2 sm:gap-2.5">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-xs font-bold text-slate-700 transition cursor-pointer"
+              className="w-full sm:w-auto px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-xs font-bold text-slate-700 transition cursor-pointer text-center"
             >
               Cancel
             </button>
@@ -515,7 +515,7 @@ export default function VisualStampPlacerModal({
             <button
               type="button"
               onClick={handleSaveAndConfirm}
-              className="px-5 py-2 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer text-center"
             >
               <CheckCircle2 className="w-4 h-4 text-amber-400" />
               <span>Confirm Stamp Position</span>

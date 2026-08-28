@@ -181,63 +181,63 @@ export default function ProfileClient({ user, auditLogs = [] }: ProfileClientPro
   return (
     <div className="space-y-6">
       {/* Navigation Tabs */}
-      <div className="flex flex-wrap p-1.5 rounded-2xl bg-slate-200/70 border border-slate-300/60 gap-1 shadow-inner">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 rounded-2xl bg-slate-200/70 border border-slate-300/60 shadow-inner">
         <button
           type="button"
           onClick={() => setActiveTab("details")}
-          className={`flex-1 min-w-32.5 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`w-full py-2.5 px-2 sm:px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
             activeTab === "details"
               ? "bg-white text-[#0F2962] shadow-sm font-extrabold"
               : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
           }`}
         >
-          <User className="w-4 h-4" />
-          <span>Profile Details</span>
+          <User className="w-4 h-4 shrink-0" />
+          <span className="truncate">Profile Details</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab("security")}
-          className={`flex-1 min-w-32.5 py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`w-full py-2.5 px-2 sm:px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
             activeTab === "security"
               ? "bg-white text-[#0F2962] shadow-sm font-extrabold"
               : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
           }`}
         >
-          <KeyRound className="w-4 h-4" />
-          <span>Change Password</span>
+          <KeyRound className="w-4 h-4 shrink-0" />
+          <span className="truncate">Password</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab("signature")}
-          className={`flex-1 min-w-28 py-2.5 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`w-full py-2.5 px-2 sm:px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
             activeTab === "signature"
               ? "bg-white text-[#0F2962] shadow-sm font-extrabold"
               : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
           }`}
         >
-          <PenLine className="w-4 h-4" />
-          <span>E-Signature</span>
+          <PenLine className="w-4 h-4 shrink-0" />
+          <span className="truncate">E-Signature</span>
         </button>
 
         <button
           type="button"
           onClick={() => setActiveTab("activity")}
-          className={`flex-1 min-w-28 py-2.5 px-3.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          className={`w-full py-2.5 px-2 sm:px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 cursor-pointer ${
             activeTab === "activity"
               ? "bg-white text-[#0F2962] shadow-sm font-extrabold"
               : "text-slate-600 hover:text-slate-900 hover:bg-white/50"
           }`}
         >
-          <History className="w-4 h-4" />
-          <span>My Activity</span>
+          <History className="w-4 h-4 shrink-0" />
+          <span className="truncate">Activity Log</span>
         </button>
       </div>
 
       {/* TAB 1: PROFILE DETAILS FORM */}
       {activeTab === "details" && (
-        <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-white/90 bg-white/90 shadow-sm space-y-6 animate-in fade-in duration-200">
+        <div className="glass-panel rounded-3xl p-5 sm:p-7 border border-white/90 bg-white/90 shadow-sm space-y-6 animate-in fade-in duration-200">
           <div>
             <h2 className="text-base font-black text-slate-900">Personal & Employee Details</h2>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
@@ -260,7 +260,7 @@ export default function ProfileClient({ user, auditLogs = [] }: ProfileClientPro
           )}
 
           <form onSubmit={handleSaveDetails} className="space-y-4">
-            <div className="grid sm:grid-cols-3 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">First Name</label>
                 <input
@@ -295,7 +295,7 @@ export default function ProfileClient({ user, auditLogs = [] }: ProfileClientPro
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">Suffix / Degree (Optional)</label>
                 <input
@@ -319,7 +319,7 @@ export default function ProfileClient({ user, auditLogs = [] }: ProfileClientPro
               </div>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1.5">Employee ID / Faculty No.</label>
                 <input
@@ -347,7 +347,7 @@ export default function ProfileClient({ user, auditLogs = [] }: ProfileClientPro
               <button
                 type="submit"
                 disabled={isSavingDetails}
-                className="px-6 py-2.5 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-extrabold shadow-md hover:shadow-lg transition flex items-center gap-2 cursor-pointer hover:-translate-y-0.5 active:scale-98 disabled:opacity-50"
+                className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-extrabold shadow-md hover:shadow-lg transition flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 active:scale-98 disabled:opacity-50"
               >
                 {isSavingDetails ? (
                   <>

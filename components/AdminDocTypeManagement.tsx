@@ -263,36 +263,36 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
-                <th className="py-3.5 px-6">Classification Code</th>
-                <th className="py-3.5 px-6">Document Type Name</th>
-                <th className="py-3.5 px-6">RA 10173 Retention</th>
-                <th className="py-3.5 px-6">Expiry Tracking</th>
-                <th className="py-3.5 px-6">Status</th>
-                <th className="py-3.5 px-6 text-right">Actions</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Code</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Document Type Name</th>
+                <th className="hidden sm:table-cell py-3 px-3 sm:py-3.5 sm:px-6">RA 10173 Retention</th>
+                <th className="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6">Expiry Tracking</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Status</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {filteredTypes.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
+                  <td colSpan={6} className="py-12 px-4 sm:px-6 text-center text-slate-400">
                     No document classification types found.
                   </td>
                 </tr>
               ) : (
                 filteredTypes.map((dt) => (
                   <tr key={dt.id} className="hover:bg-slate-50/80 transition">
-                    <td className="py-4 px-6 font-mono font-bold text-slate-900">{dt.code}</td>
-                    <td className="py-4 px-6">
-                      <span className="font-bold text-slate-900 block">{dt.name}</span>
-                      {dt.description && <span className="text-[11px] text-slate-500 line-clamp-1">{dt.description}</span>}
+                    <td className="py-3 px-3 sm:py-4 sm:px-6 font-mono font-bold text-slate-900">{dt.code}</td>
+                    <td className="py-3 px-3 sm:py-4 sm:px-6">
+                      <span className="font-bold text-slate-900 block truncate max-w-37.5 xs:max-w-xs">{dt.name}</span>
+                      {dt.description && <span className="text-[11px] text-slate-500 line-clamp-1 max-w-37.5 xs:max-w-xs">{dt.description}</span>}
                     </td>
-                    <td className="py-4 px-6 font-mono text-slate-700">
+                    <td className="hidden sm:table-cell py-3 px-3 sm:py-4 sm:px-6 font-mono text-slate-700">
                       <span className="inline-flex items-center gap-1 font-bold text-[11px]">
-                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>{dt.defaultRetentionDays} days ({Math.round(dt.defaultRetentionDays / 365)} yr)</span>
+                        <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span>{dt.defaultRetentionDays}d ({Math.round(dt.defaultRetentionDays / 365)}y)</span>
                       </span>
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6">
                       {dt.requiresExpiryTracking ? (
                         <span className="inline-flex items-center gap-1 text-amber-700 font-bold text-[10px] bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                           <Calendar className="w-3 h-3" />
@@ -302,9 +302,9 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
                         <span className="text-slate-400 text-[11px]">Not required</span>
                       )}
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-3 px-3 sm:py-4 sm:px-6">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        className={`inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold ${
                           dt.isActive
                             ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
                             : "bg-slate-100 text-slate-600 border border-slate-200"
@@ -313,7 +313,7 @@ export default function AdminDocTypeManagement({ docTypes }: { docTypes: DocType
                         {dt.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-right space-x-2">
+                    <td className="py-3 px-3 sm:py-4 sm:px-6 text-right space-x-1.5 sm:space-x-2">
                       <button
                         title="Edit Type"
                         onClick={() => {

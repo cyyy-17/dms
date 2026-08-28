@@ -194,7 +194,10 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               <span>Portal</span>
             </Link>
             <ChevronRight className="hidden sm:inline w-3.5 h-3.5 text-slate-300 shrink-0" />
-            <span className="font-black text-slate-900 text-xs sm:text-base tracking-tight truncate max-w-30 xs:max-w-50 sm:max-w-none">
+            <span
+              className="font-black text-slate-900 text-xs sm:text-base tracking-tight truncate max-w-30 xs:max-w-50 sm:max-w-none"
+              title={currentTitle}
+            >
               {currentTitle}
             </span>
           </div>
@@ -215,12 +218,12 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
         </button>
 
         {/* Right: Signature Indicator & Profile Summary */}
-        <div className="flex items-center gap-2.5 sm:gap-3.5">
+        <div className="flex items-center gap-1.5 sm:gap-3.5 shrink-0">
           {/* Mobile search icon button */}
           <button
             type="button"
             onClick={() => setIsQuickSearchOpen(true)}
-            className="md:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none"
+            className="md:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none shrink-0"
             title="Search"
             aria-label="Open Search"
           >
@@ -234,7 +237,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           <button
             type="button"
             onClick={toggleAudio}
-            className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition cursor-pointer border border-transparent hover:border-slate-200 hidden sm:flex items-center justify-center"
+            className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition cursor-pointer border border-transparent hover:border-slate-200 hidden sm:flex items-center justify-center shrink-0"
             title={isAudioMuted ? "Notification chimes muted (Click to enable)" : "Notification chimes enabled (Click to mute)"}
             aria-label="Toggle audio alerts"
           >
@@ -248,7 +251,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           {/* Quick Approvals Action Shortcut */}
           <Link
             href="/dashboard/approvals"
-            className="hidden sm:flex p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition items-center gap-1.5 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962]"
+            className="hidden sm:flex p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition items-center gap-1.5 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] shrink-0"
             title="View sequential approval action items"
           >
             <CheckSquare className="w-3.5 h-3.5 text-[#0F2962]" />
@@ -257,28 +260,29 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
           <button
             onClick={() => setIsSignatureModalOpen(true)}
-            className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border text-xs font-bold transition-all duration-200 flex items-center gap-2 shadow-xs hover:-translate-y-0.5 active:scale-98 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none ${
+            className={`px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border text-xs font-bold transition-all duration-200 flex items-center gap-1.5 sm:gap-2 shadow-xs hover:-translate-y-0.5 active:scale-98 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none shrink-0 ${
               hasSignature
                 ? "bg-emerald-50/80 border-emerald-200/80 text-emerald-800 hover:bg-emerald-100"
                 : "bg-amber-50/80 border-amber-200/80 text-amber-900 hover:bg-amber-100"
             }`}
             title="Manage institutional electronic signature"
           >
-            <PenLine className="w-3.5 h-3.5 text-[#0F2962]" />
-            <span className="hidden sm:inline">My E-Signature</span>
+            <PenLine className="w-3.5 h-3.5 text-[#0F2962] shrink-0" />
+            <span className="hidden xs:inline sm:inline">My E-Signature</span>
+            <span className="inline xs:hidden">E-Sign</span>
             {hasSignature ? (
-              <span className="w-2 h-2 rounded-full bg-emerald-500" title="Active signature on file" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Active signature on file" />
             ) : (
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" title="Signature required" />
+              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" title="Signature required" />
             )}
           </button>
 
-          <div className="h-5 w-px bg-slate-200 hidden sm:block" />
+          <div className="h-5 w-px bg-slate-200 hidden sm:block shrink-0" />
 
           {/* User Identity Chip */}
           <Link
             href="/dashboard/profile"
-            className="flex items-center gap-2.5 hover:opacity-90 transition group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none rounded-xl p-1"
+            className="flex items-center gap-2 hover:opacity-90 transition group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none rounded-xl p-1 shrink-0"
             title="View profile & settings"
           >
             <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center border border-blue-900 shadow-md shrink-0">
@@ -304,10 +308,10 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             onClick={() => setIsMobileMenuOpen(false)}
           />
 
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-slate-950 text-slate-200 border-r border-slate-800 shadow-2xl p-5 space-y-6 z-10 animate-in slide-in-from-left duration-200">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white/95 p-1 flex items-center justify-center border border-amber-400/40 shadow-md shrink-0">
+          <div className="relative flex-1 flex flex-col max-w-70 xs:max-w-xs w-full bg-slate-950 text-slate-200 border-r border-slate-800 shadow-2xl p-4 sm:p-5 space-y-5 z-10 animate-in slide-in-from-left duration-200 h-dvh">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3.5 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-white/95 p-1 flex items-center justify-center border border-amber-400/40 shadow-md shrink-0">
                   <Image
                     src="/images/faith-crest.png"
                     alt="FAITH Crest"
@@ -316,14 +320,15 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                     className="w-auto h-full object-contain"
                   />
                 </div>
-                <div>
-                  <span className="font-black text-white text-sm block">SASDMS</span>
-                  <span className="text-[10px] text-slate-400 block">{user.unitName || "FAITH Colleges"}</span>
+                <div className="min-w-0">
+                  <span className="font-black text-white text-sm block leading-tight">SASDMS</span>
+                  <span className="text-[10px] text-slate-400 block truncate">{user.unitName || "FAITH Colleges"}</span>
                 </div>
               </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="p-1 text-slate-400 hover:text-white"
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-900 transition"
+                aria-label="Close navigation"
               >
                 <X className="w-5 h-5" />
               </button>

@@ -329,19 +329,19 @@ export default function AdminDelegationManagement({
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
-                <th className="py-3.5 px-6">Delegator (Authority)</th>
-                <th className="py-3.5 px-6">Appointed Delegate</th>
-                <th className="py-3.5 px-6">Covered Unit</th>
-                <th className="py-3.5 px-6">Delegation Window</th>
-                <th className="py-3.5 px-6">Reason / Justification</th>
-                <th className="py-3.5 px-6">Status</th>
-                <th className="py-3.5 px-6 text-right">Actions</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Delegator (Principal)</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Acting Delegate</th>
+                <th className="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6">Assigned Unit</th>
+                <th className="hidden sm:table-cell py-3 px-3 sm:py-3.5 sm:px-6">Validity Period</th>
+                <th className="hidden lg:table-cell py-3 px-3 sm:py-3.5 sm:px-6">Reason</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Status</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {filteredDelegations.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400">
+                  <td colSpan={7} className="py-12 px-4 sm:px-6 text-center text-slate-400">
                     No active or historical signatory delegations recorded.
                   </td>
                 </tr>
@@ -352,40 +352,40 @@ export default function AdminDelegationManagement({
 
                   return (
                     <tr key={d.id} className="hover:bg-slate-50/80 transition">
-                      <td className="py-4 px-6">
-                        <span className="font-bold text-slate-900 block">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6">
+                        <span className="font-bold text-slate-900 block truncate max-w-32.5 xs:max-w-xs">
                           {d.delegator.firstName} {d.delegator.lastName}
                         </span>
                         <span className="text-[10px] text-slate-400 font-semibold uppercase">
                           {getRoleLabel(d.delegator.role)}
                         </span>
                       </td>
-                      <td className="py-4 px-6">
-                        <span className="font-bold text-slate-900 flex items-center gap-1">
-                          <UserCheck className="w-3.5 h-3.5 text-blue-600" />
-                          <span>
+                      <td className="py-3 px-3 sm:py-4 sm:px-6">
+                        <span className="font-bold text-slate-900 flex items-center gap-1 truncate max-w-32.5 xs:max-w-xs">
+                          <UserCheck className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                          <span className="truncate">
                             {d.delegate.firstName} {d.delegate.lastName}
                           </span>
                         </span>
-                        <span className="text-[11px] text-slate-400 font-mono">{d.delegate.email}</span>
+                        <span className="text-[11px] text-slate-400 font-mono block truncate max-w-32.5 xs:max-w-xs">{d.delegate.email}</span>
                       </td>
-                      <td className="py-4 px-6 font-semibold text-slate-700">
+                      <td className="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6 font-semibold text-slate-700">
                         {d.unit.code} ({d.unit.name})
                       </td>
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-1 font-medium text-slate-800">
-                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                      <td className="hidden sm:table-cell py-3 px-3 sm:py-4 sm:px-6">
+                        <div className="flex items-center gap-1 font-medium text-slate-800 text-xs">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                           <span>
                             {formatHumanDate(d.startDate)} – {formatHumanDate(d.endDate)}
                           </span>
                         </div>
                       </td>
-                      <td className="py-4 px-6 text-slate-600 max-w-xs truncate">
+                      <td className="hidden lg:table-cell py-3 px-3 sm:py-4 sm:px-6 text-slate-600 max-w-xs truncate">
                         {d.reason || <span className="text-slate-400 italic">Official administrative leave</span>}
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                          className={`inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold ${
                             !d.isActive
                               ? "bg-red-100 text-red-800 border border-red-200"
                               : isCurrent
@@ -395,17 +395,17 @@ export default function AdminDelegationManagement({
                               : "bg-blue-100 text-blue-800 border border-blue-200"
                           }`}
                         >
-                          {!d.isActive ? "Revoked" : isCurrent ? "Active Delegation" : "Expired"}
+                          {!d.isActive ? "Revoked" : isCurrent ? "Active" : "Expired"}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-right">
+                      <td className="py-3 px-3 sm:py-4 sm:px-6 text-right">
                         {d.isActive && isCurrent && (
                           <button
                             onClick={() => setRevokingDelegation(d)}
                             disabled={isLoading}
-                            className="px-2.5 py-1 rounded bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-[11px] transition"
+                            className="px-2.5 py-1 rounded bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-[11px] transition cursor-pointer"
                           >
-                            Revoke Delegation
+                            Revoke
                           </button>
                         )}
                       </td>

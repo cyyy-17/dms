@@ -1191,24 +1191,24 @@ export default function DocumentDetailActions({
 
       {/* New Version Upload Modal */}
       {showVersionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md">
-          <div className="glass-panel rounded-3xl p-7 max-w-lg w-full bg-white shadow-2xl space-y-5 border border-white/90 animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between border-b border-slate-200/80 pb-4">
-              <h3 className="font-black text-slate-900 text-base flex items-center gap-2.5">
-                <Upload className="w-5 h-5 text-blue-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md">
+          <div className="glass-panel rounded-3xl p-5 sm:p-7 max-w-lg w-full max-h-[90dvh] overflow-y-auto bg-white shadow-2xl space-y-5 border border-white/90 animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between border-b border-slate-200/80 pb-3 sm:pb-4">
+              <h3 className="font-black text-slate-900 text-sm sm:text-base flex items-center gap-2">
+                <Upload className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 shrink-0" />
                 <span>Upload Revised Version (v{(document.currentVersion?.versionNumber || 1) + 1})</span>
               </h3>
               <button
                 onClick={() => setShowVersionModal(false)}
-                className="text-slate-400 hover:text-slate-700 text-sm font-bold p-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 text-sm font-bold p-1.5 rounded-lg hover:bg-slate-100 cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleUploadNewVersion} className="space-y-4.5">
+            <form onSubmit={handleUploadNewVersion} className="space-y-4">
               <div>
-                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                   Change Summary / Revisions Made *
                 </label>
                 <textarea
@@ -1217,12 +1217,12 @@ export default function DocumentDetailActions({
                   placeholder="Summarize the adjustments made in this revision..."
                   value={changeSummary}
                   onChange={(e) => setChangeSummary(e.target.value)}
-                  className="block w-full px-4 py-2.5 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                  className="block w-full px-3.5 py-2 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-2">
+                <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                   New Document File (Official PDF Document, Max 25 MB) *
                 </label>
                 <input
@@ -1230,7 +1230,7 @@ export default function DocumentDetailActions({
                   required
                   accept=".pdf,application/pdf"
                   onChange={handleNewVersionFileChange}
-                  className="block w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-[#0F2962] hover:file:bg-blue-100 cursor-pointer"
+                  className="block w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-3 sm:file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-[#0F2962] hover:file:bg-blue-100 cursor-pointer"
                 />
               </div>
 
@@ -1241,18 +1241,18 @@ export default function DocumentDetailActions({
                 </div>
               )}
 
-              <div className="flex justify-end gap-3 pt-3">
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowVersionModal(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer"
+                  className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer text-center"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isLoading || !newVersionFile}
-                  className="px-5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md transition disabled:opacity-50 cursor-pointer"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md transition disabled:opacity-50 cursor-pointer text-center"
                 >
                   {isLoading ? "Uploading..." : "Save New Version"}
                 </button>
@@ -1264,17 +1264,17 @@ export default function DocumentDetailActions({
 
       {/* Return for Revision Modal */}
       {showReturnModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-150">
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 max-w-lg w-full bg-white shadow-2xl space-y-5 border border-amber-200 animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="glass-panel rounded-3xl p-5 sm:p-7 max-w-lg w-full max-h-[90dvh] overflow-y-auto bg-white shadow-2xl space-y-4 sm:space-y-5 border border-amber-200 animate-in zoom-in-95 duration-150">
             <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
-              <div className="flex items-start gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 shadow-xs font-bold mt-0.5">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0 shadow-xs font-bold mt-0.5">
                   <RotateCcw className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-900 text-base">Return Document for Revision</h3>
+                  <h3 className="font-black text-slate-900 text-sm sm:text-base">Return Document for Revision</h3>
                   <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
-                    The document will be returned to the uploader. An immutable version tree will record your remarks and request a revised version (v2+).
+                    The document will be returned to the uploader. An immutable version tree will record your remarks.
                   </p>
                 </div>
               </div>
@@ -1292,7 +1292,7 @@ export default function DocumentDetailActions({
                 Mandatory Revision Remarks & Feedback *
               </label>
               <textarea
-                rows={4}
+                rows={3}
                 required
                 placeholder="Explain the required revisions, corrections, or adjustments for the uploader..."
                 value={comments}
@@ -1307,22 +1307,19 @@ export default function DocumentDetailActions({
                     key={idx}
                     type="button"
                     onClick={() => setComments(tmpl)}
-                    className="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 text-[10px] font-semibold transition cursor-pointer border border-amber-200"
+                    className="px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 text-[10px] font-semibold transition cursor-pointer border border-amber-200 truncate max-w-50"
                   >
-                    {tmpl.length > 35 ? tmpl.slice(0, 32) + "..." : tmpl}
+                    {tmpl.length > 30 ? tmpl.slice(0, 28) + "..." : tmpl}
                   </button>
                 ))}
               </div>
-              <p className="text-[11px] text-slate-500 font-medium">
-                The uploader will receive these remarks directly in their notifications and document dashboard.
-              </p>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 sm:gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowReturnModal(false)}
-                className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer text-center"
               >
                 Cancel
               </button>
@@ -1330,7 +1327,7 @@ export default function DocumentDetailActions({
                 type="button"
                 onClick={handleExecuteReturn}
                 disabled={isLoading || !comments.trim()}
-                className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer text-center"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
                 <span>{isLoading ? "Returning..." : "Confirm Return for Revision"}</span>
@@ -1342,17 +1339,17 @@ export default function DocumentDetailActions({
 
       {/* Terminally Close & Reject Modal */}
       {showCloseConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-150">
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 max-w-lg w-full bg-white shadow-2xl space-y-5 border border-red-200 animate-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="glass-panel rounded-3xl p-5 sm:p-7 max-w-lg w-full max-h-[90dvh] overflow-y-auto bg-white shadow-2xl space-y-4 sm:space-y-5 border border-red-200 animate-in zoom-in-95 duration-150">
             <div className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3">
-              <div className="flex items-start gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center shrink-0 shadow-xs font-bold mt-0.5">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center shrink-0 shadow-xs font-bold mt-0.5">
                   <XCircle className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-900 text-base">Terminally Close & Reject</h3>
+                  <h3 className="font-black text-slate-900 text-sm sm:text-base">Terminally Close & Reject</h3>
                   <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
-                    This action is <strong>irreversible</strong>. The document will be permanently marked as rejected and removed from active signatory pipelines.
+                    This action is <strong>irreversible</strong>. The document will be permanently marked as rejected.
                   </p>
                 </div>
               </div>
@@ -1370,7 +1367,7 @@ export default function DocumentDetailActions({
                 Mandatory Reason for Cancellation *
               </label>
               <textarea
-                rows={4}
+                rows={3}
                 required
                 placeholder="State the institutional reason for permanently closing and rejecting this document..."
                 value={comments}
@@ -1380,11 +1377,11 @@ export default function DocumentDetailActions({
               />
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5 sm:gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setShowCloseConfirm(false)}
-                className="px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 font-bold text-xs hover:bg-slate-100 transition cursor-pointer text-center"
               >
                 Keep Active / Cancel
               </button>
@@ -1392,7 +1389,7 @@ export default function DocumentDetailActions({
                 type="button"
                 onClick={handleConfirmedClose}
                 disabled={isLoading || !comments.trim()}
-                className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1.5 disabled:opacity-50 cursor-pointer text-center"
               >
                 <XCircle className="w-3.5 h-3.5" />
                 <span>{isLoading ? "Rejecting..." : "Confirm Terminal Rejection"}</span>

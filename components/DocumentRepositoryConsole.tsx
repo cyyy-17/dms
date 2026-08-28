@@ -276,7 +276,7 @@ export default function DocumentRepositoryConsole({
       {/* Control Filter Bar */}
       <div className="glass-panel rounded-3xl p-4 sm:p-5 border border-white/90 shadow-sm space-y-3.5">
         {/* Tier 1: Search Input (Full Width on left) + View Controls / Actions (on right) */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -290,7 +290,7 @@ export default function DocumentRepositoryConsole({
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
                 title="Clear search"
               >
                 <X className="w-3.5 h-3.5" />
@@ -298,42 +298,44 @@ export default function DocumentRepositoryConsole({
             )}
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
-            <button
-              type="button"
-              onClick={() => setOnlyStarred(!onlyStarred)}
-              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap ${
-                onlyStarred
-                  ? "bg-amber-500 text-slate-950 font-black shadow-amber-500/30"
-                  : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
-              }`}
-              title="Filter to your starred / pinned documents"
-            >
-              <Star className={`w-3.5 h-3.5 ${onlyStarred ? "fill-slate-950 text-slate-950" : "text-amber-500"}`} />
-              <span>Starred</span>
-              {starredCount > 0 && (
-                <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
-                  onlyStarred ? "bg-slate-950 text-amber-400" : "bg-amber-100 text-amber-900"
-                }`}>
-                  {starredCount}
-                </span>
-              )}
-            </button>
+          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 sm:gap-2.5 shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <button
+                type="button"
+                onClick={() => setOnlyStarred(!onlyStarred)}
+                className={`px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap ${
+                  onlyStarred
+                    ? "bg-amber-500 text-slate-950 font-black shadow-amber-500/30"
+                    : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
+                }`}
+                title="Filter to your starred / pinned documents"
+              >
+                <Star className={`w-3.5 h-3.5 ${onlyStarred ? "fill-slate-950 text-slate-950" : "text-amber-500"}`} />
+                <span>Starred</span>
+                {starredCount > 0 && (
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                    onlyStarred ? "bg-slate-950 text-amber-400" : "bg-amber-100 text-amber-900"
+                  }`}>
+                    {starredCount}
+                  </span>
+                )}
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setOnlyEscalated(!onlyEscalated)}
-              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap ${
-                onlyEscalated
-                  ? "bg-red-600 text-white shadow-red-500/30"
-                  : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
-              }`}
-            >
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              <span>Escalated</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => setOnlyEscalated(!onlyEscalated)}
+                className={`px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap ${
+                  onlyEscalated
+                    ? "bg-red-600 text-white shadow-red-500/30"
+                    : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                <span>Escalated</span>
+              </button>
+            </div>
 
-            <div className="border-l border-slate-200 pl-2.5 flex items-center gap-1.5">
+            <div className="border-l border-slate-200 pl-2 sm:pl-2.5 flex items-center gap-1">
               <button
                 type="button"
                 onClick={() => setViewMode("table")}
@@ -369,7 +371,7 @@ export default function DocumentRepositoryConsole({
         </div>
 
         {/* Tier 2: Category Filter Selects (Equal Grid spanning full width) */}
-        <div className={`grid grid-cols-1 sm:grid-cols-2 ${isDirectorOrAdmin ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-3 pt-2.5 border-t border-slate-100/90`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 ${isDirectorOrAdmin ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-2.5 sm:gap-3 pt-2.5 border-t border-slate-100/90`}>
           {isDirectorOrAdmin && (
             <div className="relative">
               <select
@@ -420,7 +422,7 @@ export default function DocumentRepositoryConsole({
 
         {/* Filter Reset pill when filters are active */}
         {hasActiveFilters && (
-          <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 text-xs">
             <span className="text-slate-500 font-medium">
               Showing filtered results ({filteredDocuments.length} of {initialDocuments.length})
             </span>
@@ -437,7 +439,7 @@ export default function DocumentRepositoryConsole({
 
       {/* Main Content Area */}
       {filteredDocuments.length === 0 ? (
-        <div className="glass-panel rounded-3xl p-14 border border-white/90 text-center space-y-4 shadow-sm">
+        <div className="glass-panel rounded-3xl p-8 sm:p-14 border border-white/90 text-center space-y-4 shadow-sm">
           <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto shadow-inner">
             <FileText className="w-7 h-7" />
           </div>
@@ -465,7 +467,7 @@ export default function DocumentRepositoryConsole({
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-slate-50/90 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200/80">
-                  <th className="py-3.5 pl-4 pr-2 w-10 text-center">
+                  <th className="py-3 pl-3 pr-1 sm:py-3.5 sm:pl-4 sm:pr-2 w-10 text-center">
                     <button
                       type="button"
                       onClick={toggleSelectAll}
@@ -479,13 +481,13 @@ export default function DocumentRepositoryConsole({
                       )}
                     </button>
                   </th>
-                  <th className="py-3.5 px-4">Tracking Number</th>
-                  <th className="py-3.5 px-6">Title & Type</th>
-                  <th className="py-3.5 px-6">Unit</th>
-                  <th className="py-3.5 px-6">Uploader</th>
-                  <th className="py-3.5 px-6">Status</th>
-                  <th className="py-3.5 px-6">Created</th>
-                  <th className="py-3.5 px-6 text-right">Action</th>
+                  <th className="py-3 px-3 sm:py-3.5 sm:px-4">Tracking Number</th>
+                  <th className="py-3 px-3 sm:py-3.5 sm:px-6">Title & Type</th>
+                  <th className="hidden sm:table-cell py-3 px-3 sm:py-3.5 sm:px-6">Unit</th>
+                  <th className="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6">Uploader</th>
+                  <th className="py-3 px-3 sm:py-3.5 sm:px-6">Status</th>
+                  <th className="hidden lg:table-cell py-3 px-3 sm:py-3.5 sm:px-6">Created</th>
+                  <th className="py-3 px-3 sm:py-3.5 sm:px-6 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100/90 bg-white/60">
@@ -499,7 +501,7 @@ export default function DocumentRepositoryConsole({
                         isSelected ? "bg-blue-50/80" : "hover:bg-blue-50/40"
                       }`}
                     >
-                      <td className="py-4 pl-4 pr-2 text-center">
+                      <td className="py-3.5 pl-3 pr-1 sm:py-4 sm:pl-4 sm:pr-2 text-center">
                         <button
                           type="button"
                           onClick={() => toggleSelectDoc(doc.id)}
@@ -512,8 +514,8 @@ export default function DocumentRepositoryConsole({
                           )}
                         </button>
                       </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
+                      <td className="py-3.5 px-3 sm:py-4 sm:px-4">
+                        <div className="flex items-center gap-1.5 sm:gap-2">
                           <button
                             type="button"
                             onClick={() => toggleStar(doc.id)}
@@ -524,40 +526,40 @@ export default function DocumentRepositoryConsole({
                           </button>
                           <CopyTrackingButton trackingNumber={doc.trackingNumber} />
                           {doc.currentVersion && (
-                            <span className="px-1.5 py-0.5 rounded-md bg-blue-100/80 text-blue-800 text-[10px] font-bold">
+                            <span className="hidden xs:inline px-1.5 py-0.5 rounded-md bg-blue-100/80 text-blue-800 text-[10px] font-bold">
                               v{doc.currentVersion.versionNumber}
                             </span>
                           )}
                         </div>
                       </td>
-                    <td className="py-4 px-6">
-                      <span className="font-bold text-slate-900 block truncate max-w-xs">
+                    <td className="py-3.5 px-3 sm:py-4 sm:px-6">
+                      <span className="font-bold text-slate-900 block truncate max-w-35 xs:max-w-xs sm:max-w-md">
                         {doc.title}
                       </span>
-                      <span className="text-[11px] text-slate-500 font-medium block">
+                      <span className="text-[11px] text-slate-500 font-medium block truncate max-w-35 xs:max-w-xs">
                         {doc.documentType?.name || "General"}
                       </span>
                       {doc.isEscalated && (
                         <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 mt-1">
-                          <AlertTriangle className="w-3 h-3" />
-                          <span>Escalated (Rejections: {doc.rejectionCount})</span>
+                          <AlertTriangle className="w-3 h-3 shrink-0" />
+                          <span>Escalated ({doc.rejectionCount})</span>
                         </span>
                       )}
                     </td>
-                    <td className="py-4 px-6 font-medium text-slate-600">
+                    <td className="hidden sm:table-cell py-3.5 px-3 sm:py-4 sm:px-6 font-medium text-slate-600">
                       <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-800 text-[11px] font-black font-mono">
                         {doc.unit?.code || "GEN"}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-slate-600 font-medium">
+                    <td className="hidden md:table-cell py-3.5 px-3 sm:py-4 sm:px-6 text-slate-600 font-medium">
                       {doc.uploader ? `${doc.uploader.firstName} ${doc.uploader.lastName}` : "Staff Member"}
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-3.5 px-3 sm:py-4 sm:px-6">
                       {(() => {
                         const prog = getStatusProgress(doc.status);
                         return (
-                          <div className="space-y-1.5 min-w-28">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
+                          <div className="space-y-1.5 min-w-24 sm:min-w-28">
+                            <span className={`inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold ${getStatusBadgeClass(doc.status)}`}>
                               {getStatusLabel(doc.status)}
                             </span>
                             <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
@@ -573,10 +575,10 @@ export default function DocumentRepositoryConsole({
                         );
                       })()}
                     </td>
-                    <td className="py-4 px-6 text-slate-500 font-mono text-[11px]">
+                    <td className="hidden lg:table-cell py-3.5 px-3 sm:py-4 sm:px-6 text-slate-500 font-mono text-[11px]">
                       {formatHumanDate(doc.createdAt)}
                     </td>
-                    <td className="py-4 px-6 text-right">
+                    <td className="py-3.5 px-3 sm:py-4 sm:px-6 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           type="button"
@@ -610,7 +612,7 @@ export default function DocumentRepositoryConsole({
 
                         <Link
                           href={`/dashboard/documents/${doc.id}`}
-                          className="px-3.5 py-1.5 rounded-xl border border-slate-300/90 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block hover:-translate-y-0.5 active:scale-98"
+                          className="px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl border border-slate-300/90 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block hover:-translate-y-0.5 active:scale-98"
                         >
                           Open
                         </Link>

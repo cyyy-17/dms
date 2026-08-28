@@ -247,50 +247,50 @@ export default function AdminAuditExplorer({ logs }: { logs: AuditLogItem[] }) {
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50/90 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200/80">
-                <th className="py-3.5 px-6">Timestamp</th>
-                <th className="py-3.5 px-6">Action Event</th>
-                <th className="py-3.5 px-6">Actor</th>
-                <th className="py-3.5 px-6">Target Record</th>
-                <th className="py-3.5 px-6">IP / Network</th>
-                <th className="py-3.5 px-6">Event Details</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Timestamp</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Action Event</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Actor</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Target Record</th>
+                <th className="hidden lg:table-cell py-3 px-3 sm:py-3.5 sm:px-6">IP / Network</th>
+                <th className="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6">Event Details</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100/90 bg-white/60">
               {filteredLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-500 font-medium">
+                  <td colSpan={6} className="py-12 px-4 sm:px-6 text-center text-slate-500 font-medium">
                     No audit records matching criteria.
                   </td>
                 </tr>
               ) : (
                 filteredLogs.map((log) => (
                   <tr key={log.id} className="hover:bg-blue-50/40 transition-colors duration-150">
-                    <td className="py-4 px-6 font-mono text-[11px] text-slate-500 whitespace-nowrap">
+                    <td className="py-3 px-3 sm:py-4 sm:px-6 font-mono text-[10.5px] text-slate-500 whitespace-nowrap">
                       {formatHumanDateTime(log.createdAt)}
                     </td>
-                    <td className="py-4 px-6">
-                      <span className="font-mono text-[10px] font-black px-2.5 py-1 rounded-full bg-blue-50 text-blue-900 border border-blue-200 shadow-xs">
+                    <td className="py-3 px-3 sm:py-4 sm:px-6">
+                      <span className="font-mono text-[9.5px] sm:text-[10px] font-black px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full bg-blue-50 text-blue-900 border border-blue-200 shadow-2xs">
                         {getActionLabel(log.action)}
                       </span>
                     </td>
-                    <td className="py-4 px-6">
-                      <span className="font-bold text-slate-900 block">
-                        {log.actor ? `${log.actor.firstName} ${log.actor.lastName}` : "System Automated Worker"}
+                    <td className="py-3 px-3 sm:py-4 sm:px-6">
+                      <span className="font-bold text-slate-900 block truncate max-w-32.5 xs:max-w-xs">
+                        {log.actor ? `${log.actor.firstName} ${log.actor.lastName}` : "System Worker"}
                       </span>
-                      <span className="text-[10px] font-mono text-slate-400 block mt-0.5">
+                      <span className="text-[10px] font-mono text-slate-400 block truncate max-w-32.5 xs:max-w-xs mt-0.5">
                         {log.actor ? log.actor.email : "system@firstasia.edu.ph"}
                       </span>
                     </td>
-                    <td className="py-4 px-6 font-medium">
-                      <span className="text-slate-500 text-[11px] block">{getTargetTypeLabel(log.targetType)}</span>
-                      <span className="font-mono font-bold text-blue-900 block mt-0.5">
+                    <td className="py-3 px-3 sm:py-4 sm:px-6 font-medium">
+                      <span className="text-slate-500 text-[10.5px] block truncate max-w-30 xs:max-w-xs">{getTargetTypeLabel(log.targetType)}</span>
+                      <span className="font-mono font-bold text-blue-900 block mt-0.5 truncate max-w-30 xs:max-w-xs">
                         {log.document ? log.document.trackingNumber : (log.targetId ? `Record #${log.targetId.substring(0, 8)}` : "System-wide")}
                       </span>
                     </td>
-                    <td className="py-4 px-6 font-mono text-[11px] text-slate-500">
+                    <td className="hidden lg:table-cell py-3 px-3 sm:py-4 sm:px-6 font-mono text-[11px] text-slate-500">
                       {log.ipAddress || "Internal Server"}
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6">
                       <div className="text-[11px] text-slate-700 bg-slate-50/90 p-2.5 rounded-xl border border-slate-200/80 max-w-sm leading-relaxed font-medium">
                         {formatAuditDetailsSummary(log.details)}
                       </div>

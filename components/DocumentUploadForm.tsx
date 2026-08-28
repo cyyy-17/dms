@@ -548,7 +548,7 @@ export default function DocumentUploadForm({
             />
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-3.5 pt-0.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
               <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
                 Effective Date (Optional)
@@ -587,7 +587,7 @@ export default function DocumentUploadForm({
           <div className="flex justify-end pt-2 border-t border-slate-100">
             <button
               type="submit"
-              className="px-5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md shadow-blue-950/20 transition-all flex items-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Continue to Signatory Chain</span>
               <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
@@ -633,31 +633,32 @@ export default function DocumentUploadForm({
               signatoryChain.map((stepItem, idx) => (
                 <div
                   key={stepItem.userId}
-                  className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition shadow-xs"
+                  className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white hover:border-blue-300 transition shadow-xs gap-2"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-6 h-6 rounded-lg bg-[#0F2962] text-amber-400 font-black text-xs flex items-center justify-center shrink-0">
                       {idx + 1}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-xs text-slate-900">{stepItem.fullName}</span>
-                        <span className="text-[9.5px] font-bold px-2 py-0.2 rounded-full bg-blue-100 text-blue-900 border border-blue-200">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="font-bold text-xs text-slate-900 truncate max-w-35 sm:max-w-none">{stepItem.fullName}</span>
+                        <span className="text-[9.5px] font-bold px-2 py-0.2 rounded-full bg-blue-100 text-blue-900 border border-blue-200 shrink-0">
                           {getRoleLabel(stepItem.role)}
                         </span>
                       </div>
-                      <span className="text-[11px] text-slate-500">
+                      <span className="text-[11px] text-slate-500 truncate block">
                         Line: <strong className="text-slate-800">{stepItem.title}</strong>
                       </span>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5 sm:gap-1 shrink-0">
                     <button
                       type="button"
                       disabled={idx === 0}
                       onClick={() => handleMoveStep(idx, "up")}
                       className="p-1.5 rounded hover:bg-slate-100 text-slate-600 disabled:opacity-30 transition cursor-pointer"
+                      title="Move Up"
                     >
                       <ChevronUp className="w-3.5 h-3.5" />
                     </button>
@@ -666,6 +667,7 @@ export default function DocumentUploadForm({
                       disabled={idx === signatoryChain.length - 1}
                       onClick={() => handleMoveStep(idx, "down")}
                       className="p-1.5 rounded hover:bg-slate-100 text-slate-600 disabled:opacity-30 transition cursor-pointer"
+                      title="Move Down"
                     >
                       <ChevronDown className="w-3.5 h-3.5" />
                     </button>
@@ -673,6 +675,7 @@ export default function DocumentUploadForm({
                       type="button"
                       onClick={() => handleRemoveStep(idx)}
                       className="p-1.5 rounded hover:bg-rose-100 text-rose-600 transition ml-0.5 cursor-pointer"
+                      title="Remove"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -689,12 +692,12 @@ export default function DocumentUploadForm({
               <span>Add Signatory to Chain</span>
             </span>
 
-            <div className="grid sm:grid-cols-5 gap-2.5">
+            <div className="flex flex-col sm:grid sm:grid-cols-5 gap-2.5">
               <div className="sm:col-span-3">
                 <select
                   value={selectedUserToAdd}
                   onChange={(e) => setSelectedUserToAdd(e.target.value)}
-                  className="block w-full px-2.5 py-1.5 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962]"
+                  className="block w-full px-2.5 py-2 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#0F2962]"
                 >
                   <option value="" className="text-slate-900 bg-white">-- Choose Signer --</option>
                   {availableUsers.map((u) => (
@@ -711,13 +714,13 @@ export default function DocumentUploadForm({
                   placeholder="e.g. Approved by"
                   value={selectedTitleToAdd}
                   onChange={(e) => setSelectedTitleToAdd(e.target.value)}
-                  className="block w-full px-2.5 py-1.5 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-lg placeholder:text-slate-400"
+                  className="block w-full px-2.5 py-2 text-xs font-medium text-slate-900 bg-white border border-slate-300 rounded-lg placeholder:text-slate-400"
                 />
                 <button
                   type="button"
                   disabled={!selectedUserToAdd}
                   onClick={handleAddSignatory}
-                  className="px-3 py-1.5 rounded-lg bg-[#0F2962] text-white font-bold text-xs hover:bg-[#091a42] disabled:opacity-50 transition shrink-0 cursor-pointer"
+                  className="px-3.5 py-2 rounded-lg bg-[#0F2962] text-white font-bold text-xs hover:bg-[#091a42] disabled:opacity-50 transition shrink-0 cursor-pointer"
                 >
                   Add
                 </button>
@@ -725,18 +728,18 @@ export default function DocumentUploadForm({
             </div>
           </div>
 
-          <div className="flex justify-between pt-2 border-t border-slate-100">
+          <div className="flex flex-col-reverse sm:flex-row justify-between gap-2.5 pt-2 border-t border-slate-100">
             <button
               type="button"
               onClick={handleBack}
-              className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer text-center"
             >
               ← Back to Metadata
             </button>
             <button
               type="button"
               onClick={handleStep2Next}
-              className="px-5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md transition flex items-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>Continue to File Upload</span>
               <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
@@ -765,7 +768,7 @@ export default function DocumentUploadForm({
           </div>
 
           {/* Pre-Flight Metadata Summary Pill */}
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
             <div>
               <span className="text-slate-400 block font-medium">Title</span>
               <span className="font-bold text-slate-900 truncate block">{title}</span>
@@ -774,7 +777,7 @@ export default function DocumentUploadForm({
               <span className="text-slate-400 block font-medium">Doc Type</span>
               <span className="font-bold text-slate-900 truncate block">{selectedDocType?.name}</span>
             </div>
-            <div className="col-span-2 sm:col-span-1">
+            <div className="xs:col-span-2 sm:col-span-1">
               <span className="text-slate-400 block font-medium">Target Unit</span>
               <span className="font-bold text-slate-900 truncate block">{selectedUnit?.name}</span>
             </div>
@@ -810,7 +813,7 @@ export default function DocumentUploadForm({
           {fileChecksum && (
             <div className="p-3 rounded-xl bg-emerald-50/90 border border-emerald-200 flex items-start gap-2.5 text-emerald-950 text-xs shadow-xs">
               <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5" />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <span className="font-extrabold text-[11px]">RA 10173 Cryptographic Integrity Verified:</span>
                 <code className="block font-mono text-[10px] text-emerald-900 break-all mt-0.5 bg-emerald-100/70 p-1.5 rounded-lg border border-emerald-200">
                   SHA-256: {fileChecksum}
@@ -819,12 +822,12 @@ export default function DocumentUploadForm({
             </div>
           )}
 
-          <div className="flex justify-between pt-2 border-t border-slate-100">
+          <div className="flex flex-col-reverse sm:flex-row justify-between gap-2.5 pt-2 border-t border-slate-100">
             <button
               type="button"
               onClick={handleBack}
               disabled={isSubmitting}
-              className="px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer disabled:opacity-50 text-center"
             >
               ← Back to Signatories
             </button>
@@ -832,7 +835,7 @@ export default function DocumentUploadForm({
             <button
               type="submit"
               disabled={isSubmitting || isHashing || !file}
-              className="px-6 py-2.5 rounded-xl bg-linear-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs shadow-lg shadow-emerald-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-linear-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs shadow-lg shadow-emerald-950/20 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>

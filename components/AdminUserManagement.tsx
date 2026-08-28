@@ -326,8 +326,8 @@ export default function AdminUserManagement({
 
       {/* Action Bar & Filters */}
       <div className="glass-card rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 flex-1">
-          <div className="relative min-w-56 flex-1 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 flex-1">
+          <div className="relative flex-1 w-full sm:w-auto min-w-50">
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
             <input
               type="text"
@@ -355,7 +355,7 @@ export default function AdminUserManagement({
             onChange={(e) => setStatusFilter(e.target.value)}
             className="text-xs font-medium text-slate-900 py-2 px-3 border border-slate-300 rounded-lg bg-white w-full sm:w-auto"
           >
-            <option value="ALL">All Account Statuses</option>
+            <option value="ALL">All Statuses</option>
             <option value="ACTIVE">Verified Active</option>
             <option value="PENDING_APPROVAL">Pending Approval</option>
             <option value="SUSPENDED">Suspended</option>
@@ -367,7 +367,7 @@ export default function AdminUserManagement({
             onChange={(e) => setUnitFilter(e.target.value)}
             className="text-xs font-medium text-slate-900 py-2 px-3 border border-slate-300 rounded-lg bg-white w-full sm:w-auto"
           >
-            <option value="ALL">All Units</option>
+            <option value="ALL">All Department Units</option>
             {units.map((u) => (
               <option key={u.id} value={u.id}>
                 {u.name} ({u.code})
@@ -376,11 +376,11 @@ export default function AdminUserManagement({
           </select>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 shrink-0 self-start md:self-auto">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
           <button
             type="button"
             onClick={() => setIsBulkModalOpen(true)}
-            className="px-3.5 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition flex items-center gap-1.5 cursor-pointer"
+            className="w-full sm:w-auto px-3.5 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
             title="Import users in batch from a spreadsheet CSV"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
@@ -390,7 +390,7 @@ export default function AdminUserManagement({
           <button
             type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            className="px-4 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-semibold shadow-sm transition flex items-center gap-1.5 cursor-pointer"
+            className="w-full sm:w-auto px-4 py-2 rounded-lg bg-[#0F2962] hover:bg-[#091a42] text-white text-xs font-semibold shadow-sm transition flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <UserPlus className="w-4 h-4 text-amber-400" />
             <span>Provision Employee</span>
@@ -404,47 +404,50 @@ export default function AdminUserManagement({
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider border-b border-slate-200">
-                <th className="py-3.5 px-6">Employee</th>
-                <th className="py-3.5 px-6">Employee ID</th>
-                <th className="py-3.5 px-6">Role & Designation</th>
-                <th className="py-3.5 px-6">Assigned Unit</th>
-                <th className="py-3.5 px-6">Status</th>
-                <th className="py-3.5 px-6 text-right">Actions & Controls</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Employee</th>
+                <th className="hidden xl:table-cell py-3 px-3 sm:py-3.5 sm:px-6">Employee ID</th>
+                <th className="hidden sm:table-cell py-3 px-3 sm:py-3.5 sm:px-6">Role & Designation</th>
+                <th className="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6">Assigned Unit</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6">Status</th>
+                <th className="py-3 px-3 sm:py-3.5 sm:px-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 bg-white">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400">
+                  <td colSpan={6} className="py-12 px-4 sm:px-6 text-center text-slate-400">
                     No employees matching filter criteria.
                   </td>
                 </tr>
               ) : (
                 filteredUsers.map((u) => (
                   <tr key={u.id} className="hover:bg-slate-50/80 transition">
-                    <td className="py-4 px-6">
-                      <span className="font-bold text-slate-900 block">
+                    <td className="py-3 px-3 sm:py-4 sm:px-6">
+                      <span className="font-bold text-slate-900 block truncate max-w-37.5 xs:max-w-xs">
                         {u.title ? `${u.title} ` : ""}
                         {u.firstName}
                         {u.middleName ? ` ${u.middleName}` : ""} {u.lastName}
                         {u.suffix ? ` ${u.suffix}` : ""}
                       </span>
-                      <span className="font-mono text-[11px] text-slate-400 block">{u.email}</span>
+                      <span className="font-mono text-[10.5px] text-slate-400 block truncate max-w-37.5 xs:max-w-xs">{u.email}</span>
+                      <span className="inline-block sm:hidden text-[9.5px] font-bold px-1.5 py-0.2 rounded bg-blue-50 text-blue-900 border border-blue-200 mt-1">
+                        {getRoleLabel(u.role)}
+                      </span>
                     </td>
-                    <td className="py-4 px-6 font-mono text-slate-600">
+                    <td className="hidden xl:table-cell py-3 px-3 sm:py-4 sm:px-6 font-mono text-slate-600">
                       {u.employeeId || <span className="text-slate-300 italic">Unassigned</span>}
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="hidden sm:table-cell py-3 px-3 sm:py-4 sm:px-6">
                       <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-900 font-bold text-[10px] border border-blue-200">
                         {getRoleLabel(u.role)}
                       </span>
                     </td>
-                    <td className="py-4 px-6 font-medium text-slate-700">
+                    <td className="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6 font-medium text-slate-700">
                       {u.unit ? `${u.unit.name} (${u.unit.code})` : <span className="text-slate-400 italic">All Department Units</span>}
                     </td>
-                    <td className="py-4 px-6">
+                    <td className="py-3 px-3 sm:py-4 sm:px-6">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                        className={`inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold ${
                           u.status === UserStatus.ACTIVE
                             ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
                             : u.status === UserStatus.PENDING_APPROVAL
@@ -455,28 +458,28 @@ export default function AdminUserManagement({
                         }`}
                       >
                         {u.status === UserStatus.ACTIVE
-                          ? "Verified Active"
+                          ? "Verified"
                           : u.status === UserStatus.PENDING_APPROVAL
-                          ? "Pending Approval"
+                          ? "Pending"
                           : u.status === UserStatus.SUSPENDED
-                          ? "Account Suspended"
+                          ? "Suspended"
                           : "Rejected"}
                       </span>
                     </td>
-                    <td className="py-4 px-6 text-right space-x-2">
+                    <td className="py-3 px-3 sm:py-4 sm:px-6 text-right">
                       {u.status === UserStatus.PENDING_APPROVAL ? (
-                        <div className="inline-flex items-center gap-1.5">
+                        <div className="inline-flex items-center gap-1">
                           <button
                             onClick={() => handleApprove(u, u.role, u.unitId || units[0]?.id)}
                             disabled={isLoading}
-                            className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition shadow-sm"
+                            className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition shadow-sm cursor-pointer"
                           >
                             Approve
                           </button>
                           <button
                             onClick={() => setRejectUser(u)}
                             disabled={isLoading}
-                            className="px-2.5 py-1 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] transition shadow-sm"
+                            className="px-2.5 py-1 rounded bg-red-600 hover:bg-red-700 text-white font-bold text-[11px] transition shadow-sm cursor-pointer"
                           >
                             Reject
                           </button>
@@ -499,7 +502,7 @@ export default function AdminUserManagement({
                                 status: u.status,
                               });
                             }}
-                            className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition"
+                            className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 transition cursor-pointer"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
@@ -507,7 +510,7 @@ export default function AdminUserManagement({
                           <button
                             title="Reset Password"
                             onClick={() => setResetPasswordUser(u)}
-                            className="p-1.5 rounded-lg border border-slate-200 hover:bg-amber-50 text-amber-700 transition"
+                            className="p-1.5 rounded-lg border border-slate-200 hover:bg-amber-50 text-amber-700 transition cursor-pointer"
                           >
                             <KeyRound className="w-3.5 h-3.5" />
                           </button>
@@ -516,7 +519,7 @@ export default function AdminUserManagement({
                             <button
                               title="Suspend Account"
                               onClick={() => setSuspendUser(u)}
-                              className="p-1.5 rounded-lg border border-slate-200 hover:bg-red-50 text-red-600 transition"
+                              className="p-1.5 rounded-lg border border-slate-200 hover:bg-red-50 text-red-600 transition cursor-pointer"
                             >
                               <Ban className="w-3.5 h-3.5" />
                             </button>
@@ -524,7 +527,7 @@ export default function AdminUserManagement({
                             <button
                               title="Reactivate Account"
                               onClick={() => handleReactivate(u)}
-                              className="p-1.5 rounded-lg border border-slate-200 hover:bg-emerald-50 text-emerald-600 transition"
+                              className="p-1.5 rounded-lg border border-slate-200 hover:bg-emerald-50 text-emerald-600 transition cursor-pointer"
                             >
                               <RotateCcw className="w-3.5 h-3.5" />
                             </button>
