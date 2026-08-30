@@ -62,6 +62,7 @@ export interface CreateVersionInput {
 export async function createDocumentAction(input: CreateDocumentInput): Promise<{
   success: boolean;
   documentId?: string;
+  trackingNumber?: string;
   error?: string;
 }> {
   const currentUser = await getAuthenticatedUser();
@@ -71,7 +72,7 @@ export async function createDocumentAction(input: CreateDocumentInput): Promise<
 
   // If in local preview mode without live Postgres
   if (!isDatabaseConfigured) {
-    return { success: true, documentId: "sample-doc-1" };
+    return { success: true, documentId: "sample-doc-1", trackingNumber: "SAS-2026-PREVIEW" };
   }
 
   // Determine Target Unit (Staff & Coordinator are locked to own unit)
@@ -239,7 +240,7 @@ export async function createDocumentAction(input: CreateDocumentInput): Promise<
     });
 
     revalidatePath("/dashboard/documents");
-    return { success: true, documentId: result.id };
+    return { success: true, documentId: result.id, trackingNumber: result.trackingNumber };
   } catch (error) {
     console.error("[DOCUMENT_CREATION_ERROR]", error);
     return { success: false, error: "Failed to create document." };

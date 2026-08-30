@@ -4,7 +4,6 @@ import DashboardSidebar from "@/components/DashboardSidebar";
 import DashboardHeader from "@/components/DashboardHeader";
 import SessionTimeoutManager from "@/components/SessionTimeoutManager";
 import IdleSessionLock from "@/components/IdleSessionLock";
-import CommandPalette from "@/components/CommandPalette";
 import OnboardingTour from "@/components/OnboardingTour";
 import KeyboardShortcutsModal from "@/components/KeyboardShortcutsModal";
 import NetworkStatusBanner from "@/components/NetworkStatusBanner";
@@ -44,7 +43,6 @@ export default async function DashboardLayout({
           userName={user.fullName || `${user.firstName} ${user.lastName}`}
           userRole={user.role}
         />
-        <CommandPalette />
         <OnboardingTour />
         <KeyboardShortcutsModal />
       </div>

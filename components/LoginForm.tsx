@@ -144,11 +144,11 @@ export default function LoginForm() {
           {isLoading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
-              <span>Verifying credentials...</span>
+              <span>Signing in...</span>
             </>
           ) : (
             <>
-              <span>Sign In to Portal</span>
+              <span>Sign In</span>
               <ArrowRight className="w-4 h-4 text-amber-400" />
             </>
           )}
@@ -157,12 +157,12 @@ export default function LoginForm() {
 
       <div className="mt-4 pt-3.5 border-t border-slate-800/80 text-center">
         <p className="text-xs text-slate-400 font-medium">
-          Not yet registered in the system?{" "}
+          Don&apos;t have an account yet?{" "}
           <Link
             href="/register"
             className="font-bold text-amber-400 hover:text-amber-300 hover:underline transition ml-1 focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none rounded"
           >
-            Register for Staff Approval
+            Create an Account
           </Link>
         </p>
       </div>

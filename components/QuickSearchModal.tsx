@@ -172,29 +172,29 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
 
   const quickActions = [
     {
-      title: "Ingest New Document",
-      desc: "Upload a new document (v1) to start a sequential review pipeline",
+      title: "New Document",
+      desc: "Upload a document to start a review workflow",
       href: "/dashboard/documents/new",
       icon: Plus,
       color: "bg-blue-100 text-blue-800",
     },
     {
-      title: "Pending Approvals Queue",
-      desc: "Inspect documents awaiting your sequential review and e-signature",
+      title: "Approvals",
+      desc: "View documents awaiting your review and signature",
       href: "/dashboard/approvals",
       icon: Clock,
       color: "bg-amber-100 text-amber-800",
     },
     {
-      title: "Document Repository Archive",
-      desc: "Search institutional records across all SAS department units",
+      title: "Documents",
+      desc: "Search and browse institutional records",
       href: "/dashboard/documents",
       icon: FileText,
       color: "bg-purple-100 text-purple-800",
     },
     {
-      title: "My Profile & E-Signature Setup",
-      desc: "Configure handwritten signature strokes and review personal audit activity",
+      title: "Profile & Settings",
+      desc: "Manage handwritten signature, credentials, and settings",
       href: "/dashboard/profile",
       icon: User,
       color: "bg-emerald-100 text-emerald-800",
@@ -204,15 +204,15 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
   if (userRole === "ADMIN") {
     quickActions.push(
       {
-        title: "User Governance & Approvals",
-        desc: "Activate pending employee registrations and assign RBAC roles",
+        title: "User Management",
+        desc: "Manage staff accounts, roles, and unit assignments",
         href: "/dashboard/admin/users",
         icon: Users,
         color: "bg-rose-100 text-rose-800",
       },
       {
-        title: "RA 10173 Cryptographic Audit Trail",
-        desc: "Examine immutable event history, IP stamps, and download CSV",
+        title: "Audit Logs",
+        desc: "View compliance audit trail and activity history",
         href: "/dashboard/admin/audit",
         icon: Shield,
         color: "bg-teal-100 text-teal-800",

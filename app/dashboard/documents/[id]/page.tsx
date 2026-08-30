@@ -289,8 +289,8 @@ export default async function DocumentDetailPage({ params }: PageProps) {
 
               {flowList.length > 0 ? (
                 <div className="flex items-center justify-between gap-2 pt-1 text-[11px] overflow-x-auto">
-                  <div className="text-left font-bold text-emerald-800 shrink-0">
-                    <span>✓ Ingested</span>
+                  <div className="text-left font-extrabold text-emerald-900 bg-emerald-100/90 px-2.5 py-0.5 rounded-md border border-emerald-200 shrink-0 flex items-center gap-1">
+                    <span>✓ Ingested (Originator)</span>
                   </div>
                   {flowList.map((step, idx) => {
                     const isDone = step.status === "APPROVED" || isApproved;
@@ -298,8 +298,12 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                     return (
                       <div
                         key={idx}
-                        className={`text-center font-bold truncate max-w-32 shrink-0 ${
-                          isDone ? "text-emerald-700" : isCurrent ? "text-[#0F2962] font-black" : "text-slate-400"
+                        className={`text-center font-bold truncate max-w-36 shrink-0 px-2 py-0.5 rounded-md ${
+                          isDone
+                            ? "text-emerald-700 bg-emerald-50 border border-emerald-200/60"
+                            : isCurrent
+                            ? "text-[#0F2962] font-black bg-blue-100/80 border border-blue-300 ring-2 ring-blue-400/20"
+                            : "text-slate-400 bg-slate-100 border border-slate-200"
                         }`}
                         title={step.fullName}
                       >
@@ -307,17 +311,25 @@ export default async function DocumentDetailPage({ params }: PageProps) {
                       </div>
                     );
                   })}
-                  <div className={`text-right font-bold shrink-0 ${isApproved ? "text-emerald-800" : "text-slate-400"}`}>
-                    <span>Sealed Vault</span>
+                  <div className={`text-right font-extrabold shrink-0 px-2.5 py-0.5 rounded-md border ${
+                    isApproved
+                      ? "text-emerald-900 bg-emerald-100/90 border-emerald-300 shadow-2xs"
+                      : "text-slate-500 bg-slate-100 border-slate-200"
+                  }`}>
+                    <span>🔒 Sealed Vault (Cert)</span>
                   </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2 pt-1 text-[11px]">
-                  <div className="text-left font-bold text-emerald-800">
-                    <span>✓ Ingested</span>
+                  <div className="text-left font-extrabold text-emerald-900 bg-emerald-100/90 px-2.5 py-0.5 rounded-md border border-emerald-200 w-fit">
+                    <span>✓ Ingested (Originator)</span>
                   </div>
-                  <div className={`text-right font-bold ${isApproved ? "text-emerald-800" : "text-slate-400"}`}>
-                    <span>{isApproved ? "✓ Sealed Vault" : "Pending Signatory"}</span>
+                  <div className={`text-right font-extrabold ml-auto px-2.5 py-0.5 rounded-md border ${
+                    isApproved
+                      ? "text-emerald-900 bg-emerald-100/90 border-emerald-300 shadow-2xs"
+                      : "text-slate-500 bg-slate-100 border-slate-200"
+                  }`}>
+                    <span>{isApproved ? "🔒 Sealed Vault (Cert)" : "Pending Signatories"}</span>
                   </div>
                 </div>
               )}

@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getStatusLabel, getStatusBadgeClass, formatHumanDate } from "@/lib/status-labels";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
 import DataTableWrapper from "@/components/DataTableWrapper";
@@ -24,6 +25,9 @@ import {
   Square,
   Copy,
   Check,
+  SlidersHorizontal,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
 
@@ -86,6 +90,7 @@ export default function DocumentRepositoryConsole({
   documentTypes,
   isDirectorOrAdmin,
 }: DocumentRepositoryConsoleProps) {
+  const router = useRouter();
   const { isStarred, toggleStar, starredCount } = useStarredDocuments();
   const [viewMode, setViewMode] = useState<"table" | "grid" | "calendar">("table");
   const [searchQuery, setSearchQuery] = useState("");
@@ -97,14 +102,20 @@ export default function DocumentRepositoryConsole({
   const [previewDoc, setPreviewDoc] = useState<QuickPreviewDoc | null>(null);
   const [selectedDocIds, setSelectedDocIds] = useState<Set<string>>(new Set());
   const [copiedBatch, setCopiedBatch] = useState(false);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (selectedUnit !== "ALL") count++;
+    if (selectedDocType !== "ALL") count++;
+    if (selectedStatus !== "ALL") count++;
+    if (onlyEscalated) count++;
+    if (onlyStarred) count++;
+    return count;
+  }, [selectedUnit, selectedDocType, selectedStatus, onlyEscalated, onlyStarred]);
 
   const hasActiveFilters =
-    searchQuery.trim() !== "" ||
-    selectedUnit !== "ALL" ||
-    selectedDocType !== "ALL" ||
-    selectedStatus !== "ALL" ||
-    onlyEscalated ||
-    onlyStarred;
+    searchQuery.trim() !== "" || activeFilterCount > 0;
 
   const handleResetFilters = () => {
     setSearchQuery("");
@@ -265,17 +276,17 @@ export default function DocumentRepositoryConsole({
 
           <Link
             href="/dashboard/documents/new"
-            className="px-4 sm:px-4.5 py-2.5 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
+            className="px-4 sm:px-4.5 py-2.5 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98 cursor-pointer"
           >
             <Plus className="w-4 h-4 text-amber-400" />
-            <span>New Submission</span>
+            <span>New Document</span>
           </Link>
         </div>
       </div>
 
-      {/* Control Filter Bar */}
+      {/* Control Filter Bar (Hick's Law: Progressive Disclosure of Filtering Options) */}
       <div className="glass-panel rounded-3xl p-4 sm:p-5 border border-white/90 shadow-sm space-y-3.5">
-        {/* Tier 1: Search Input (Full Width on left) + View Controls / Actions (on right) */}
+        {/* Tier 1: Search Input (Immediate Action) + Filter Drawer Toggle + View Mode Switcher */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -299,42 +310,32 @@ export default function DocumentRepositoryConsole({
           </div>
 
           <div className="flex flex-wrap items-center justify-between sm:justify-end gap-2 sm:gap-2.5 shrink-0">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <button
-                type="button"
-                onClick={() => setOnlyStarred(!onlyStarred)}
-                className={`px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap ${
-                  onlyStarred
-                    ? "bg-amber-500 text-slate-950 font-black shadow-amber-500/30"
-                    : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
-                }`}
-                title="Filter to your starred / pinned documents"
-              >
-                <Star className={`w-3.5 h-3.5 ${onlyStarred ? "fill-slate-950 text-slate-950" : "text-amber-500"}`} />
-                <span>Starred</span>
-                {starredCount > 0 && (
-                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
-                    onlyStarred ? "bg-slate-950 text-amber-400" : "bg-amber-100 text-amber-900"
-                  }`}>
-                    {starredCount}
-                  </span>
-                )}
-              </button>
+            {/* Filter Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsFilterPanelOpen(!isFilterPanelOpen)}
+              className={`px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-xs whitespace-nowrap ${
+                isFilterPanelOpen || activeFilterCount > 0
+                  ? "bg-[#0F2962] text-white shadow-blue-950/20"
+                  : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
+              }`}
+              title="Toggle filter criteria drawer"
+            >
+              <SlidersHorizontal className={`w-3.5 h-3.5 ${isFilterPanelOpen || activeFilterCount > 0 ? "text-amber-400" : "text-slate-500"}`} />
+              <span>Filters</span>
+              {activeFilterCount > 0 && (
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-amber-400 text-slate-950 font-black">
+                  {activeFilterCount}
+                </span>
+              )}
+              {isFilterPanelOpen ? (
+                <ChevronUp className="w-3.5 h-3.5 opacity-70" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+              )}
+            </button>
 
-              <button
-                type="button"
-                onClick={() => setOnlyEscalated(!onlyEscalated)}
-                className={`px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap ${
-                  onlyEscalated
-                    ? "bg-red-600 text-white shadow-red-500/30"
-                    : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <span>Escalated</span>
-              </button>
-            </div>
-
+            {/* View Mode Switcher */}
             <div className="border-l border-slate-200 pl-2 sm:pl-2.5 flex items-center gap-1">
               <button
                 type="button"
@@ -362,7 +363,7 @@ export default function DocumentRepositoryConsole({
                 className={`p-2 rounded-xl transition-all cursor-pointer ${
                   viewMode === "calendar" ? "bg-[#0F2962] text-white shadow-xs" : "text-slate-500 hover:bg-slate-100 bg-white border border-slate-200"
                 }`}
-                title="Expiry Calendar View"
+                title="Calendar Expiry View"
               >
                 <Calendar className="w-4 h-4" />
               </button>
@@ -370,61 +371,211 @@ export default function DocumentRepositoryConsole({
           </div>
         </div>
 
-        {/* Tier 2: Category Filter Selects (Equal Grid spanning full width) */}
-        <div className={`grid grid-cols-1 sm:grid-cols-2 ${isDirectorOrAdmin ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-2.5 sm:gap-3 pt-2.5 border-t border-slate-100/90`}>
-          {isDirectorOrAdmin && (
-            <div className="relative">
-              <select
-                value={selectedUnit}
-                onChange={(e) => setSelectedUnit(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
-              >
-                <option value="ALL">All Department Units</option>
-                {units.map((u) => (
-                  <option key={u.id} value={u.code}>
-                    {u.code} - {u.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
+        {/* Serial Position Effect: Quick Preset Filter Bar (Primacy: All/Queue -> Recency: Sealed/Archived) */}
+        <div className="flex items-center gap-1.5 pt-1 border-t border-slate-200/60 text-xs overflow-x-auto pb-1 sm:flex-wrap">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1 shrink-0">
+            Quick Views:
+          </span>
 
-          <div className="relative">
-            <select
-              value={selectedDocType}
-              onChange={(e) => setSelectedDocType(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
-            >
-              <option value="ALL">All Classification Types</option>
-              {documentTypes.map((dt) => (
-                <option key={dt.id} value={dt.name}>
-                  {dt.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedStatus("ALL");
+              setOnlyEscalated(false);
+              setOnlyStarred(false);
+            }}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shrink-0 ${
+              selectedStatus === "ALL" && !onlyEscalated && !onlyStarred
+                ? "bg-[#0F2962] text-white shadow-xs"
+                : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-50"
+            }`}
+          >
+            All ({initialDocuments.length})
+          </button>
 
-          <div className="relative">
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
-            >
-              <option value="ALL">All Lifecycle Statuses</option>
-              <option value="PENDING_COORDINATOR">Pending Coordinator</option>
-              <option value="PENDING_DIRECTOR">Pending Director</option>
-              <option value="APPROVED">Approved & Sealed</option>
-              <option value="REJECTED_RETURNED">Returned for Rework</option>
-              <option value="ARCHIVED">Archived Vault</option>
-            </select>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedStatus("APPROVED");
+              setOnlyEscalated(false);
+              setOnlyStarred(false);
+            }}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shrink-0 ${
+              selectedStatus === "APPROVED" && !onlyEscalated && !onlyStarred
+                ? "bg-emerald-700 text-white shadow-xs"
+                : "bg-white text-slate-600 border border-slate-200 hover:bg-emerald-50 hover:text-emerald-800"
+            }`}
+          >
+            ✓ Sealed / Approved
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedStatus("REJECTED_RETURNED");
+              setOnlyEscalated(false);
+              setOnlyStarred(false);
+            }}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shrink-0 ${
+              selectedStatus === "REJECTED_RETURNED" && !onlyEscalated && !onlyStarred
+                ? "bg-amber-600 text-white shadow-xs"
+                : "bg-white text-slate-600 border border-slate-200 hover:bg-amber-50 hover:text-amber-800"
+            }`}
+          >
+            ↩ Returned for Rework
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setOnlyEscalated(true);
+              setSelectedStatus("ALL");
+              setOnlyStarred(false);
+            }}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs transition cursor-pointer shrink-0 ${
+              onlyEscalated
+                ? "bg-rose-600 text-white shadow-xs"
+                : "bg-white text-rose-700 border border-rose-200 hover:bg-rose-50"
+            }`}
+          >
+            ⚠️ Escalated
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setOnlyStarred(!onlyStarred);
+              setOnlyEscalated(false);
+            }}
+            className={`px-3 py-1.5 rounded-xl font-bold text-xs transition flex items-center gap-1.5 cursor-pointer shrink-0 ${
+              onlyStarred
+                ? "bg-amber-400 text-slate-950 font-black shadow-xs"
+                : "bg-white text-slate-600 border border-slate-200 hover:bg-amber-50"
+            }`}
+          >
+            <Star className={`w-3.5 h-3.5 ${onlyStarred ? "fill-slate-950" : "fill-amber-400 text-amber-500"}`} />
+            <span>Starred ({starredCount})</span>
+          </button>
         </div>
 
-        {/* Filter Reset pill when filters are active */}
-        {hasActiveFilters && (
+        {/* Tier 2: Expandable Filter Panel (Progressive Disclosure) */}
+        {isFilterPanelOpen && (
+          <div className="pt-3 border-t border-slate-100/90 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${isDirectorOrAdmin ? "lg:grid-cols-3" : "lg:grid-cols-2"} gap-2.5 sm:gap-3`}>
+              {isDirectorOrAdmin && (
+                <div className="relative">
+                  <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                    Department Unit
+                  </label>
+                  <select
+                    value={selectedUnit}
+                    onChange={(e) => setSelectedUnit(e.target.value)}
+                    className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                  >
+                    <option value="ALL">All Department Units</option>
+                    {units.map((u) => (
+                      <option key={u.id} value={u.code}>
+                        {u.code} - {u.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              <div className="relative">
+                <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                  Document Classification
+                </label>
+                <select
+                  value={selectedDocType}
+                  onChange={(e) => setSelectedDocType(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                >
+                  <option value="ALL">All Classification Types</option>
+                  {documentTypes.map((dt) => (
+                    <option key={dt.id} value={dt.name}>
+                      {dt.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="relative">
+                <label className="block text-[10px] font-black uppercase tracking-wider text-slate-500 mb-1">
+                  Workflow Status
+                </label>
+                <select
+                  value={selectedStatus}
+                  onChange={(e) => setSelectedStatus(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border border-slate-300/90 text-xs text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-[#0F2962] transition-all shadow-inner"
+                >
+                  <option value="ALL">All Lifecycle Statuses</option>
+                  <option value="PENDING_COORDINATOR">Pending Coordinator</option>
+                  <option value="PENDING_DIRECTOR">Pending Director</option>
+                  <option value="APPROVED">Approved & Sealed</option>
+                  <option value="REJECTED_RETURNED">Returned for Rework</option>
+                  <option value="ARCHIVED">Archived Vault</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Quick Status Toggles & Reset Controls */}
+            <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-slate-100">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setOnlyStarred(!onlyStarred)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs whitespace-nowrap ${
+                    onlyStarred
+                      ? "bg-amber-500 text-slate-950 font-black shadow-amber-500/30"
+                      : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
+                  }`}
+                  title="Filter to your starred / pinned documents"
+                >
+                  <Star className={`w-3.5 h-3.5 ${onlyStarred ? "fill-slate-950 text-slate-950" : "text-amber-500"}`} />
+                  <span>Starred Only</span>
+                  {starredCount > 0 && (
+                    <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                      onlyStarred ? "bg-slate-950 text-amber-400" : "bg-amber-100 text-amber-900"
+                    }`}>
+                      {starredCount}
+                    </span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setOnlyEscalated(!onlyEscalated)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs whitespace-nowrap ${
+                    onlyEscalated
+                      ? "bg-red-600 text-white shadow-red-500/30"
+                      : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>Escalated SLA Only</span>
+                </button>
+              </div>
+
+              {hasActiveFilters && (
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="text-xs font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1 cursor-pointer hover:underline"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  <span>Reset All Filters</span>
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Filter Summary Ribbon when filters are active and drawer is closed */}
+        {hasActiveFilters && !isFilterPanelOpen && (
           <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 text-xs">
             <span className="text-slate-500 font-medium">
-              Showing filtered results ({filteredDocuments.length} of {initialDocuments.length})
+              Showing filtered results ({filteredDocuments.length} of {initialDocuments.length}) • <strong className="text-slate-800">{activeFilterCount} active filter{activeFilterCount !== 1 ? "s" : ""}</strong>
             </span>
             <button
               onClick={handleResetFilters}
@@ -497,15 +648,26 @@ export default function DocumentRepositoryConsole({
                   return (
                     <tr
                       key={doc.id}
-                      className={`transition-colors duration-150 ${
-                        isSelected ? "bg-blue-50/80" : "hover:bg-blue-50/40"
+                      onClick={() => router.push(`/dashboard/documents/${doc.id}`)}
+                      className={`transition-colors duration-150 cursor-pointer ${
+                        isSelected
+                          ? "bg-blue-50/80"
+                          : doc.isEscalated
+                          ? "bg-rose-50/40 hover:bg-rose-50/70 border-l-4 border-l-rose-500"
+                          : doc.status === "REJECTED_RETURNED"
+                          ? "bg-amber-50/30 hover:bg-amber-50/60 border-l-4 border-l-amber-400"
+                          : "hover:bg-blue-50/50"
                       }`}
                     >
                       <td className="py-3.5 pl-3 pr-1 sm:py-4 sm:pl-4 sm:pr-2 text-center">
                         <button
                           type="button"
-                          onClick={() => toggleSelectDoc(doc.id)}
-                          className="p-1 rounded hover:bg-slate-100 transition cursor-pointer text-slate-600"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleSelectDoc(doc.id);
+                          }}
+                          className="p-2 rounded-lg hover:bg-slate-200/70 transition cursor-pointer text-slate-600"
+                          title={isSelected ? "Deselect document" : "Select document"}
                         >
                           {isSelected ? (
                             <CheckSquare className="w-4 h-4 text-[#0F2962]" />
@@ -518,13 +680,18 @@ export default function DocumentRepositoryConsole({
                         <div className="flex items-center gap-1.5 sm:gap-2">
                           <button
                             type="button"
-                            onClick={() => toggleStar(doc.id)}
-                            className="p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer text-slate-400 hover:text-amber-500"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleStar(doc.id);
+                            }}
+                            className="p-2 rounded-lg hover:bg-slate-200/70 transition cursor-pointer text-slate-400 hover:text-amber-500"
                             title={starred ? "Unpin document" : "Pin/Star document"}
                           >
                             <Star className={`w-3.5 h-3.5 ${starred ? "fill-amber-400 text-amber-500" : ""}`} />
                           </button>
-                          <CopyTrackingButton trackingNumber={doc.trackingNumber} />
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <CopyTrackingButton trackingNumber={doc.trackingNumber} />
+                          </div>
                           {doc.currentVersion && (
                             <span className="hidden xs:inline px-1.5 py-0.5 rounded-md bg-blue-100/80 text-blue-800 text-[10px] font-bold">
                               v{doc.currentVersion.versionNumber}
@@ -533,7 +700,7 @@ export default function DocumentRepositoryConsole({
                         </div>
                       </td>
                     <td className="py-3.5 px-3 sm:py-4 sm:px-6">
-                      <span className="font-bold text-slate-900 block truncate max-w-35 xs:max-w-xs sm:max-w-md">
+                      <span className="font-bold text-slate-900 block truncate max-w-35 xs:max-w-xs sm:max-w-md hover:text-[#0F2962] transition-colors">
                         {doc.title}
                       </span>
                       <span className="text-[11px] text-slate-500 font-medium block truncate max-w-35 xs:max-w-xs">
@@ -579,10 +746,11 @@ export default function DocumentRepositoryConsole({
                       {formatHumanDate(doc.createdAt)}
                     </td>
                     <td className="py-3.5 px-3 sm:py-4 sm:px-6 text-right">
-                      <div className="flex items-center justify-end gap-1.5">
+                      <div className="flex items-center justify-end gap-1.5 sm:gap-2">
                         <button
                           type="button"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setPreviewDoc({
                               id: doc.id,
                               trackingNumber: doc.trackingNumber,
@@ -602,9 +770,9 @@ export default function DocumentRepositoryConsole({
                                     sha256Checksum: "",
                                   }
                                 : null,
-                            })
-                          }
-                          className="p-1.5 rounded-xl border border-slate-200 hover:bg-blue-50 hover:text-[#0F2962] text-slate-500 transition cursor-pointer"
+                            });
+                          }}
+                          className="p-2.5 rounded-xl border border-slate-200 hover:bg-blue-50 hover:text-[#0F2962] text-slate-500 transition cursor-pointer shadow-2xs"
                           title="Quick Preview"
                         >
                           <Eye className="w-3.5 h-3.5" />
@@ -612,7 +780,8 @@ export default function DocumentRepositoryConsole({
 
                         <Link
                           href={`/dashboard/documents/${doc.id}`}
-                          className="px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-xl border border-slate-300/90 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block hover:-translate-y-0.5 active:scale-98"
+                          onClick={(e) => e.stopPropagation()}
+                          className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-slate-300/90 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block hover:-translate-y-0.5 active:scale-98"
                         >
                           Open
                         </Link>
@@ -633,8 +802,12 @@ export default function DocumentRepositoryConsole({
             return (
               <div
                 key={doc.id}
-                className={`glass-panel glass-panel-interactive rounded-3xl p-6 border transition flex flex-col justify-between space-y-4 bg-white/85 ${
-                  doc.isEscalated ? "border-red-300 bg-red-50/20" : "border-white/90"
+                className={`glass-panel glass-panel-interactive rounded-3xl p-6 border transition flex flex-col justify-between space-y-4 ${
+                  doc.isEscalated
+                    ? "border-rose-300 bg-rose-50/25 shadow-md shadow-rose-950/5"
+                    : doc.status === "REJECTED_RETURNED"
+                    ? "border-amber-300 bg-amber-50/25 shadow-md shadow-amber-950/5"
+                    : "border-white/90 bg-white/85"
                 }`}
               >
                 <div className="space-y-3.5">
@@ -643,7 +816,7 @@ export default function DocumentRepositoryConsole({
                       <button
                         type="button"
                         onClick={() => toggleStar(doc.id)}
-                        className="p-1 rounded-lg hover:bg-slate-100 transition cursor-pointer text-slate-400 hover:text-amber-500"
+                        className="p-2 rounded-lg hover:bg-slate-100 transition cursor-pointer text-slate-400 hover:text-amber-500"
                         title={isStarred(doc.id) ? "Unpin document" : "Pin/Star document"}
                       >
                         <Star className={`w-3.5 h-3.5 ${isStarred(doc.id) ? "fill-amber-400 text-amber-500" : ""}`} />
@@ -691,12 +864,44 @@ export default function DocumentRepositoryConsole({
                   </span>
                 </div>
 
-                <Link
-                  href={`/dashboard/documents/${doc.id}`}
-                  className="w-full py-2.5 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold text-center block shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-98"
-                >
-                  Live View & Review
-                </Link>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPreviewDoc({
+                        id: doc.id,
+                        trackingNumber: doc.trackingNumber,
+                        title: doc.title,
+                        status: doc.status,
+                        createdAt: doc.createdAt,
+                        expiryDate: doc.expiryDate,
+                        unit: doc.unit || { code: "GEN", name: "General Administration" },
+                        documentType: doc.documentType || { code: "DOC", name: "Standard Document" },
+                        uploader: doc.uploader
+                          ? { firstName: doc.uploader.firstName, lastName: doc.uploader.lastName, email: "" }
+                          : { firstName: "Staff", lastName: "Member", email: "" },
+                        currentVersion: doc.currentVersion
+                          ? {
+                              versionNumber: doc.currentVersion.versionNumber,
+                              fileName: doc.currentVersion.fileName,
+                              sha256Checksum: "",
+                            }
+                          : null,
+                      })
+                    }
+                    className="p-3 rounded-xl border border-slate-200 hover:bg-blue-50 hover:text-[#0F2962] text-slate-500 transition cursor-pointer shrink-0 shadow-2xs"
+                    title="Quick Preview"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+
+                  <Link
+                    href={`/dashboard/documents/${doc.id}`}
+                    className="flex-1 py-3 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold text-center block shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-98"
+                  >
+                    Live View &amp; Review
+                  </Link>
+                </div>
               </div>
             </div>
           );

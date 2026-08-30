@@ -144,7 +144,7 @@ export default function NotificationBell() {
           setIsOpen(!isOpen);
           if (!isOpen) fetchNotifications();
         }}
-        className="relative p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962]"
+        className="relative p-2.5 sm:px-3.5 sm:py-2.5 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962]"
         title="Notifications"
         aria-label="View notifications"
       >
@@ -193,7 +193,7 @@ export default function NotificationBell() {
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-white transition cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-white transition cursor-pointer"
                 aria-label="Close notifications"
               >
                 <X className="w-4 h-4" />
@@ -224,25 +224,23 @@ export default function NotificationBell() {
                   : "/dashboard/approvals";
 
                 return (
-                  <div
+                  <Link
                     key={item.id}
-                    className={`p-3.5 transition flex items-start gap-3 hover:bg-slate-50 ${
+                    href={targetUrl}
+                    onClick={() => {
+                      markSingleAsRead(item.id);
+                      setIsOpen(false);
+                    }}
+                    className={`p-3.5 transition flex items-start gap-3 hover:bg-slate-100/80 group cursor-pointer ${
                       isRead ? "opacity-75 bg-white" : "bg-blue-50/40"
                     }`}
                   >
                     <div className="mt-0.5">{getNotificationIcon(item.type)}</div>
 
                     <div className="flex-1 min-w-0">
-                      <Link
-                        href={targetUrl}
-                        onClick={() => {
-                          markSingleAsRead(item.id);
-                          setIsOpen(false);
-                        }}
-                        className="block text-xs font-bold text-slate-900 hover:text-[#0F2962] line-clamp-2 leading-snug wrap-break-word"
-                      >
+                      <span className="block text-xs font-bold text-slate-900 group-hover:text-[#0F2962] line-clamp-2 leading-snug wrap-break-word">
                         {item.subject}
-                      </Link>
+                      </span>
 
                       <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-[10px] text-slate-400">
                         {item.trackingNumber && (
@@ -258,7 +256,7 @@ export default function NotificationBell() {
                     {!isRead && (
                       <span className="w-2 h-2 rounded-full bg-blue-600 shrink-0 mt-1.5" />
                     )}
-                  </div>
+                  </Link>
                 );
               })
             )}

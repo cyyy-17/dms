@@ -160,8 +160,8 @@
   background: linear-gradient(135deg, #dc2626, #991b1b);
   color: #ffffff;
   border: 1px solid #ef4444;
-  box-shadow: 0 0 16px rgba(220, 38, 38, 0.45);
-  animation: pulse-glow 2s infinite;
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.35);
+  animation: pulse-glow 2s ease-in-out 4;
 }
 
 /* ==========================================================================

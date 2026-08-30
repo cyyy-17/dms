@@ -102,12 +102,12 @@ export default function LandingNavbar({ unitCount = 0 }: LandingNavbarProps) {
             Sign In
           </Link>
 
-          {/* Staff Access CTA Button */}
+          {/* Request Access CTA Button */}
           <Link
             href="/register"
             className="text-xs text-slate-950 bg-linear-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 px-4 py-2 rounded-xl shadow-md shadow-amber-400/20 hover:shadow-amber-400/35 transition-all duration-150 flex items-center gap-1.5 font-extrabold transform active:scale-95 cursor-pointer whitespace-nowrap"
           >
-            <span>Staff Access</span>
+            <span>Request Access</span>
             <ArrowRight className="w-3.5 h-3.5 shrink-0" />
           </Link>
         </div>
@@ -153,7 +153,7 @@ export default function LandingNavbar({ unitCount = 0 }: LandingNavbarProps) {
               onClick={() => setMobileMenuOpen(false)}
               className="w-full py-2.5 rounded-xl bg-linear-to-r from-amber-400 via-amber-300 to-yellow-400 text-slate-950 font-black text-xs text-center flex items-center justify-center gap-2 shadow-lg shadow-amber-400/20 whitespace-nowrap"
             >
-              <span>Apply for Staff Access</span>
+              <span>Request Access</span>
               <ArrowRight className="w-4 h-4 shrink-0" />
             </Link>
             <div className="flex items-center justify-center gap-1.5 text-[10px] text-slate-400 pt-1">

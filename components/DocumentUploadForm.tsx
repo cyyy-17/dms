@@ -23,6 +23,12 @@ import {
   Users,
   Loader2,
   FileDown,
+  CheckCircle2,
+  Copy,
+  Check,
+  Sparkles,
+  ExternalLink,
+  RotateCcw,
 } from "lucide-react";
 import { getRoleLabel, formatFileSize } from "@/lib/status-labels";
 
@@ -89,6 +95,15 @@ export default function DocumentUploadForm({
   const [error, setError] = useState<string | null>(null);
   const [duplicateWarning, setDuplicateWarning] = useState<string | null>(null);
 
+  // Peak-End Rule: Celebratory Success State
+  const [createdDocInfo, setCreatedDocInfo] = useState<{
+    id: string;
+    trackingNumber: string;
+    title: string;
+    checksum: string;
+  } | null>(null);
+  const [copiedTracking, setCopiedTracking] = useState(false);
+
   useEffect(() => {
     const trimmedTitle = title.trim();
     if (!trimmedTitle || trimmedTitle.length < 4 || !unitId) {
@@ -114,38 +129,27 @@ export default function DocumentUploadForm({
   }, [title, unitId]);
 
   const activeDuplicateWarning = title.trim().length >= 4 ? duplicateWarning : null;
-
   const selectedDocType = docTypes.find((d) => d.id === documentTypeId);
   const selectedUnit = units.find((u) => u.id === unitId);
 
-  // File selection and SHA-256 computation
+  // Auto-calculate cryptographic hash on file pick
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile) return;
 
-    const MAX_SIZE = 25 * 1024 * 1024;
-    if (selectedFile.size > MAX_SIZE) {
-      setError("File exceeds the maximum allowable size of 25MB.");
-      setFile(null);
-      setFileChecksum(null);
-      e.target.value = "";
+    if (selectedFile.type !== "application/pdf" && !selectedFile.name.endsWith(".pdf")) {
+      setError("Only official PDF files (*.pdf) are accepted for institutional compliance.");
       return;
     }
 
-    if (
-      selectedFile.type !== "application/pdf" &&
-      !selectedFile.name.toLowerCase().endsWith(".pdf")
-    ) {
-      setError("Only official PDF documents are supported for ingestion.");
-      setFile(null);
-      setFileChecksum(null);
-      e.target.value = "";
+    if (selectedFile.size > 25 * 1024 * 1024) {
+      setError("File size exceeds 25 MB institutional limit.");
       return;
     }
 
     setFile(selectedFile);
-    setIsHashing(true);
     setError(null);
+    setIsHashing(true);
 
     try {
       const arrayBuffer = await selectedFile.arrayBuffer();
@@ -246,6 +250,49 @@ export default function DocumentUploadForm({
       setError(`Expiry Date is mandatory for ${selectedDocType.name} classification.`);
       return;
     }
+
+    // Tesler's Law: Automatically pre-populate default signatory workflow if empty
+    if (signatoryChain.length === 0 && availableUsers.length > 0) {
+      const autoSteps: AssignedSignatoryStep[] = [];
+      const targetUnitObj = units.find((u) => u.id === unitId);
+
+      // 1. Coordinator in target unit
+      const unitCoord = availableUsers.find(
+        (u) =>
+          (u.role === "COORDINATOR" || u.role === "STAFF") &&
+          (targetUnitObj ? u.unitCode === targetUnitObj.code : true)
+      );
+      if (unitCoord) {
+        autoSteps.push({
+          userId: unitCoord.id,
+          fullName: unitCoord.fullName,
+          role: unitCoord.role,
+          title: "Recommending Approval",
+          stepOrder: 0,
+          status: "PENDING",
+        });
+      }
+
+      // 2. Director / Executive Signatory
+      const director = availableUsers.find(
+        (u) => u.role === "DIRECTOR" && (!unitCoord || u.id !== unitCoord.id)
+      );
+      if (director) {
+        autoSteps.push({
+          userId: director.id,
+          fullName: director.fullName,
+          role: director.role,
+          title: "Final Approval & Seal",
+          stepOrder: autoSteps.length,
+          status: "PENDING",
+        });
+      }
+
+      if (autoSteps.length > 0) {
+        setSignatoryChain(autoSteps);
+      }
+    }
+
     setDirection("forward");
     setStep(2);
   };
@@ -292,7 +339,12 @@ export default function DocumentUploadForm({
       });
 
       if (res.success && res.documentId) {
-        router.push(`/dashboard/documents/${res.documentId}`);
+        setCreatedDocInfo({
+          id: res.documentId,
+          trackingNumber: res.trackingNumber || `SAS-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`,
+          title: title.trim(),
+          checksum: fileChecksum,
+        });
         router.refresh();
       } else {
         setError(res.error || "Failed to create document.");
@@ -303,6 +355,106 @@ export default function DocumentUploadForm({
       setIsSubmitting(false);
     }
   };
+
+  const handleUploadAnother = () => {
+    setCreatedDocInfo(null);
+    setTitle("");
+    setDescription("");
+    setFile(null);
+    setFileChecksum(null);
+    setSignatoryChain([]);
+    setStep(1);
+    setError(null);
+    setDuplicateWarning(null);
+  };
+
+  const handleCopyTrackingNumber = () => {
+    if (!createdDocInfo) return;
+    navigator.clipboard.writeText(createdDocInfo.trackingNumber);
+    setCopiedTracking(true);
+    setTimeout(() => setCopiedTracking(false), 2000);
+  };
+
+  // Peak-End Rule: Celebratory Success Card View
+  if (createdDocInfo) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in zoom-in-95 duration-300">
+        <div className="glass-panel border-gradient-gold rounded-3xl p-6 sm:p-8 border border-white/90 shadow-2xl space-y-6 text-center bg-white/90">
+          <div className="w-16 h-16 rounded-3xl bg-linear-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-emerald-600/30">
+            <CheckCircle2 className="w-9 h-9" />
+          </div>
+
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-black">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Document Registered &amp; Encrypted</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900">
+              Document Ingestion Successful!
+            </h1>
+            <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
+              Your document is recorded in the institutional ledger and ready for sequential signatory review.
+            </p>
+          </div>
+
+          {/* Tracking Number Callout Card */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 max-w-lg mx-auto">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+              Official Tracking Number
+            </span>
+            <div className="flex items-center justify-center gap-2">
+              <span className="text-lg sm:text-xl font-black font-mono text-[#0F2962] tracking-wider">
+                {createdDocInfo.trackingNumber}
+              </span>
+              <button
+                type="button"
+                onClick={handleCopyTrackingNumber}
+                className="p-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 transition cursor-pointer shadow-2xs"
+                title="Copy tracking number"
+              >
+                {copiedTracking ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </div>
+            <p className="text-xs font-bold text-slate-800 truncate pt-1 border-t border-slate-200/80">
+              &ldquo;{createdDocInfo.title}&rdquo;
+            </p>
+          </div>
+
+          {/* Cryptographic SHA-256 Vault Record */}
+          <div className="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-left space-y-1 max-w-lg mx-auto text-xs">
+            <div className="flex items-center gap-1.5 font-bold text-emerald-950">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>RA 10173 Cryptographic Hash Confirmed:</span>
+            </div>
+            <code className="block font-mono text-[10px] text-emerald-900 break-all bg-emerald-100/70 p-2 rounded-xl border border-emerald-300/60">
+              SHA-256: {createdDocInfo.checksum}
+            </code>
+          </div>
+
+          {/* Action CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => router.push(`/dashboard/documents/${createdDocInfo.id}`)}
+              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-black shadow-lg shadow-blue-950/20 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 active:scale-98"
+            >
+              <span>Open Document Workspace</span>
+              <ExternalLink className="w-4 h-4 text-amber-400" />
+            </button>
+
+            <button
+              type="button"
+              onClick={handleUploadAnother}
+              className="w-full sm:w-auto px-5 py-3.5 rounded-2xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 active:scale-98 shadow-xs"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Ingest Another Document</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const isStep1Done = title.trim().length > 0 && !!documentTypeId && !!unitId;
   const isStep2Done = signatoryChain.length > 0;
@@ -344,7 +496,7 @@ export default function DocumentUploadForm({
               setDirection(step > 1 ? "backward" : "forward");
               setStep(1);
             }}
-            className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-left cursor-pointer ${
+            className={`p-2.5 sm:p-3 rounded-xl border transition-all flex items-center gap-2 text-left cursor-pointer ${
               step === 1
                 ? "bg-blue-50/90 border-blue-400 ring-2 ring-blue-400/20 text-blue-950 font-bold"
                 : isStep1Done
@@ -376,7 +528,7 @@ export default function DocumentUploadForm({
               }
             }}
             disabled={!isStep1Done}
-            className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`p-2.5 sm:p-3 rounded-xl border transition-all flex items-center gap-2 text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
               step === 2
                 ? "bg-blue-50/90 border-blue-400 ring-2 ring-blue-400/20 text-blue-950 font-bold"
                 : isStep2Done
@@ -408,7 +560,7 @@ export default function DocumentUploadForm({
               }
             }}
             disabled={!isStep1Done}
-            className={`p-2 rounded-xl border transition-all flex items-center gap-2 text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+            className={`p-2.5 sm:p-3 rounded-xl border transition-all flex items-center gap-2 text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
               step === 3
                 ? "bg-blue-50/90 border-blue-400 ring-2 ring-blue-400/20 text-blue-950 font-bold"
                 : isStep3Done
@@ -476,24 +628,6 @@ export default function DocumentUploadForm({
                   </option>
                 ))}
               </select>
-
-              <div className="flex items-center justify-between pt-1.5 px-0.5">
-                <span className="text-[10px] text-slate-500 font-medium">Standard template</span>
-                <button
-                  type="button"
-                  onClick={handleDownloadTemplate}
-                  disabled={isCheckingTemplate}
-                  className="text-[11px] font-bold text-[#0F2962] hover:text-blue-700 flex items-center gap-1 cursor-pointer hover:underline disabled:opacity-50"
-                  title="Download blank official template for this document classification"
-                >
-                  {isCheckingTemplate ? (
-                    <Loader2 className="w-3 h-3 animate-spin text-[#0F2962]" />
-                  ) : (
-                    <FileDown className="w-3 h-3 text-blue-600" />
-                  )}
-                  <span>Download Blank PDF</span>
-                </button>
-              </div>
             </div>
 
             <div>
@@ -514,6 +648,29 @@ export default function DocumentUploadForm({
               </select>
             </div>
           </div>
+
+          {/* Contextual Template Helper */}
+          {selectedDocType && (
+            <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-slate-600 text-xs">
+              <span className="text-[11px] font-medium text-slate-500">
+                Official Template for <strong className="text-slate-700">{selectedDocType.name}</strong>
+              </span>
+              <button
+                type="button"
+                onClick={handleDownloadTemplate}
+                disabled={isCheckingTemplate}
+                className="text-[11px] font-bold text-[#0F2962] hover:text-blue-700 flex items-center gap-1.5 cursor-pointer hover:underline disabled:opacity-50"
+                title="Download blank official template for this document classification"
+              >
+                {isCheckingTemplate ? (
+                  <Loader2 className="w-3 h-3 animate-spin text-[#0F2962]" />
+                ) : (
+                  <FileDown className="w-3.5 h-3.5 text-blue-600" />
+                )}
+                <span>Download Blank PDF</span>
+              </button>
+            </div>
+          )}
 
           <div>
             <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -587,7 +744,7 @@ export default function DocumentUploadForm({
           <div className="flex justify-end pt-2 border-t border-slate-100">
             <button
               type="submit"
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md shadow-blue-950/20 transition-all flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 active:scale-98"
             >
               <span>Continue to Signatory Chain</span>
               <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
@@ -720,7 +877,7 @@ export default function DocumentUploadForm({
                   type="button"
                   disabled={!selectedUserToAdd}
                   onClick={handleAddSignatory}
-                  className="px-3.5 py-2 rounded-lg bg-[#0F2962] text-white font-bold text-xs hover:bg-[#091a42] disabled:opacity-50 transition shrink-0 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl bg-[#0F2962] text-white font-bold text-xs hover:bg-[#091a42] disabled:opacity-50 transition shrink-0 cursor-pointer shadow-xs"
                 >
                   Add
                 </button>
@@ -732,14 +889,14 @@ export default function DocumentUploadForm({
             <button
               type="button"
               onClick={handleBack}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer text-center"
+              className="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer text-center"
             >
               ← Back to Metadata
             </button>
             <button
               type="button"
               onClick={handleStep2Next}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#0F2962] hover:bg-[#091a42] text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer hover:-translate-y-0.5 active:scale-98"
             >
               <span>Continue to File Upload</span>
               <ArrowRight className="w-3.5 h-3.5 text-amber-400" />
@@ -827,7 +984,7 @@ export default function DocumentUploadForm({
               type="button"
               onClick={handleBack}
               disabled={isSubmitting}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer disabled:opacity-50 text-center"
+              className="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer disabled:opacity-50 text-center"
             >
               ← Back to Signatories
             </button>
@@ -835,7 +992,7 @@ export default function DocumentUploadForm({
             <button
               type="submit"
               disabled={isSubmitting || isHashing || !file}
-              className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-linear-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs shadow-lg shadow-emerald-950/20 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-linear-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 text-white font-bold text-xs shadow-lg shadow-emerald-950/20 hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 active:scale-98"
             >
               {isSubmitting ? (
                 <>

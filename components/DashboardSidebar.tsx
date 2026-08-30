@@ -61,25 +61,19 @@ export default function DashboardSidebar({ user }: SidebarProps) {
       roles: ["STAFF", "COORDINATOR", "DIRECTOR", "ADMIN"],
     },
     {
-      label: "Document Repository",
+      label: "Documents",
       href: "/dashboard/documents",
       icon: FileText,
       roles: ["STAFF", "COORDINATOR", "DIRECTOR", "ADMIN"],
     },
     {
-      label: "New Submission",
-      href: "/dashboard/documents/new",
-      icon: FilePlus2,
-      roles: ["STAFF", "COORDINATOR", "DIRECTOR", "ADMIN"],
-    },
-    {
-      label: "Approval Queue",
+      label: "Approvals",
       href: "/dashboard/approvals",
       icon: CheckSquare,
       roles: ["COORDINATOR", "DIRECTOR", "ADMIN"],
     },
     {
-      label: "My E-Signature",
+      label: "Profile & Settings",
       href: "/dashboard/profile",
       icon: Shield,
       roles: ["STAFF", "COORDINATOR", "DIRECTOR", "ADMIN"],
@@ -88,12 +82,12 @@ export default function DashboardSidebar({ user }: SidebarProps) {
 
   const adminLinks = [
     {
-      label: "Staff & Users",
+      label: "Users",
       href: "/dashboard/admin/users",
       icon: Users,
     },
     {
-      label: "Department Units",
+      label: "Units",
       href: "/dashboard/admin/units",
       icon: Building2,
     },
@@ -103,22 +97,22 @@ export default function DashboardSidebar({ user }: SidebarProps) {
       icon: FileCode2,
     },
     {
-      label: "Signatory Delegations",
+      label: "Delegations",
       href: "/dashboard/admin/delegations",
       icon: FileCheck2,
     },
     {
-      label: "Emergency Overrides",
+      label: "Document Overrides",
       href: "/dashboard/admin/documents-override",
       icon: Wrench,
     },
     {
-      label: "RA 10173 Audit Logs",
+      label: "Audit Logs",
       href: "/dashboard/admin/audit",
       icon: ShieldCheck,
     },
     {
-      label: "Notification Dispatcher",
+      label: "Notifications",
       href: "/dashboard/admin/notifications",
       icon: BellRing,
     },
@@ -153,8 +147,19 @@ export default function DashboardSidebar({ user }: SidebarProps) {
         </div>
       </Link>
 
+      {/* Primary Action: + New Document Button (Drive / Linear convention) */}
+      <div className="p-3 pb-0">
+        <Link
+          href="/dashboard/documents/new"
+          className="flex items-center justify-center gap-2.5 w-full py-3 px-4 rounded-xl font-bold text-xs bg-linear-to-r from-amber-400 via-amber-300 to-yellow-400 text-slate-950 shadow-md shadow-amber-400/20 hover:shadow-amber-400/35 hover:from-amber-300 hover:to-yellow-300 active:scale-[0.98] transition-all cursor-pointer group"
+        >
+          <FilePlus2 className="w-4 h-4 text-slate-950 group-hover:rotate-12 transition-transform" />
+          <span>New Document</span>
+        </Link>
+      </div>
+
       {/* User Profile Card */}
-      <div className="p-4 border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md">
+      <div className="p-4 border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md mt-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-linear-to-br from-slate-800 to-slate-700 text-amber-400 font-black text-sm flex items-center justify-center border border-slate-600/80 shadow-md shrink-0">
             {user.fullName.charAt(0)}
@@ -186,9 +191,6 @@ export default function DashboardSidebar({ user }: SidebarProps) {
       {/* Navigation Links */}
       <div className="flex-1 py-4 px-3 space-y-6 overflow-y-auto dark-scroll">
         <div className="space-y-1">
-          <span className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-2">
-            Operations & Workflow
-          </span>
           {navLinks
             .filter((link) => link.roles.includes(user.role))
             .map((link) => {
@@ -198,7 +200,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 group focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none ${
+                  className={`flex items-center justify-between px-3 py-3 rounded-xl text-xs font-bold transition-all duration-200 group focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none ${
                     isActive
                       ? "bg-linear-to-r from-[#1E40AF] to-[#0F2962] text-white shadow-md shadow-blue-950/40 border border-blue-400/30"
                       : "text-slate-400 hover:bg-slate-900/80 hover:text-white"
@@ -217,7 +219,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
         {isAdmin && (
           <div className="space-y-1">
             <span className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block mb-2">
-              Enterprise Administration
+              Administration
             </span>
             {adminLinks.map((link) => {
               const Icon = link.icon;
@@ -249,7 +251,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
         <button
           onClick={handleSignOut}
           disabled={isSigningOut}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-red-400 bg-red-950/30 hover:bg-red-950/60 hover:text-red-300 border border-red-900/40 transition-all duration-200 disabled:opacity-50 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
+          className="w-full flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs font-bold text-red-400 bg-red-950/30 hover:bg-red-950/60 hover:text-red-300 border border-red-900/40 transition-all duration-200 disabled:opacity-50 cursor-pointer focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:outline-none"
         >
           {isSigningOut ? (
             <>
@@ -259,7 +261,7 @@ export default function DashboardSidebar({ user }: SidebarProps) {
           ) : (
             <>
               <LogOut className="w-4 h-4" />
-              <span>Sign Out Session</span>
+              <span>Sign Out</span>
             </>
           )}
         </button>

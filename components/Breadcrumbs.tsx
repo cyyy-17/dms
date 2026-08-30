@@ -24,7 +24,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
         title="Go to Dashboard Overview"
       >
         <Home className="w-3.5 h-3.5" />
-        <span className="sr-only sm:not-sr-only">Portal</span>
+        <span className="sr-only sm:not-sr-only">Home</span>
       </Link>
 
       {items.map((item, index) => {

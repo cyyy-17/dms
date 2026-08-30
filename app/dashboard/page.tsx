@@ -204,22 +204,42 @@ export default async function DashboardPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 shrink-0">
-            <Link
-              href="/dashboard/documents/new"
-              className="px-4.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-extrabold shadow-lg shadow-blue-950/25 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
-            >
-              <Plus className="w-4 h-4 text-amber-400" />
-              <span>Ingest Document</span>
-            </Link>
-
-            {(stats.awaitingMySignature > 0 || user.role === "COORDINATOR" || user.role === "DIRECTOR" || user.role === "ADMIN") && (
-              <Link
-                href="/dashboard/approvals"
-                className="px-4.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-white/95 border border-slate-300 hover:border-blue-400 text-slate-800 text-xs font-extrabold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
-              >
-                <Clock className="w-4 h-4 text-amber-600" />
-                <span>Review Queue ({stats.awaitingMySignature > 0 ? stats.awaitingMySignature : stats.pendingCoordinator + stats.pendingDirector})</span>
-              </Link>
+            {stats.awaitingMySignature > 0 ? (
+              <>
+                <Link
+                  href="/dashboard/approvals"
+                  className="px-4.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-linear-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-black shadow-lg shadow-amber-950/20 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
+                >
+                  <PenLine className="w-4 h-4 text-slate-950" />
+                  <span>Sign Pending Documents ({stats.awaitingMySignature})</span>
+                </Link>
+                <Link
+                  href="/dashboard/documents/new"
+                  className="px-4.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-white/95 border border-slate-300 hover:border-blue-400 text-slate-800 text-xs font-extrabold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
+                >
+                  <Plus className="w-4 h-4 text-slate-600" />
+                  <span>New Document</span>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/dashboard/documents/new"
+                  className="px-4.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-extrabold shadow-lg shadow-blue-950/25 hover:shadow-xl transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
+                >
+                  <Plus className="w-4 h-4 text-amber-400" />
+                  <span>New Document</span>
+                </Link>
+                {(user.role === "COORDINATOR" || user.role === "DIRECTOR" || user.role === "ADMIN") && (stats.pendingCoordinator + stats.pendingDirector > 0) && (
+                  <Link
+                    href="/dashboard/approvals"
+                    className="px-4.5 py-2.5 sm:px-5 sm:py-3 rounded-2xl bg-white/95 border border-slate-300 hover:border-blue-400 text-slate-800 text-xs font-extrabold shadow-xs hover:shadow-md transition-all duration-200 flex items-center gap-2 hover:-translate-y-0.5 active:scale-98"
+                  >
+                    <Clock className="w-4 h-4 text-slate-600" />
+                    <span>Review Queue ({stats.pendingCoordinator + stats.pendingDirector})</span>
+                  </Link>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -287,83 +307,93 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* Modern KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {/* KPI 1 */}
-        <div className="glass-panel stat-kpi-card glow-blue rounded-3xl p-5 sm:p-6 border border-white/90 bg-white/80">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
-              Total Ingested
-            </span>
-            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#0F2962] border border-blue-200/80 flex items-center justify-center shadow-xs">
-              <FileText className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-3.5 flex items-baseline justify-between">
-            <span className="text-3xl font-black text-slate-900 tracking-tight">{stats.total}</span>
-            <span className="text-xs font-extrabold text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-              <TrendingUp className="w-3 h-3" />
-              {approvalRate}% Sealed
-            </span>
-          </div>
-          <p className="mt-2 text-[11px] text-slate-400 font-medium">Immutable cryptographed records</p>
+      {/* Miller's Law: 3-Cluster Cognitive Metrics Architecture */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-black uppercase tracking-wider text-slate-500 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-[#0F2962]" />
+            <span>Operational &amp; Governance Metrics</span>
+          </h2>
+          <span className="text-[11px] font-mono text-slate-400">Real-time Telemetry</span>
         </div>
 
-        {/* KPI 2 */}
-        <div className="glass-panel stat-kpi-card glow-amber rounded-3xl p-5 sm:p-6 border border-amber-200/80 bg-amber-50/40">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black uppercase tracking-wider text-amber-900">
-              In Sequential Review
-            </span>
-            <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 border border-amber-300/80 flex items-center justify-center shadow-xs">
-              <Clock className="w-5 h-5" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+          {/* KPI 1: Total Ingested */}
+          <div className="glass-panel stat-kpi-card glow-blue rounded-3xl p-5 sm:p-6 border border-white/90 bg-white/85 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+                Total Ingested
+              </span>
+              <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#0F2962] border border-blue-200/80 flex items-center justify-center shadow-xs">
+                <FileText className="w-5 h-5" />
+              </div>
             </div>
+            <div className="mt-3.5 flex items-baseline justify-between">
+              <span className="text-3xl font-black text-slate-900 tracking-tight">{stats.total}</span>
+              <span className="text-xs font-extrabold text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                <TrendingUp className="w-3 h-3" />
+                {approvalRate}% Sealed
+              </span>
+            </div>
+            <p className="mt-2 text-[11px] text-slate-400 font-medium">Immutable cryptographed records</p>
           </div>
-          <div className="mt-3.5 flex items-baseline justify-between">
-            <span className="text-3xl font-black text-amber-950 tracking-tight">{stats.pendingCoordinator + stats.pendingDirector}</span>
-            <span className="text-[10px] font-extrabold text-amber-800 bg-amber-200/70 px-2.5 py-0.5 rounded-full">
-              In Pipeline
-            </span>
-          </div>
-          <p className="mt-2 text-[11px] text-amber-800/80 font-medium">Assigned signatory flow active</p>
-        </div>
 
-        {/* KPI 3 */}
-        <div className="glass-panel stat-kpi-card glow-purple rounded-3xl p-5 sm:p-6 border border-purple-200/80 bg-purple-50/40">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black uppercase tracking-wider text-purple-900">
-              Awaiting My Turn
-            </span>
-            <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-800 border border-purple-300/80 flex items-center justify-center shadow-xs">
-              <Building2 className="w-5 h-5" />
+          {/* KPI 2: In Sequential Review */}
+          <div className="glass-panel stat-kpi-card glow-amber rounded-3xl p-5 sm:p-6 border border-amber-200/80 bg-amber-50/40 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-amber-900">
+                In Sequential Review
+              </span>
+              <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 border border-amber-300/80 flex items-center justify-center shadow-xs">
+                <Clock className="w-5 h-5" />
+              </div>
             </div>
+            <div className="mt-3.5 flex items-baseline justify-between">
+              <span className="text-3xl font-black text-amber-950 tracking-tight">{stats.pendingCoordinator + stats.pendingDirector}</span>
+              <span className="text-[10px] font-extrabold text-amber-800 bg-amber-200/70 px-2.5 py-0.5 rounded-full">
+                In Pipeline
+              </span>
+            </div>
+            <p className="mt-2 text-[11px] text-amber-800/80 font-medium">Assigned signatory flow active</p>
           </div>
-          <div className="mt-3.5 flex items-baseline justify-between">
-            <span className="text-3xl font-black text-purple-950 tracking-tight">{stats.awaitingMySignature}</span>
-            <span className="text-[10px] font-extrabold text-purple-800 bg-purple-200/70 px-2.5 py-0.5 rounded-full">
-              My Action
-            </span>
-          </div>
-          <p className="mt-2 text-[11px] text-purple-800/80 font-medium">Ready for your e-signature</p>
-        </div>
 
-        {/* KPI 4 */}
-        <div className="glass-panel stat-kpi-card glow-emerald rounded-3xl p-5 sm:p-6 border border-emerald-200/80 bg-emerald-50/40">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black uppercase tracking-wider text-emerald-900">
-              Approved & Stamped
-            </span>
-            <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 border border-emerald-300/80 flex items-center justify-center shadow-xs">
-              <CheckCircle2 className="w-5 h-5" />
+          {/* KPI 3: Awaiting My Turn */}
+          <div className="glass-panel stat-kpi-card glow-purple rounded-3xl p-5 sm:p-6 border border-purple-200/80 bg-purple-50/40 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-purple-900">
+                Awaiting My Turn
+              </span>
+              <div className="w-10 h-10 rounded-2xl bg-purple-100 text-purple-800 border border-purple-300/80 flex items-center justify-center shadow-xs">
+                <Building2 className="w-5 h-5" />
+              </div>
             </div>
+            <div className="mt-3.5 flex items-baseline justify-between">
+              <span className="text-3xl font-black text-purple-950 tracking-tight">{stats.awaitingMySignature}</span>
+              <span className="text-[10px] font-extrabold text-purple-800 bg-purple-200/70 px-2.5 py-0.5 rounded-full">
+                My Action
+              </span>
+            </div>
+            <p className="mt-2 text-[11px] text-purple-800/80 font-medium">Ready for your e-signature</p>
           </div>
-          <div className="mt-3.5 flex items-baseline justify-between">
-            <span className="text-3xl font-black text-emerald-950 tracking-tight">{stats.approved}</span>
-            <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-200/70 px-2.5 py-0.5 rounded-full">
-              Cryptosealed
-            </span>
+
+          {/* KPI 4: Approved & Stamped */}
+          <div className="glass-panel stat-kpi-card glow-emerald rounded-3xl p-5 sm:p-6 border border-emerald-200/80 bg-emerald-50/40 shadow-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-black uppercase tracking-wider text-emerald-900">
+                Approved & Stamped
+              </span>
+              <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 border border-emerald-300/80 flex items-center justify-center shadow-xs">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+            </div>
+            <div className="mt-3.5 flex items-baseline justify-between">
+              <span className="text-3xl font-black text-emerald-950 tracking-tight">{stats.approved}</span>
+              <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-200/70 px-2.5 py-0.5 rounded-full">
+                Cryptosealed
+              </span>
+            </div>
+            <p className="mt-2 text-[11px] text-emerald-800/80 font-medium">With Smart Anchor E-Signature</p>
           </div>
-          <p className="mt-2 text-[11px] text-emerald-800/80 font-medium">With Smart Anchor E-Signature</p>
         </div>
       </div>
 
@@ -430,32 +460,38 @@ export default async function DashboardPage() {
               <span className="font-bold text-slate-900">{user.fullName}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-slate-500 font-medium">Designation:</span>
-              <span className="font-bold text-[#0F2962]">{getRoleLabel(user.role)}</span>
+              <span className="text-slate-500 font-medium">Role Authority:</span>
+              <span className="font-bold text-slate-900">{getRoleLabel(user.role)}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-500 font-medium">Unit Tenancy:</span>
+              <span className="font-bold text-slate-900">{user.unitCode || "Global SAS"}</span>
             </div>
           </div>
 
           <Link
-            href="/dashboard/approvals"
-            className="w-full py-3 rounded-xl bg-linear-to-r from-[#0F2962] to-[#1E40AF] hover:from-[#091a42] hover:to-[#0F2962] text-white text-xs font-bold text-center shadow-md hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-98"
+            href="/dashboard/profile"
+            className="w-full py-3 rounded-xl bg-white border border-slate-300 hover:bg-blue-50 hover:text-[#0F2962] hover:border-blue-300 text-slate-700 text-xs font-bold text-center block transition shadow-xs cursor-pointer hover:-translate-y-0.5 active:scale-98"
           >
-            Manage Review Queue
+            Manage Signature Profile
           </Link>
         </div>
       </div>
 
-      {/* Recent Submissions Table */}
-      <div className="glass-panel rounded-3xl border border-white/90 overflow-hidden shadow-sm">
-        <div className="px-6 py-5 border-b border-slate-200/80 flex items-center justify-between bg-white/80">
+      {/* Tertiary Section: Recent Audit Ingestions Table */}
+      <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-white/90 space-y-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-4">
           <div>
-            <h2 className="text-sm sm:text-base font-black text-slate-900">Recent Document Ingestions</h2>
-            <p className="text-xs text-slate-500 font-medium">Tracking sequential pipeline state and active version pointers</p>
+            <h2 className="text-sm font-black uppercase tracking-wider text-slate-900">
+              Recent Repository Ingestions
+            </h2>
+            <p className="text-xs text-slate-500 font-medium">Audit registry of documents across SAS tenancy</p>
           </div>
           <Link
             href="/dashboard/documents"
-            className="text-xs font-bold text-[#0F2962] hover:text-blue-700 hover:underline flex items-center gap-1.5 transition"
+            className="text-xs font-bold text-[#0F2962] hover:text-blue-700 transition flex items-center gap-1 self-start sm:self-auto"
           >
-            <span>View Full Repository</span>
+            <span>View Complete Repository</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -487,25 +523,37 @@ export default async function DashboardPage() {
                 </tr>
               ) : (
                 recentDocs.map((doc) => (
-                  <tr key={doc.id} className="hover:bg-blue-50/50 transition-colors duration-150">
+                  <tr
+                    key={doc.id}
+                    className={`transition-colors duration-150 group ${
+                      doc.isEscalated
+                        ? "bg-rose-50/40 hover:bg-rose-50/70 border-l-4 border-l-rose-500"
+                        : "hover:bg-blue-50/50"
+                    }`}
+                  >
                     <td className="py-3 px-3 sm:py-4 sm:px-6">
                       <CopyTrackingButton trackingNumber={doc.trackingNumber} />
                     </td>
                     <td className="py-3 px-3 sm:py-4 sm:px-6">
-                      <span className="font-bold text-slate-900 block truncate max-w-35 xs:max-w-xs sm:max-w-md">
+                      <Link
+                        href={`/dashboard/documents/${doc.id}`}
+                        className="font-bold text-slate-900 block truncate max-w-35 xs:max-w-xs sm:max-w-md group-hover:text-[#0F2962] transition-colors"
+                      >
                         {doc.title}
-                      </span>
+                      </Link>
                       {doc.isEscalated && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 mt-0.5">
-                          <AlertTriangle className="w-3 h-3 shrink-0" />
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 mt-0.5 bg-rose-100/80 px-2 py-0.2 rounded-md border border-rose-200">
+                          <AlertTriangle className="w-3 h-3 shrink-0 text-rose-600" />
                           <span>Escalated (Rejections: {doc.rejectionCount})</span>
                         </span>
                       )}
                     </td>
                     <td className="hidden sm:table-cell py-3 px-3 sm:py-4 sm:px-6 font-medium text-slate-600">
-                      {doc.unit?.code || "GENERAL"}
+                      <span className="px-2 py-0.5 rounded bg-slate-100 font-mono font-bold text-[11px]">
+                        {doc.unit?.code || "GENERAL"}
+                      </span>
                     </td>
-                    <td className="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6 text-slate-600">
+                    <td className="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6 text-slate-600 font-medium">
                       {doc.uploader ? `${doc.uploader.firstName} ${doc.uploader.lastName}` : "Staff Member"}
                     </td>
                     <td className="py-3 px-3 sm:py-4 sm:px-6">
@@ -516,7 +564,7 @@ export default async function DashboardPage() {
                     <td className="py-3 px-3 sm:py-4 sm:px-6 text-right">
                       <Link
                         href={`/dashboard/documents/${doc.id}`}
-                        className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl border border-slate-300 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block"
+                        className="px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border border-slate-300 hover:bg-[#0F2962] hover:text-white hover:border-[#0F2962] text-slate-700 text-xs font-bold transition-all shadow-xs inline-block hover:-translate-y-0.5 active:scale-98"
                       >
                         Details
                       </Link>

@@ -456,9 +456,9 @@ export default function RegisterForm({ units }: { units: UnitOption[] }) {
       {/* Footer Return Link */}
       <div className="mt-3 pt-2.5 border-t border-slate-800/80 text-center">
         <p className="text-xs text-slate-400 font-medium">
-          Already registered?{" "}
+          Already have an account?{" "}
           <Link href="/login" className="font-bold text-amber-400 hover:text-amber-300 hover:underline transition ml-1">
-            Sign In to Portal
+            Sign In
           </Link>
         </p>
       </div>

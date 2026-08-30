@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  PenLine,
   Menu,
   X,
   Home,
@@ -32,7 +31,6 @@ import { signOutAction } from "@/actions/auth";
 import { getRoleLabel } from "@/lib/status-labels";
 import dynamic from "next/dynamic";
 
-const SignaturePadModal = dynamic(() => import("@/components/SignaturePadModal"), { ssr: false });
 const QuickSearchModal = dynamic(() => import("@/components/QuickSearchModal"), { ssr: false });
 import NotificationBell from "@/components/NotificationBell";
 
@@ -63,7 +61,6 @@ interface DashboardHeaderProps {
 export default function DashboardHeader({ user }: DashboardHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
   const [isQuickSearchOpen, setIsQuickSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -110,27 +107,27 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
       (prev === "documents" && last !== "new");
 
     if (isId) {
-      if (prev === "documents") return "Document Inspector";
+      if (prev === "documents") return "Document Details";
       if (prev === "users") return "User Account Details";
-      if (prev === "units") return "Unit Specifications";
+      if (prev === "units") return "Unit Details";
       return "Record Details";
     }
 
     const routeMap: Record<string, string> = {
       dashboard: "Overview",
-      documents: "Document Repository",
-      new: "Document Ingestion",
-      approvals: "Sequential Approvals",
-      profile: "My Profile & E-Signature",
+      documents: "Documents",
+      new: "New Document",
+      approvals: "Approvals",
+      profile: "Profile & Settings",
       admin: "Administration",
-      users: "User Governance",
+      users: "Users",
       units: "Department Units",
-      "document-types": "Document Classification Catalog",
-      delegations: "Signatory Delegations",
-      "documents-override": "Governance State Overrides",
-      audit: "RA 10173 Audit Explorer",
-      notifications: "System Notifications Queue",
-      settings: "System Governance Parameters",
+      "document-types": "Document Types",
+      delegations: "Delegations",
+      "documents-override": "Document Overrides",
+      audit: "Audit Logs",
+      notifications: "Notifications",
+      settings: "System Settings",
     };
 
     if (routeMap[last]) return routeMap[last];
@@ -158,21 +155,20 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
 
   const navLinks = [
     { label: "Overview", href: "/dashboard", icon: LayoutDashboard, roles: ["STAFF", "COORDINATOR", "DIRECTOR", "ADMIN"] },
-    { label: "Document Ingestion", href: "/dashboard/documents/new", icon: FilePlus2, roles: ["STAFF", "COORDINATOR", "DIRECTOR", "ADMIN"] },
-    { label: "Document Repository", href: "/dashboard/documents", icon: FileText, roles: ["STAFF", "COORDINATOR", "DIRECTOR", "ADMIN"] },
-    { label: "Sequential Approvals", href: "/dashboard/approvals", icon: CheckSquare, roles: ["COORDINATOR", "DIRECTOR", "ADMIN"] },
-    { label: "My Profile & E-Sign", href: "/dashboard/profile", icon: User, roles: ["STAFF", "COORDINATOR", "DIRECTOR", "ADMIN"] },
+    { label: "Documents", href: "/dashboard/documents", icon: FileText, roles: ["STAFF", "COORDINATOR", "DIRECTOR", "ADMIN"] },
+    { label: "Approvals", href: "/dashboard/approvals", icon: CheckSquare, roles: ["COORDINATOR", "DIRECTOR", "ADMIN"] },
+    { label: "Profile & Settings", href: "/dashboard/profile", icon: User, roles: ["STAFF", "COORDINATOR", "DIRECTOR", "ADMIN"] },
   ];
 
   const adminLinks = [
-    { label: "User Governance", href: "/dashboard/admin/users", icon: Users },
+    { label: "Users", href: "/dashboard/admin/users", icon: Users },
     { label: "Department Units", href: "/dashboard/admin/units", icon: Building2 },
     { label: "Document Types", href: "/dashboard/admin/document-types", icon: FileCode2 },
-    { label: "Authority Delegation", href: "/dashboard/admin/delegations", icon: FileCheck2 },
+    { label: "Delegations", href: "/dashboard/admin/delegations", icon: FileCheck2 },
     { label: "Document Overrides", href: "/dashboard/admin/documents-override", icon: Wrench },
-    { label: "RA 10173 Audit Explorer", href: "/dashboard/admin/audit", icon: ShieldCheck },
-    { label: "System Notifications", href: "/dashboard/admin/notifications", icon: BellRing },
-    { label: "System Parameters", href: "/dashboard/admin/settings", icon: Sliders },
+    { label: "Audit Logs", href: "/dashboard/admin/audit", icon: ShieldCheck },
+    { label: "Notifications", href: "/dashboard/admin/notifications", icon: BellRing },
+    { label: "System Settings", href: "/dashboard/admin/settings", icon: Sliders },
   ];
 
   return (
@@ -182,7 +178,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none shrink-0"
+            className="lg:hidden p-2.5 rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none shrink-0"
             aria-label="Toggle Navigation"
           >
             {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -191,7 +187,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-semibold text-slate-500 min-w-0">
             <Link href="/dashboard" className="hidden sm:flex items-center gap-1.5 text-slate-400 hover:text-slate-700 transition focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none rounded-lg p-0.5 shrink-0">
               <Home className="w-3.5 h-3.5" />
-              <span>Portal</span>
+              <span>Home</span>
             </Link>
             <ChevronRight className="hidden sm:inline w-3.5 h-3.5 text-slate-300 shrink-0" />
             <span
@@ -207,8 +203,8 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
         <button
           type="button"
           onClick={() => setIsQuickSearchOpen(true)}
-          className="hidden md:flex items-center gap-2.5 px-3.5 py-2 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100/80 text-slate-400 hover:text-slate-700 text-xs font-medium transition-all shadow-inner cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none"
-          title="Quick search tracking numbers and shortcuts (Ctrl+K)"
+          className="hidden md:flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100/80 text-slate-400 hover:text-slate-700 text-xs font-medium transition-all shadow-inner cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none"
+          title="Quick search documents, units, and shortcuts (Ctrl+K)"
         >
           <Search className="w-3.5 h-3.5 text-slate-400" />
           <span className="w-44 text-left truncate text-[11px] text-slate-500 font-medium">Quick search...</span>
@@ -217,13 +213,13 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           </kbd>
         </button>
 
-        {/* Right: Signature Indicator & Profile Summary */}
-        <div className="flex items-center gap-1.5 sm:gap-3.5 shrink-0">
+        {/* Right: Notifications, Audio & User Profile */}
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {/* Mobile search icon button */}
           <button
             type="button"
             onClick={() => setIsQuickSearchOpen(true)}
-            className="md:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none shrink-0"
+            className="md:hidden p-2.5 rounded-xl text-slate-500 hover:bg-slate-100 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none shrink-0"
             title="Search"
             aria-label="Open Search"
           >
@@ -237,8 +233,8 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           <button
             type="button"
             onClick={toggleAudio}
-            className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition cursor-pointer border border-transparent hover:border-slate-200 hidden sm:flex items-center justify-center shrink-0"
-            title={isAudioMuted ? "Notification chimes muted (Click to enable)" : "Notification chimes enabled (Click to mute)"}
+            className="p-2.5 rounded-xl text-slate-500 hover:bg-slate-100 transition cursor-pointer border border-transparent hover:border-slate-200 hidden sm:flex items-center justify-center shrink-0"
+            title={isAudioMuted ? "Audio alerts muted (Click to enable)" : "Audio alerts enabled (Click to mute)"}
             aria-label="Toggle audio alerts"
           >
             {isAudioMuted ? (
@@ -248,45 +244,24 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
             )}
           </button>
 
-          {/* Quick Approvals Action Shortcut */}
-          <Link
-            href="/dashboard/approvals"
-            className="hidden sm:flex p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition items-center gap-1.5 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] shrink-0"
-            title="View sequential approval action items"
-          >
-            <CheckSquare className="w-3.5 h-3.5 text-[#0F2962]" />
-            <span>Approvals</span>
-          </Link>
-
-          <button
-            onClick={() => setIsSignatureModalOpen(true)}
-            className={`px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl border text-xs font-bold transition-all duration-200 flex items-center gap-1.5 sm:gap-2 shadow-xs hover:-translate-y-0.5 active:scale-98 cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none shrink-0 ${
-              hasSignature
-                ? "bg-emerald-50/80 border-emerald-200/80 text-emerald-800 hover:bg-emerald-100"
-                : "bg-amber-50/80 border-amber-200/80 text-amber-900 hover:bg-amber-100"
-            }`}
-            title="Manage institutional electronic signature"
-          >
-            <PenLine className="w-3.5 h-3.5 text-[#0F2962] shrink-0" />
-            <span className="hidden xs:inline sm:inline">My E-Signature</span>
-            <span className="inline xs:hidden">E-Sign</span>
-            {hasSignature ? (
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="Active signature on file" />
-            ) : (
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" title="Signature required" />
-            )}
-          </button>
-
           <div className="h-5 w-px bg-slate-200 hidden sm:block shrink-0" />
 
           {/* User Identity Chip */}
           <Link
             href="/dashboard/profile"
-            className="flex items-center gap-2 hover:opacity-90 transition group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none rounded-xl p-1 shrink-0"
-            title="View profile & settings"
+            className="flex items-center gap-2 hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all group cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] focus-visible:outline-none rounded-xl p-1.5 shrink-0"
+            title="View Profile & Settings"
           >
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center border border-blue-900 shadow-md shrink-0">
-              {user.fullName.charAt(0)}
+            <div className="relative">
+              <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-xl bg-linear-to-br from-[#0F2962] to-[#1E40AF] text-amber-400 font-black text-xs flex items-center justify-center border border-blue-900 shadow-xs shrink-0">
+                {user.fullName.charAt(0)}
+              </div>
+              {!hasSignature && (
+                <span
+                  className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-500 border-2 border-white rounded-full animate-pulse"
+                  title="E-Signature setup required"
+                />
+              )}
             </div>
             <div className="hidden md:block text-left leading-tight">
               <span className="font-bold text-xs text-slate-900 block truncate max-w-36 group-hover:text-[#0F2962]">
@@ -327,18 +302,25 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               </div>
               <button
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-900 transition"
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-900 transition cursor-pointer"
                 aria-label="Close navigation"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
+            {/* Mobile New Document Button */}
+            <Link
+              href="/dashboard/documents/new"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="flex items-center justify-center gap-2 w-full py-3 px-3 rounded-xl font-bold text-xs bg-linear-to-r from-amber-400 via-amber-300 to-yellow-400 text-slate-950 shadow-md shadow-amber-400/20 active:scale-98 transition"
+            >
+              <FilePlus2 className="w-4 h-4 text-slate-950" />
+              <span>New Document</span>
+            </Link>
+
             <div className="flex-1 overflow-y-auto space-y-4 dark-scroll">
               <div className="space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 px-3 block mb-1">
-                  Menu
-                </span>
                 {navLinks
                   .filter((link) => link.roles.includes(user.role))
                   .map((link) => {
@@ -349,7 +331,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                         key={link.href}
                         href={link.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition ${
+                        className={`flex items-center gap-3 px-3 py-3 rounded-xl text-xs font-bold transition ${
                           isActive
                             ? "bg-[#0F2962] text-white border border-blue-400/40"
                             : "text-slate-400 hover:bg-slate-900 hover:text-white"
@@ -375,7 +357,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
                         key={link.href}
                         href={link.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold transition ${
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold transition ${
                           isActive
                             ? "bg-[#0F2962] text-white border border-blue-400/40"
                             : "text-slate-400 hover:bg-slate-900 hover:text-white"
@@ -394,7 +376,7 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
               <button
                 onClick={handleSignOut}
                 disabled={isSigningOut}
-                className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 text-xs font-bold flex items-center justify-center gap-2 border border-slate-800 transition"
+                className="w-full py-3 rounded-xl bg-slate-900 hover:bg-rose-950/40 text-slate-300 hover:text-rose-300 text-xs font-bold flex items-center justify-center gap-2 border border-slate-800 transition cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
                 <span>{isSigningOut ? "Signing out..." : "Sign Out"}</span>
@@ -403,16 +385,6 @@ export default function DashboardHeader({ user }: DashboardHeaderProps) {
           </div>
         </div>
       )}
-
-      {/* Signature Pad Modal */}
-      <SignaturePadModal
-        isOpen={isSignatureModalOpen}
-        onClose={() => setIsSignatureModalOpen(false)}
-        onSignatureSaved={() => {
-          setIsSignatureModalOpen(false);
-          router.refresh();
-        }}
-      />
 
       {/* Quick Search / Command Palette Modal */}
       <QuickSearchModal
