@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 import DocumentDetailActions from "@/components/DocumentDetailActions";
 import LiveDocumentViewer from "@/components/LiveDocumentViewer";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
@@ -27,7 +28,7 @@ import {
   RotateCcw,
   XCircle,
 } from "lucide-react";
-import { DocumentStatus, ApprovalActionType, UserRole, UserStatus } from "@prisma/client";
+import { DocumentStatus, ApprovalActionType, UserRole } from "@prisma/client";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -93,20 +94,10 @@ export const dynamic = "force-dynamic";
 
 export default async function DocumentDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const currentUser: AuthenticatedUser = (await getAuthenticatedUser()) || {
-    id: "demo-coordinator-user",
-    email: "coordinator.career@firstasia.edu.ph",
-    firstName: "Maria",
-    lastName: "Santos",
-    fullName: "Maria Santos",
-    employeeId: "EMP-COORD-001",
-    role: UserRole.COORDINATOR,
-    status: UserStatus.ACTIVE,
-    unitId: "demo-unit-career",
-    unitCode: "CAREER",
-    unitName: "Career Services & Placement",
-    signaturePath: null,
-  };
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    redirect("/login");
+  }
 
   let doc: DocumentDetail | null = null;
   let isAccessDenied = false;

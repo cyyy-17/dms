@@ -1,5 +1,6 @@
+import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
-import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 import DocumentUploadForm from "@/components/DocumentUploadForm";
 
 interface DocTypeOption {
@@ -19,20 +20,10 @@ interface UnitOption {
 export const dynamic = "force-dynamic";
 
 export default async function NewDocumentPage() {
-  const user: AuthenticatedUser = (await getAuthenticatedUser()) || {
-    id: "demo-staff-user",
-    email: "staff.career@firstasia.edu.ph",
-    firstName: "Juan",
-    lastName: "Dela Cruz",
-    fullName: "Juan Dela Cruz",
-    employeeId: "EMP-STAFF-001",
-    role: "STAFF",
-    status: "ACTIVE",
-    unitId: "demo-unit-career",
-    unitCode: "CAREER",
-    unitName: "Career Services & Placement",
-    signaturePath: null,
-  };
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   let docTypes: DocTypeOption[] = [];
   let units: UnitOption[] = [];

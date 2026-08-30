@@ -8,6 +8,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
 import { queueNotification } from "@/lib/notifications";
 import { generateTrackingNumber, STORAGE_BUCKETS } from "@/lib/constants";
+import { checkRateLimit, RATE_LIMIT_PRESETS } from "@/lib/rate-limit";
 import { DocumentStatus, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 
@@ -68,6 +69,19 @@ export async function createDocumentAction(input: CreateDocumentInput): Promise<
   const currentUser = await getAuthenticatedUser();
   if (!currentUser) {
     return { success: false, error: "Unauthorized. Please log in." };
+  }
+
+  // Rate Limiting Guard
+  const rl = checkRateLimit(
+    `doc_create:${currentUser.id}`,
+    RATE_LIMIT_PRESETS.DOCUMENT_INGESTION.limit,
+    RATE_LIMIT_PRESETS.DOCUMENT_INGESTION.windowMs
+  );
+  if (!rl.success) {
+    return {
+      success: false,
+      error: "Document creation rate limit exceeded. Please wait before submitting more documents.",
+    };
   }
 
   // If in local preview mode without live Postgres
@@ -258,6 +272,19 @@ export async function createDocumentVersionAction(input: CreateVersionInput): Pr
   const currentUser = await getAuthenticatedUser();
   if (!currentUser) {
     return { success: false, error: "Unauthorized. Please log in." };
+  }
+
+  // Rate Limiting Guard
+  const rl = checkRateLimit(
+    `doc_version:${currentUser.id}`,
+    RATE_LIMIT_PRESETS.DOCUMENT_INGESTION.limit,
+    RATE_LIMIT_PRESETS.DOCUMENT_INGESTION.windowMs
+  );
+  if (!rl.success) {
+    return {
+      success: false,
+      error: "Version upload rate limit exceeded. Please wait before uploading more versions.",
+    };
   }
 
   if (!isDatabaseConfigured) {
@@ -706,6 +733,17 @@ export async function verifyTrackingTokenAction(trackingNumberOrId: string): Pro
       return { success: false, error: "No document matching this tracking number was found." };
     }
 
+    const currentUser = await getAuthenticatedUser();
+    const isInternal = !!currentUser;
+    const sanitizedUploader = doc.uploader
+      ? isInternal
+        ? doc.uploader
+        : {
+            firstName: `${doc.uploader.firstName.slice(0, 1)}***`,
+            lastName: `${doc.uploader.lastName.slice(0, 1)}***`,
+          }
+      : null;
+
     return {
       success: true,
       isValid: true,
@@ -715,7 +753,7 @@ export async function verifyTrackingTokenAction(trackingNumberOrId: string): Pro
         title: doc.title,
         status: doc.status,
         unit: doc.unit,
-        uploader: doc.uploader,
+        uploader: sanitizedUploader,
         currentVersion: doc.currentVersion,
         updatedAt: doc.updatedAt,
       },
@@ -768,15 +806,20 @@ export async function getSignedDocumentUrlAction(
         targetDoc = version?.document || null;
       }
 
-      if (targetDoc) {
-        const isAuthorized =
-          targetDoc.unitId === currentUser.unitId ||
-          targetDoc.uploaderId === currentUser.id ||
-          targetDoc.currentSignatoryId === currentUser.id;
+      if (!targetDoc) {
+        return {
+          success: false,
+          error: "Access denied. Target document record could not be verified.",
+        };
+      }
 
-        if (!isAuthorized) {
-          return { success: false, error: "Access denied. Cross-unit document download is strictly restricted." };
-        }
+      const isAuthorized =
+        targetDoc.unitId === currentUser.unitId ||
+        targetDoc.uploaderId === currentUser.id ||
+        targetDoc.currentSignatoryId === currentUser.id;
+
+      if (!isAuthorized) {
+        return { success: false, error: "Access denied. Cross-unit document download is strictly restricted." };
       }
     }
 

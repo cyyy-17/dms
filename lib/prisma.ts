@@ -25,11 +25,17 @@ function createPrismaClient() {
 
   // In serverless / Supabase environments, keep connection pool small (max 2) per worker
   // and short idle timeout to prevent exhausting Supabase pool_size: 15
+  const sslConfig = isCloud
+    ? process.env.SUPABASE_SSL_CA
+      ? { rejectUnauthorized: true, ca: process.env.SUPABASE_SSL_CA }
+      : { rejectUnauthorized: false }
+    : undefined;
+
   const pool =
     globalForPrisma.pool ??
     new Pool({
       connectionString,
-      ssl: isCloud ? { rejectUnauthorized: false } : undefined,
+      ssl: sslConfig,
       max: isCloud ? 2 : 10,
       idleTimeoutMillis: 5000,
       connectionTimeoutMillis: 10000,

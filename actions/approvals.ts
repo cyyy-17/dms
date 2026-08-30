@@ -344,6 +344,19 @@ export async function rejectReturnAction(input: RejectionInput): Promise<{
       return { success: false, error: "Document not found." };
     }
 
+    // Strict RBAC & Tenancy Authorization Guard
+    const isAssigned = doc.currentSignatoryId === currentUser.id;
+    const isCoordinatorOfUnit = currentUser.role === "COORDINATOR" && currentUser.unitId === doc.unitId;
+    const isDirectorOrAdmin = currentUser.role === "DIRECTOR" || currentUser.role === "ADMIN";
+    const isDelegate = await checkActiveDelegation(currentUser.id, doc.unitId);
+
+    if (!isAssigned && !isCoordinatorOfUnit && !isDirectorOrAdmin && !isDelegate) {
+      return {
+        success: false,
+        error: "Access denied. You are not authorized to return this document for revision.",
+      };
+    }
+
     const newRejectionCount = doc.rejectionCount + 1;
     const isEscalatedNow = newRejectionCount >= AUTO_ESCALATION_REJECTION_THRESHOLD;
 
@@ -463,6 +476,18 @@ export async function rejectCloseAction(input: RejectionInput): Promise<{
 
     if (!doc || !doc.currentVersion) {
       return { success: false, error: "Document not found." };
+    }
+
+    // Strict RBAC & Tenancy Authorization Guard for Termination
+    const isCoordinatorOfUnit = currentUser.role === "COORDINATOR" && currentUser.unitId === doc.unitId;
+    const isDirectorOrAdmin = currentUser.role === "DIRECTOR" || currentUser.role === "ADMIN";
+    const isDelegate = await checkActiveDelegation(currentUser.id, doc.unitId);
+
+    if (!isCoordinatorOfUnit && !isDirectorOrAdmin && !isDelegate) {
+      return {
+        success: false,
+        error: "Access denied. Only unit coordinators, directors, or administrators can terminate documents.",
+      };
     }
 
     await prisma.$transaction(async (tx) => {

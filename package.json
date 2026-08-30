@@ -8,7 +8,7 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx scripts/test-workflow.ts && tsx scripts/test-batch1-verification.ts && tsx scripts/test-batch2-verification.ts && tsx scripts/test-batch3-verification.ts && tsx scripts/test-batch4-verification.ts && tsx scripts/test-batch5-verification.ts && tsx scripts/test-batch6-verification.ts && tsx scripts/test-batch7-verification.ts && tsx scripts/test-batch8-verification.ts && tsx scripts/test-batch9-verification.ts && tsx scripts/test-final-verification.ts"
+    "test": "tsx scripts/test-workflow.ts && tsx scripts/test-batch1-verification.ts && tsx scripts/test-batch2-verification.ts && tsx scripts/test-batch3-verification.ts && tsx scripts/test-batch4-verification.ts && tsx scripts/test-batch5-verification.ts && tsx scripts/test-batch6-verification.ts && tsx scripts/test-batch7-verification.ts && tsx scripts/test-batch8-verification.ts && tsx scripts/test-batch9-verification.ts && tsx scripts/test-final-verification.ts && tsx scripts/test-security-remediation.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",

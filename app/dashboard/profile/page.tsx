@@ -1,4 +1,5 @@
 import { getAuthenticatedUser } from "@/lib/auth/session";
+import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import ProfileClient from "@/components/ProfileClient";
 import {
@@ -12,25 +13,9 @@ import { DocumentStatus } from "@prisma/client";
 export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
-  let user = await getAuthenticatedUser();
+  const user = await getAuthenticatedUser();
   if (!user) {
-    user = {
-      id: "demo-admin-user",
-      email: "admin@firstasia.edu.ph",
-      firstName: "System",
-      middleName: null,
-      lastName: "Administrator",
-      suffix: null,
-      title: "System Administrator",
-      fullName: "System Administrator",
-      employeeId: "EMP-ADMIN-001",
-      role: "ADMIN",
-      status: "ACTIVE",
-      unitId: null,
-      unitCode: "ADMIN",
-      unitName: "System Administration",
-      signaturePath: null,
-    };
+    redirect("/login");
   }
 
   // Stats for the profile card

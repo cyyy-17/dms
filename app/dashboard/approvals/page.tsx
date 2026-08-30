@@ -1,6 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
-import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 import { getStatusLabel, getStatusBadgeClass, formatHumanDate } from "@/lib/status-labels";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
 import { calculateSlaStatus } from "@/lib/sla";
@@ -42,20 +43,10 @@ interface ApprovalQueueItem {
 export const dynamic = "force-dynamic";
 
 export default async function ApprovalQueuePage() {
-  const user: AuthenticatedUser = (await getAuthenticatedUser()) || {
-    id: "demo-admin-user",
-    email: "admin@firstasia.edu.ph",
-    firstName: "System",
-    lastName: "Administrator",
-    fullName: "System Administrator",
-    employeeId: "EMP-ADMIN-001",
-    role: "ADMIN",
-    status: "ACTIVE",
-    unitId: null,
-    unitCode: "ADMIN",
-    unitName: "System Administration",
-    signaturePath: null,
-  };
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   const isDirectorOrAdmin = user.role === "DIRECTOR" || user.role === "ADMIN";
 

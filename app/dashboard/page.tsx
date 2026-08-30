@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
-import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 import { getStatusLabel, getStatusBadgeClass, getRoleLabel } from "@/lib/status-labels";
 import CopyTrackingButton from "@/components/CopyTrackingButton";
 import DataTableWrapper from "@/components/DataTableWrapper";
@@ -23,20 +24,10 @@ import { DocumentStatus } from "@prisma/client";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const user: AuthenticatedUser = (await getAuthenticatedUser()) || {
-    id: "demo-admin-user",
-    email: "admin@firstasia.edu.ph",
-    firstName: "System",
-    lastName: "Administrator",
-    fullName: "System Administrator",
-    employeeId: "EMP-ADMIN-001",
-    role: "ADMIN",
-    status: "ACTIVE",
-    unitId: null,
-    unitCode: "ADMIN",
-    unitName: "System Administration",
-    signaturePath: null,
-  };
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   let stats = {
     total: 0,

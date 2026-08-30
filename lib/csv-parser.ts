@@ -20,6 +20,35 @@ export interface ParseResult {
 }
 
 /**
+ * RFC 4180 compliant CSV line tokenizer
+ * Handles quoted cells, escaped quotes (""), and commas inside quotes
+ */
+export function parseCsvLine(text: string): string[] {
+  const result: string[] = [];
+  let cur = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === '"') {
+      if (inQuotes && text[i + 1] === '"') {
+        cur += '"';
+        i++; // skip next escaped quote
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (ch === "," && !inQuotes) {
+      result.push(cur.trim());
+      cur = "";
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+/**
  * Parses and validates CSV string for bulk user creation.
  * Supported headers: firstName, lastName, email, role, unitCode, middleName, suffix, title, employeeId, password
  */
@@ -33,9 +62,9 @@ export function parseUsersCsv(csvContent: string): ParseResult {
     return { validRows: [], errors: [{ row: 0, message: "CSV file is empty." }] };
   }
 
-  // Parse header
+  // Parse header with RFC 4180 tokenizer
   const headerLine = lines[0];
-  const headers = headerLine.split(",").map((h) => h.trim().toLowerCase());
+  const headers = parseCsvLine(headerLine).map((h) => h.toLowerCase());
 
   const getCol = (hName: string) => headers.indexOf(hName.toLowerCase());
 
@@ -71,7 +100,7 @@ export function parseUsersCsv(csvContent: string): ParseResult {
 
   for (let i = 1; i < lines.length; i++) {
     const rowNumber = i + 1;
-    const row = lines[i].split(",").map((c) => c.trim().replace(/^["']|["']$/g, ""));
+    const row = parseCsvLine(lines[i]);
 
     if (row.length === 0 || row.every((c) => c === "")) continue;
 

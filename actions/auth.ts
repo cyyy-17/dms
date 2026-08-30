@@ -9,6 +9,8 @@ import { INSTITUTION_EMAIL_DOMAIN } from "@/lib/constants";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import { checkRateLimit, RATE_LIMIT_PRESETS } from "@/lib/rate-limit";
 import crypto from "crypto";
 
 export interface RegisterInput {
@@ -39,6 +41,28 @@ export async function registerEmployee(input: RegisterInput): Promise<{
       success: false,
       error: `Registration is restricted exclusively to official institutional email addresses ending in ${INSTITUTION_EMAIL_DOMAIN}.`,
     };
+  }
+
+  // Rate Limiting Guard
+  try {
+    const headerList = await headers();
+    const clientIp =
+      headerList.get("x-forwarded-for")?.split(",")[0].trim() ||
+      headerList.get("x-real-ip") ||
+      "127.0.0.1";
+    const rl = checkRateLimit(
+      `register:${clientIp}`,
+      RATE_LIMIT_PRESETS.AUTH_ATTEMPT.limit,
+      RATE_LIMIT_PRESETS.AUTH_ATTEMPT.windowMs
+    );
+    if (!rl.success) {
+      return {
+        success: false,
+        error: "Too many registration attempts. Please wait a minute before trying again.",
+      };
+    }
+  } catch {
+    // Non-blocking fallback
   }
 
   // 2. If running in local preview mode without live Postgres credentials
@@ -196,6 +220,28 @@ export async function loginEmployee(formData: {
     };
   }
 
+  // Rate Limiting Guard
+  try {
+    const headerList = await headers();
+    const clientIp =
+      headerList.get("x-forwarded-for")?.split(",")[0].trim() ||
+      headerList.get("x-real-ip") ||
+      "127.0.0.1";
+    const rl = checkRateLimit(
+      `login:${clientIp}:${normalizedEmail}`,
+      RATE_LIMIT_PRESETS.AUTH_ATTEMPT.limit,
+      RATE_LIMIT_PRESETS.AUTH_ATTEMPT.windowMs
+    );
+    if (!rl.success) {
+      return {
+        success: false,
+        error: "Too many login attempts. Please wait a minute before trying again.",
+      };
+    }
+  } catch {
+    // Non-blocking fallback
+  }
+
   // Check if live database credentials are present
   if (!isDatabaseConfigured) {
     return {
@@ -346,6 +392,23 @@ export async function getSignedSignatureUrlAction(storagePath: string): Promise<
   signedUrl?: string;
   error?: string;
 }> {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    return { success: false, error: "Unauthorized. Please log in." };
+  }
+
+  // Authorization & Tenancy Guard:
+  // User can access their own signature, or Directors/Admins/Signatories reviewing associated workflows
+  const isOwnSignature = storagePath.includes(`signatures/${currentUser.id}/`);
+  const isPrivileged = currentUser.role === "ADMIN" || currentUser.role === "DIRECTOR";
+
+  if (!isOwnSignature && !isPrivileged) {
+    return {
+      success: false,
+      error: "Access denied. You do not have permission to view this signature asset.",
+    };
+  }
+
   try {
     const { data, error } = await supabaseAdmin.storage
       .from("signatures-private")
@@ -464,7 +527,7 @@ export async function updateUserProfileDetailsAction(input: {
  * Update Self Password with Mandatory Auto-Logout
  */
 export async function updateUserPasswordAction(input: {
-  currentPassword?: string;
+  currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }): Promise<{
@@ -479,6 +542,10 @@ export async function updateUserPasswordAction(input: {
 
   const { currentPassword, newPassword, confirmPassword } = input;
 
+  if (!currentPassword) {
+    return { success: false, error: "Current password is strictly required to update your credentials." };
+  }
+
   if (!newPassword || newPassword.length < 8) {
     return { success: false, error: "New password must contain at least 8 characters." };
   }
@@ -490,16 +557,14 @@ export async function updateUserPasswordAction(input: {
   try {
     const supabase = await createClient();
 
-    // Verify current password if provided
-    if (currentPassword) {
-      const { error: verifyError } = await supabase.auth.signInWithPassword({
-        email: currentUser.email,
-        password: currentPassword,
-      });
+    // Mandatory current password verification against Supabase Auth
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: currentUser.email,
+      password: currentPassword,
+    });
 
-      if (verifyError) {
-        return { success: false, error: "Current password verification failed. Please check your credentials." };
-      }
+    if (verifyError) {
+      return { success: false, error: "Current password verification failed. Please check your credentials." };
     }
 
     // Update password via Supabase Admin

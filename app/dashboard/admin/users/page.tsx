@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
-import { getAuthenticatedUser, AuthenticatedUser } from "@/lib/auth/session";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 import AdminUserManagement from "@/components/AdminUserManagement";
 import { Users, ShieldAlert } from "lucide-react";
 import { UserRole, UserStatus } from "@prisma/client";
@@ -30,20 +30,10 @@ interface UnitItem {
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage() {
-  const currentUser: AuthenticatedUser = (await getAuthenticatedUser()) || {
-    id: "demo-admin-user",
-    email: "admin@firstasia.edu.ph",
-    firstName: "System",
-    lastName: "Administrator",
-    fullName: "System Administrator",
-    employeeId: "EMP-ADMIN-001",
-    role: UserRole.ADMIN,
-    status: UserStatus.ACTIVE,
-    unitId: null,
-    unitCode: null,
-    unitName: null,
-    signaturePath: null,
-  };
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser) {
+    redirect("/login");
+  }
 
   if (currentUser.role !== UserRole.ADMIN) {
     redirect("/dashboard");

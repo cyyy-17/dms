@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma, isDatabaseConfigured } from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/auth/session";
 import { queueNotification } from "@/lib/notifications";
 import { DocumentStatus } from "@prisma/client";
 
@@ -18,6 +19,11 @@ export async function checkExpiringDocumentsAction(): Promise<{
   result?: DocumentExpiryAlertResult;
   error?: string;
 }> {
+  const currentUser = await getAuthenticatedUser();
+  if (!currentUser || (currentUser.role !== "ADMIN" && currentUser.role !== "DIRECTOR")) {
+    return { success: false, error: "Unauthorized. Admin or Director privileges required." };
+  }
+
   if (!isDatabaseConfigured) {
     return {
       success: true,
