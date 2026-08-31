@@ -51,13 +51,11 @@ export default function LoginForm() {
         return;
       }
 
-      router.prefetch("/dashboard");
-
       if (res.user) {
         setAuthUserData(res.user);
+        router.push("/dashboard");
       } else {
         router.push("/dashboard");
-        router.refresh();
       }
     } catch (err: unknown) {
       console.error("[LOGIN_PAGE_ERROR]", err);

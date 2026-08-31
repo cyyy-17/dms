@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { ShieldCheck, Lock, Cpu, Sparkles, CheckCircle2 } from "lucide-react";
+import { ShieldCheck, Lock, Cpu, Sparkles, CheckCircle2, Loader2 } from "lucide-react";
 
 interface AuthGatewayTransitionProps {
   user: {
@@ -25,7 +25,7 @@ export default function AuthGatewayTransition({
   onComplete,
 }: AuthGatewayTransitionProps) {
   const [step, setStep] = useState<number>(1);
-  const [isExiting, setIsExiting] = useState(false);
+  const completedRef = useRef(false);
 
   const isMounted = useSyncExternalStore(
     emptySubscribe,
@@ -38,32 +38,29 @@ export default function AuthGatewayTransition({
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    // Step 1 -> Step 2 (300ms)
+    // Step 1 -> Step 2 (250ms)
     const timer1 = setTimeout(() => {
       setStep(2);
-    }, 300);
+    }, 250);
 
-    // Step 2 -> Step 3 (600ms) - Begin route handoff
+    // Step 2 -> Step 3 (500ms) - Full verification ready
     const timer2 = setTimeout(() => {
       setStep(3);
-    }, 600);
+    }, 500);
 
-    // Step 3 -> Exit Content Aperture (850ms)
+    // Fallback sync trigger (750ms)
     const timer3 = setTimeout(() => {
-      setIsExiting(true);
-    }, 850);
-
-    // Final Handshake: Call onComplete while background stays dark solid slate (1050ms)
-    const timer4 = setTimeout(() => {
-      onComplete();
-    }, 1050);
+      if (!completedRef.current) {
+        completedRef.current = true;
+        onComplete();
+      }
+    }, 750);
 
     return () => {
       document.body.style.overflow = originalOverflow;
       clearTimeout(timer1);
       clearTimeout(timer2);
       clearTimeout(timer3);
-      clearTimeout(timer4);
     };
   }, [onComplete]);
 
@@ -78,12 +75,8 @@ export default function AuthGatewayTransition({
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute inset-0 bg-grid-cyber opacity-30 pointer-events-none" />
 
-      {/* Center Quantum Gateway Portal - Scales and apertures out while dark backdrop stays solid */}
-      <div
-        className={`relative z-10 flex flex-col items-center text-center max-w-md w-full space-y-6 transition-all ${
-          isExiting ? "animate-gateway-out pointer-events-none" : "animate-gateway-in"
-        }`}
-      >
+      {/* Center Quantum Gateway Portal */}
+      <div className="relative z-10 flex flex-col items-center text-center max-w-md w-full space-y-6 animate-gateway-in">
         {/* Animated Central Emblem with Circular Laser Ring */}
         <div className="relative flex items-center justify-center w-36 h-36">
           {/* Outer Rotating Laser Scanner Track */}
@@ -132,7 +125,7 @@ export default function AuthGatewayTransition({
 
             {/* Step 1 */}
             <div
-              className={`flex items-center gap-2 text-[11px] transition-all duration-200 ${
+              className={`flex items-center gap-2 text-[11px] transition-all duration-150 ${
                 step >= 1 ? "text-emerald-400 opacity-100" : "text-slate-600 opacity-40"
               }`}
             >
@@ -142,7 +135,7 @@ export default function AuthGatewayTransition({
 
             {/* Step 2 */}
             <div
-              className={`flex items-center gap-2 text-[11px] transition-all duration-200 ${
+              className={`flex items-center gap-2 text-[11px] transition-all duration-150 ${
                 step >= 2 ? "text-cyan-300 opacity-100" : "text-slate-600 opacity-40"
               }`}
             >
@@ -158,11 +151,15 @@ export default function AuthGatewayTransition({
 
             {/* Step 3 */}
             <div
-              className={`flex items-center gap-2 text-[11px] transition-all duration-200 ${
+              className={`flex items-center gap-2 text-[11px] transition-all duration-150 ${
                 step >= 3 ? "text-amber-300 opacity-100" : "text-slate-600 opacity-40"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+              {step >= 3 ? (
+                <Sparkles className="w-3.5 h-3.5 shrink-0 text-amber-400 animate-pulse" />
+              ) : (
+                <Loader2 className="w-3.5 h-3.5 shrink-0 text-slate-600 animate-spin" />
+              )}
               <span className="truncate">Session Keys Active • Launching Workspace...</span>
             </div>
           </div>
@@ -172,15 +169,15 @@ export default function AuthGatewayTransition({
         <div className="w-full max-w-xs space-y-1.5">
           <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-0.5">
             <div
-              className="h-full bg-linear-to-r from-blue-500 via-cyan-400 to-amber-400 rounded-full transition-all duration-300 ease-out"
+              className="h-full bg-linear-to-r from-blue-500 via-cyan-400 to-amber-400 rounded-full transition-all duration-200 ease-out"
               style={{
-                width: step === 1 ? "35%" : step === 2 ? "75%" : "100%",
+                width: step === 1 ? "40%" : step === 2 ? "80%" : "100%",
               }}
             />
           </div>
           <div className="flex items-center justify-between text-[10px] font-mono text-slate-500">
             <span>SAS DMS v2.4</span>
-            <span className="text-cyan-400 font-bold">{step === 3 ? "100%" : step === 2 ? "75%" : "35%"}</span>
+            <span className="text-cyan-400 font-bold">{step === 3 ? "100% Ready" : step === 2 ? "80%" : "40%"}</span>
           </div>
         </div>
       </div>
