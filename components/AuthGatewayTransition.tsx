@@ -20,12 +20,18 @@ function emptySubscribe() {
   return () => {};
 }
 
+// Ease function for realistic progress acceleration & smooth deceleration
+function easeInOutQuad(t: number): number {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+
 export default function AuthGatewayTransition({
   user,
   onComplete,
 }: AuthGatewayTransitionProps) {
+  const [progress, setProgress] = useState<number>(0);
   const [step, setStep] = useState<number>(1);
-  const completedRef = useRef(false);
+  const hasCompletedRef = useRef(false);
 
   const isMounted = useSyncExternalStore(
     emptySubscribe,
@@ -38,29 +44,46 @@ export default function AuthGatewayTransition({
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    // Step 1 -> Step 2 (250ms)
-    const timer1 = setTimeout(() => {
-      setStep(2);
-    }, 250);
+    const TOTAL_DURATION = 1350; // ms for a rich, continuous visual sequence
+    let startTimestamp: number | null = null;
+    let animationFrameId: number;
 
-    // Step 2 -> Step 3 (500ms) - Full verification ready
-    const timer2 = setTimeout(() => {
-      setStep(3);
-    }, 500);
+    const animateProgress = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const elapsed = timestamp - startTimestamp;
+      const linearRatio = Math.min(elapsed / TOTAL_DURATION, 1);
+      const easedRatio = easeInOutQuad(linearRatio);
+      const currentPct = Math.min(Math.round(easedRatio * 100), 100);
 
-    // Fallback sync trigger (750ms)
-    const timer3 = setTimeout(() => {
-      if (!completedRef.current) {
-        completedRef.current = true;
-        onComplete();
+      setProgress(currentPct);
+
+      // Dynamically activate sequential telemetry steps based on real progress
+      if (currentPct >= 35 && currentPct < 75) {
+        setStep(2);
+      } else if (currentPct >= 75) {
+        setStep(3);
       }
-    }, 750);
+
+      if (linearRatio < 1) {
+        animationFrameId = requestAnimationFrame(animateProgress);
+      } else {
+        setProgress(100);
+        setStep(3);
+        if (!hasCompletedRef.current) {
+          hasCompletedRef.current = true;
+          // Synchronize route handoff exactly at 100%
+          setTimeout(() => {
+            onComplete();
+          }, 80);
+        }
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(animateProgress);
 
     return () => {
       document.body.style.overflow = originalOverflow;
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      clearTimeout(timer3);
+      cancelAnimationFrame(animationFrameId);
     };
   }, [onComplete]);
 
@@ -68,7 +91,7 @@ export default function AuthGatewayTransition({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-99999 bg-slate-950 flex flex-col items-center justify-center p-4 select-none overflow-hidden animate-in fade-in duration-150"
+      className="fixed inset-0 z-99999 bg-slate-950 flex flex-col items-center justify-center p-4 select-none overflow-hidden animate-in fade-in duration-200"
     >
       {/* Ambient Radial Lights */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-140 h-140 bg-blue-600/15 rounded-full blur-[140px] pointer-events-none" />
@@ -112,7 +135,7 @@ export default function AuthGatewayTransition({
               <span>Quantum Gateway Authorization</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              {step === 3 ? `Welcome, ${user.firstName}!` : "Establishing Secure Session"}
+              {progress >= 75 ? `Welcome, ${user.firstName}!` : "Establishing Secure Session"}
             </h2>
           </div>
 
@@ -125,7 +148,7 @@ export default function AuthGatewayTransition({
 
             {/* Step 1 */}
             <div
-              className={`flex items-center gap-2 text-[11px] transition-all duration-150 ${
+              className={`flex items-center gap-2 text-[11px] transition-all duration-200 ${
                 step >= 1 ? "text-emerald-400 opacity-100" : "text-slate-600 opacity-40"
               }`}
             >
@@ -135,7 +158,7 @@ export default function AuthGatewayTransition({
 
             {/* Step 2 */}
             <div
-              className={`flex items-center gap-2 text-[11px] transition-all duration-150 ${
+              className={`flex items-center gap-2 text-[11px] transition-all duration-200 ${
                 step >= 2 ? "text-cyan-300 opacity-100" : "text-slate-600 opacity-40"
               }`}
             >
@@ -151,33 +174,40 @@ export default function AuthGatewayTransition({
 
             {/* Step 3 */}
             <div
-              className={`flex items-center gap-2 text-[11px] transition-all duration-150 ${
+              className={`flex items-center gap-2 text-[11px] transition-all duration-200 ${
                 step >= 3 ? "text-amber-300 opacity-100" : "text-slate-600 opacity-40"
               }`}
             >
-              {step >= 3 ? (
+              {progress >= 100 ? (
                 <Sparkles className="w-3.5 h-3.5 shrink-0 text-amber-400 animate-pulse" />
               ) : (
-                <Loader2 className="w-3.5 h-3.5 shrink-0 text-slate-600 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 shrink-0 text-amber-400 animate-spin" />
               )}
-              <span className="truncate">Session Keys Active • Launching Workspace...</span>
+              <span className="truncate">
+                {progress >= 100 ? "Session Activated • Workspace Ready" : "Session Keys Active • Preparing Workspace..."}
+              </span>
             </div>
           </div>
         </div>
 
-        {/* Minimalist Linear Progress Bar */}
+        {/* Minimalist Linear Progress Bar with Continuous Filling and Glow Head */}
         <div className="w-full max-w-xs space-y-1.5">
-          <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-0.5">
+          <div className="relative h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800 p-0.5 shadow-inner">
             <div
-              className="h-full bg-linear-to-r from-blue-500 via-cyan-400 to-amber-400 rounded-full transition-all duration-200 ease-out"
+              className="h-full bg-linear-to-r from-blue-600 via-cyan-400 to-amber-400 rounded-full transition-all duration-75 ease-linear relative shadow-[0_0_10px_rgba(56,189,248,0.5)]"
               style={{
-                width: step === 1 ? "40%" : step === 2 ? "80%" : "100%",
+                width: `${progress}%`,
               }}
-            />
+            >
+              {/* Laser Leading Edge */}
+              <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/80 rounded-full shadow-[0_0_8px_#ffffff]" />
+            </div>
           </div>
-          <div className="flex items-center justify-between text-[10px] font-mono text-slate-500">
+          <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
             <span>SAS DMS v2.4</span>
-            <span className="text-cyan-400 font-bold">{step === 3 ? "100% Ready" : step === 2 ? "80%" : "40%"}</span>
+            <span className="text-cyan-400 font-bold tabular-nums">
+              {progress}% {progress === 100 ? "Ready" : "Loading"}
+            </span>
           </div>
         </div>
       </div>
