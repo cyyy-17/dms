@@ -4,6 +4,18 @@
 
 export const INSTITUTION_EMAIL_DOMAIN = "@firstasia.edu.ph";
 
+/**
+ * Checks whether an email is a valid institutional email or authorized testing account.
+ */
+export function isValidInstitutionalEmail(email: string): boolean {
+  if (!email) return false;
+  const normalized = email.trim().toLowerCase();
+  return (
+    normalized.endsWith(INSTITUTION_EMAIL_DOMAIN) ||
+    normalized === "cpm.061798@gmail.com"
+  );
+}
+
 
 
 /**

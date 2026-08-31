@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { loginEmployee } from "@/actions/auth";
+import { isValidInstitutionalEmail } from "@/lib/constants";
 import { Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff, Loader2, ShieldCheck, CheckCircle2, Clock } from "lucide-react";
 import AuthGatewayTransition from "@/components/AuthGatewayTransition";
 
@@ -32,7 +33,7 @@ export default function LoginForm() {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    if (!normalizedEmail.endsWith("@firstasia.edu.ph")) {
+    if (!isValidInstitutionalEmail(normalizedEmail)) {
       setError("Access is restricted strictly to official @firstasia.edu.ph institutional accounts.");
       setIsLoading(false);
       return;

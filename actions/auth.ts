@@ -5,7 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/audit";
 import { queueNotification } from "@/lib/notifications";
-import { INSTITUTION_EMAIL_DOMAIN } from "@/lib/constants";
+import { INSTITUTION_EMAIL_DOMAIN, isValidInstitutionalEmail } from "@/lib/constants";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -36,7 +36,7 @@ export async function registerEmployee(input: RegisterInput): Promise<{
   const normalizedEmail = input.email.trim().toLowerCase();
 
   // 1. Strict Application-Layer Domain Guard
-  if (!normalizedEmail.endsWith(INSTITUTION_EMAIL_DOMAIN)) {
+  if (!isValidInstitutionalEmail(normalizedEmail)) {
     return {
       success: false,
       error: `Registration is restricted exclusively to official institutional email addresses ending in ${INSTITUTION_EMAIL_DOMAIN}.`,
@@ -220,7 +220,7 @@ export async function loginEmployee(formData: {
   const normalizedEmail = formData.email.trim().toLowerCase();
 
   // Strict Domain Check
-  if (!normalizedEmail.endsWith(INSTITUTION_EMAIL_DOMAIN)) {
+  if (!isValidInstitutionalEmail(normalizedEmail)) {
     return {
       success: false,
       error: `Access is restricted to official @firstasia.edu.ph institutional accounts.`,
@@ -637,7 +637,7 @@ export async function requestPasswordResetAction(email: string): Promise<{
   const normalizedEmail = email.trim().toLowerCase();
 
   // 1. Strict Institutional Domain Guard
-  if (!normalizedEmail.endsWith(INSTITUTION_EMAIL_DOMAIN)) {
+  if (!isValidInstitutionalEmail(normalizedEmail)) {
     return {
       success: false,
       error: `Password reset is restricted exclusively to official institutional accounts ending in ${INSTITUTION_EMAIL_DOMAIN}.`,

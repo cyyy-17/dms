@@ -5,7 +5,7 @@ import { getAuthenticatedUser } from "@/lib/auth/session";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { logAuditEvent } from "@/lib/audit";
 import { queueNotification } from "@/lib/notifications";
-import { INSTITUTION_EMAIL_DOMAIN } from "@/lib/constants";
+import { INSTITUTION_EMAIL_DOMAIN, isValidInstitutionalEmail } from "@/lib/constants";
 import {
   UserRole,
   UserStatus,
@@ -48,7 +48,7 @@ export async function createUserDirectAction(input: CreateUserDirectInput): Prom
 
   const normalizedEmail = input.email.trim().toLowerCase();
 
-  if (!normalizedEmail.endsWith(INSTITUTION_EMAIL_DOMAIN)) {
+  if (!isValidInstitutionalEmail(normalizedEmail)) {
     return {
       success: false,
       error: `Email must belong to ${INSTITUTION_EMAIL_DOMAIN}.`,

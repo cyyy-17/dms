@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { requestPasswordResetAction } from "@/actions/auth";
+import { isValidInstitutionalEmail } from "@/lib/constants";
 import {
   Mail,
   ArrowRight,
@@ -41,7 +42,7 @@ export default function ForgotPasswordForm() {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    if (!normalizedEmail.endsWith("@firstasia.edu.ph")) {
+    if (!isValidInstitutionalEmail(normalizedEmail)) {
       setError("Password reset is restricted strictly to official @firstasia.edu.ph institutional accounts.");
       return;
     }
