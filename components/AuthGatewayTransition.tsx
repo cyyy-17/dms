@@ -38,25 +38,25 @@ export default function AuthGatewayTransition({
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
-    // Step 1 -> Step 2 (320ms)
+    // Step 1 -> Step 2 (300ms)
     const timer1 = setTimeout(() => {
       setStep(2);
-    }, 320);
+    }, 300);
 
-    // Step 2 -> Step 3 (650ms)
+    // Step 2 -> Step 3 (600ms) - Begin route handoff
     const timer2 = setTimeout(() => {
       setStep(3);
-    }, 650);
+    }, 600);
 
-    // Step 3 -> Exit Aperture (950ms)
+    // Step 3 -> Exit Content Aperture (850ms)
     const timer3 = setTimeout(() => {
       setIsExiting(true);
-    }, 950);
+    }, 850);
 
-    // Exit Complete -> Route to Dashboard (1180ms)
+    // Final Handshake: Call onComplete while background stays dark solid slate (1050ms)
     const timer4 = setTimeout(() => {
       onComplete();
-    }, 1180);
+    }, 1050);
 
     return () => {
       document.body.style.overflow = originalOverflow;
@@ -71,17 +71,19 @@ export default function AuthGatewayTransition({
 
   return createPortal(
     <div
-      className={`fixed inset-0 z-99999 bg-slate-950 flex flex-col items-center justify-center p-4 select-none overflow-hidden transition-all ${
-        isExiting ? "animate-gateway-out pointer-events-none" : "animate-in fade-in duration-200"
-      }`}
+      className="fixed inset-0 z-99999 bg-slate-950 flex flex-col items-center justify-center p-4 select-none overflow-hidden animate-in fade-in duration-150"
     >
       {/* Ambient Radial Lights */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-140 h-140 bg-blue-600/15 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute inset-0 bg-grid-cyber opacity-30 pointer-events-none" />
 
-      {/* Center Quantum Gateway Portal */}
-      <div className="relative z-10 flex flex-col items-center text-center max-w-md w-full space-y-6">
+      {/* Center Quantum Gateway Portal - Scales and apertures out while dark backdrop stays solid */}
+      <div
+        className={`relative z-10 flex flex-col items-center text-center max-w-md w-full space-y-6 transition-all ${
+          isExiting ? "animate-gateway-out pointer-events-none" : "animate-gateway-in"
+        }`}
+      >
         {/* Animated Central Emblem with Circular Laser Ring */}
         <div className="relative flex items-center justify-center w-36 h-36">
           {/* Outer Rotating Laser Scanner Track */}
@@ -96,7 +98,7 @@ export default function AuthGatewayTransition({
           <div className="absolute inset-0 rounded-full bg-cyan-400/20 animate-shockwave pointer-events-none" />
 
           {/* Center Institutional Crest Plaque */}
-          <div className="relative w-24 h-24 rounded-3xl bg-slate-900/90 border border-amber-400/50 p-3 shadow-2xl flex items-center justify-center backdrop-blur-xl animate-gateway-in">
+          <div className="relative w-24 h-24 rounded-3xl bg-slate-900/90 border border-amber-400/50 p-3 shadow-2xl flex items-center justify-center backdrop-blur-xl">
             <Image
               src="/images/faith-crest.png"
               alt="FAITH Colleges Crest"

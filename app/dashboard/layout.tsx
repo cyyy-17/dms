@@ -26,7 +26,7 @@ export default async function DashboardLayout({
 
   return (
     <ToastProvider>
-      <div className="flex h-dvh overflow-hidden bg-slate-100 text-slate-900 selection:bg-amber-400 selection:text-slate-950">
+      <div className="flex h-dvh overflow-hidden bg-slate-100 text-slate-900 selection:bg-amber-400 selection:text-slate-950 animate-in fade-in duration-300">
         <DashboardSidebar user={user} />
         <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
           <DashboardHeader user={user} />
