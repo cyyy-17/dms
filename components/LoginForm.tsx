@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { loginEmployee } from "@/actions/auth";
 import { Lock, Mail, ArrowRight, AlertCircle, Eye, EyeOff, Loader2, ShieldCheck, CheckCircle2, Clock } from "lucide-react";
+import AuthGatewayTransition from "@/components/AuthGatewayTransition";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -16,6 +17,13 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [authUserData, setAuthUserData] = useState<{
+    firstName: string;
+    lastName: string;
+    role: string;
+    unitCode: string | null;
+    unitName: string | null;
+  } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,8 +51,14 @@ export default function LoginForm() {
         return;
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      router.prefetch("/dashboard");
+
+      if (res.user) {
+        setAuthUserData(res.user);
+      } else {
+        router.push("/dashboard");
+        router.refresh();
+      }
     } catch (err: unknown) {
       console.error("[LOGIN_PAGE_ERROR]", err);
       const msg = err instanceof Error ? err.message : "An unexpected error occurred during login.";
@@ -166,6 +180,16 @@ export default function LoginForm() {
           </Link>
         </p>
       </div>
+
+      {authUserData && (
+        <AuthGatewayTransition
+          user={authUserData}
+          onComplete={() => {
+            router.push("/dashboard");
+            router.refresh();
+          }}
+        />
+      )}
     </div>
   );
 }

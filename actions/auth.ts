@@ -209,6 +209,13 @@ export async function loginEmployee(formData: {
   success: boolean;
   error?: string;
   status?: string;
+  user?: {
+    firstName: string;
+    lastName: string;
+    role: string;
+    unitCode: string | null;
+    unitName: string | null;
+  };
 }> {
   const normalizedEmail = formData.email.trim().toLowerCase();
 
@@ -297,8 +304,22 @@ export async function loginEmployee(formData: {
       };
     }
 
+    const userUnit = profile.unitId
+      ? await prisma.unit.findUnique({ where: { id: profile.unitId } })
+      : null;
+
     revalidatePath("/", "layout");
-    return { success: true, status: profile.status };
+    return {
+      success: true,
+      status: profile.status,
+      user: {
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        role: profile.role,
+        unitCode: userUnit?.code || null,
+        unitName: userUnit?.name || null,
+      },
+    };
   } catch (err) {
     console.error("[LOGIN_ERROR]", err);
     const msg = err instanceof Error ? err.message : String(err);

@@ -479,6 +479,52 @@
   transform-origin: top center;
 }
 
+/* Quantum Gateway & Decryption Keyframes */
+@keyframes gateway-laser-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-gateway-laser-spin {
+  animation: gateway-laser-spin 2s linear infinite;
+}
+
+@keyframes gateway-aperture-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+    filter: blur(8px);
+  }
+}
+
+.animate-gateway-out {
+  animation: gateway-aperture-out 0.28s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+@keyframes gateway-scale-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-gateway-in {
+  animation: gateway-scale-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-laser-scan,
   .animate-stamp-press,
