@@ -737,7 +737,7 @@ export async function requestPasswordResetAction(email: string): Promise<{
     }
 
     // 5. Dispatch email notification immediately via Resend API
-    await dispatchImmediateNotification({
+    const dispatchResult = await dispatchImmediateNotification({
       recipientId: user.id,
       recipientEmail: user.email,
       type: NotificationType.REGISTRATION_REQUEST_ADMIN,
@@ -749,6 +749,13 @@ export async function requestPasswordResetAction(email: string): Promise<{
         expirationMinutes: 15,
       },
     });
+
+    if (!dispatchResult.success) {
+      return {
+        success: false,
+        error: dispatchResult.error || "Failed to dispatch recovery email. Please check server configuration.",
+      };
+    }
 
     // 6. Log security audit event
     await logAuditEvent({

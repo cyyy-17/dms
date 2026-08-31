@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
     failed: 0,
   };
 
-  const sender = process.env.SYSTEM_SENDER_EMAIL || "SAS Document System <sasdms-notifications@firstasia.edu.ph>";
+  const sender = process.env.SYSTEM_SENDER_EMAIL || "SAS Document System <onboarding@resend.dev>";
 
   for (const job of pendingJobs) {
     try {

@@ -59,9 +59,12 @@ export async function dispatchImmediateNotification(params: QueueNotificationPar
   });
 
   if (!apiKey || apiKey.startsWith("re_placeholder") || apiKey.includes("your_resend_api_key")) {
-    console.warn("[IMMEDIATE_NOTIFICATION_WARNING] RESEND_API_KEY is not configured. Queuing notification in DB only.");
+    console.error("[IMMEDIATE_NOTIFICATION_ERROR] RESEND_API_KEY is not configured on the server.");
     await queueNotification(params);
-    return { success: true };
+    return {
+      success: false,
+      error: "Email delivery service (RESEND_API_KEY) is not configured in your Vercel Project Settings.",
+    };
   }
 
   try {
