@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/notifications",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/check-expiries",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/retention-cleanup",
+      "schedule": "0 1 * * *"
+    }
+  ]
+}

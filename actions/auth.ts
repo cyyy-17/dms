@@ -4,7 +4,7 @@ import { prisma, isDatabaseConfigured } from "@/lib/prisma";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/audit";
-import { queueNotification } from "@/lib/notifications";
+import { queueNotification, dispatchImmediateNotification } from "@/lib/notifications";
 import { NotificationType } from "@prisma/client";
 import { INSTITUTION_EMAIL_DOMAIN, isValidInstitutionalEmail } from "@/lib/constants";
 import { getAuthenticatedUser } from "@/lib/auth/session";
@@ -736,8 +736,8 @@ export async function requestPasswordResetAction(email: string): Promise<{
       console.warn("[SUPABASE_GENERATE_LINK_WARNING]", e);
     }
 
-    // 5. Enqueue branded email notification
-    await queueNotification({
+    // 5. Dispatch email notification immediately via Resend API
+    await dispatchImmediateNotification({
       recipientId: user.id,
       recipientEmail: user.email,
       type: NotificationType.REGISTRATION_REQUEST_ADMIN,
