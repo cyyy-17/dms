@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma";
 import { UserRole, UserStatus } from "@prisma/client";
 
 async function makeAdmin() {
-  const email = "mclemente08@firstasia.edu.ph";
+  const email = "mclemente@firstasia.edu.ph";
 
   const user = await prisma.user.findUnique({
     where: { email },

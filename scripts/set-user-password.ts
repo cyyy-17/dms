@@ -3,7 +3,7 @@ import { prisma } from "../lib/prisma";
 import { supabaseAdmin } from "../lib/supabase/admin";
 
 async function setPassword() {
-  const email = "mclemente08@firstasia.edu.ph";
+  const email = "mclemente@firstasia.edu.ph";
   const newPassword = "Password123!"; // Also setting an institutional default
 
   const user = await prisma.user.findUnique({
