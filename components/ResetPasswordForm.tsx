@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { resetPasswordConfirmAction } from "@/actions/auth";
+import { createClient } from "@/lib/supabase/client";
 import {
   Lock,
   ArrowRight,
@@ -27,6 +28,20 @@ export default function ResetPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const supabase = createClient();
+      supabase.auth.onAuthStateChange((event) => {
+        if (event === "PASSWORD_RECOVERY") {
+          setError(null);
+        }
+      });
+    } catch {
+      // Non-blocking
+    }
+  }, []);
 
   // Password Strength Criteria Checks
   const hasMinLength = newPassword.length >= 8;
@@ -54,21 +69,41 @@ export default function ResetPasswordForm() {
     setIsLoading(true);
 
     try {
+      // 1. Try Server Action with SSR session
       const res = await resetPasswordConfirmAction({
         newPassword,
         confirmPassword,
       });
 
-      if (!res.success) {
-        setError(res.error || "Failed to update password. Your reset link may have expired.");
-        setIsLoading(false);
+      if (res.success) {
+        setIsSuccess(true);
+        setTimeout(() => {
+          router.push("/login?reason=password_changed");
+        }, 1500);
         return;
       }
 
-      setIsSuccess(true);
-      setTimeout(() => {
-        router.push("/login?reason=password_changed");
-      }, 1500);
+      // 2. Client-side fallback if session was established via client hash (#access_token)
+      try {
+        const supabase = createClient();
+        const { error: clientError } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
+
+        if (!clientError) {
+          await supabase.auth.signOut();
+          setIsSuccess(true);
+          setTimeout(() => {
+            router.push("/login?reason=password_changed");
+          }, 1500);
+          return;
+        }
+      } catch {
+        // Fall through to error display
+      }
+
+      setError(res.error || "Failed to update password. Your reset link may have expired.");
+      setIsLoading(false);
     } catch (err: unknown) {
       console.error("[RESET_PASSWORD_SUBMISSION_ERROR]", err);
       const msg = err instanceof Error ? err.message : "An unexpected error occurred.";
