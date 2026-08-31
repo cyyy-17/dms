@@ -725,11 +725,15 @@ export async function requestPasswordResetAction(email: string): Promise<{
         },
       });
 
-      if (!linkError && linkData?.properties?.action_link) {
-        actionLink = linkData.properties.action_link;
-        // If Supabase generated a link with localhost, replace it with the deployed baseUrl
-        if (baseUrl !== "http://localhost:3000" && !baseUrl.includes("127.0.0.1")) {
-          actionLink = actionLink.replace(/http:\/\/(localhost|127\.0\.0\.1):3000/g, baseUrl);
+      if (!linkError && linkData?.properties) {
+        // Direct link to our own auth callback using token_hash (avoids Supabase Site URL redirects completely)
+        if (linkData.properties.hashed_token) {
+          actionLink = `${baseUrl}/auth/callback?token_hash=${linkData.properties.hashed_token}&type=recovery&next=/reset-password`;
+        } else if (linkData.properties.action_link) {
+          actionLink = linkData.properties.action_link;
+          if (baseUrl !== "http://localhost:3000" && !baseUrl.includes("127.0.0.1")) {
+            actionLink = actionLink.replace(/http:\/\/(localhost|127\.0\.0\.1):3000/g, baseUrl);
+          }
         }
       }
     } catch (e) {
