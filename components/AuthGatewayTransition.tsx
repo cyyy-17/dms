@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { ShieldCheck, Lock, Cpu, Sparkles, CheckCircle2 } from "lucide-react";
 
@@ -15,6 +16,10 @@ interface AuthGatewayTransitionProps {
   onComplete: () => void;
 }
 
+function emptySubscribe() {
+  return () => {};
+}
+
 export default function AuthGatewayTransition({
   user,
   onComplete,
@@ -22,7 +27,17 @@ export default function AuthGatewayTransition({
   const [step, setStep] = useState<number>(1);
   const [isExiting, setIsExiting] = useState(false);
 
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+
   useEffect(() => {
+    // Lock background scrolling
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     // Step 1 -> Step 2 (320ms)
     const timer1 = setTimeout(() => {
       setStep(2);
@@ -44,6 +59,7 @@ export default function AuthGatewayTransition({
     }, 1180);
 
     return () => {
+      document.body.style.overflow = originalOverflow;
       clearTimeout(timer1);
       clearTimeout(timer2);
       clearTimeout(timer3);
@@ -51,15 +67,17 @@ export default function AuthGatewayTransition({
     };
   }, [onComplete]);
 
-  return (
+  if (!isMounted || typeof document === "undefined") return null;
+
+  return createPortal(
     <div
-      className={`fixed inset-0 z-9999 bg-slate-950/95 backdrop-blur-2xl flex flex-col items-center justify-center p-4 select-none overflow-hidden transition-all ${
+      className={`fixed inset-0 z-99999 bg-slate-950 flex flex-col items-center justify-center p-4 select-none overflow-hidden transition-all ${
         isExiting ? "animate-gateway-out pointer-events-none" : "animate-in fade-in duration-200"
       }`}
     >
       {/* Ambient Radial Lights */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-120 h-120 bg-blue-600/15 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-amber-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-140 h-140 bg-blue-600/15 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute inset-0 bg-grid-cyber opacity-30 pointer-events-none" />
 
       {/* Center Quantum Gateway Portal */}
@@ -164,6 +182,7 @@ export default function AuthGatewayTransition({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
