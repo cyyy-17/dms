@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { type EmailOtpType } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
@@ -20,10 +21,34 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // 1. Direct Token Hash verification (Bypasses Supabase Site URL redirects entirely)
+  const cookieStore = await cookies();
+  const response = NextResponse.redirect(new URL(next, requestUrl.origin));
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL || "https://placeholder.supabase.co",
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-anon-key",
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) => {
+            try {
+              cookieStore.set(name, value, options);
+            } catch {
+              // Ignore if called from response
+            }
+            response.cookies.set(name, value, options);
+          });
+        },
+      },
+    }
+  );
+
+  // 1. Direct Token Hash verification
   if (tokenHash && type) {
     try {
-      const supabase = await createClient();
       const { error: verifyError } = await supabase.auth.verifyOtp({
         token_hash: tokenHash,
         type: type,
@@ -33,13 +58,13 @@ export async function GET(request: NextRequest) {
         console.error("[AUTH_VERIFY_OTP_ERROR]", verifyError);
         return NextResponse.redirect(
           new URL(
-            `/forgot-password?error=${encodeURIComponent("Password reset link has expired or is invalid. Please request a new one.")}`,
+            `/forgot-password?error=${encodeURIComponent("This password reset link has expired or was superseded by a newer request. Please request a new one.")}`,
             requestUrl.origin
           )
         );
       }
 
-      return NextResponse.redirect(new URL(next, requestUrl.origin));
+      return response;
     } catch (err) {
       console.error("[AUTH_VERIFY_OTP_EXCEPTION]", err);
       return NextResponse.redirect(
@@ -54,7 +79,6 @@ export async function GET(request: NextRequest) {
   // 2. PKCE Authorization Code exchange
   if (code) {
     try {
-      const supabase = await createClient();
       const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
       if (exchangeError) {
         console.error("[AUTH_EXCHANGE_CODE_ERROR]", exchangeError);
@@ -65,6 +89,8 @@ export async function GET(request: NextRequest) {
           )
         );
       }
+
+      return response;
     } catch (err) {
       console.error("[AUTH_CALLBACK_EXCEPTION]", err);
       return NextResponse.redirect(
@@ -76,6 +102,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Redirect to target destination (default: /reset-password)
-  return NextResponse.redirect(new URL(next, requestUrl.origin));
+  return response;
 }
