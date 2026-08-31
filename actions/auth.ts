@@ -693,8 +693,15 @@ export async function requestPasswordResetAction(email: string): Promise<{
     }
 
     // 4. Generate recovery link using Supabase Admin Auth
-    const hostHeader = (await headers()).get("host");
-    const forwardedProto = (await headers()).get("x-forwarded-proto");
+    let hostHeader: string | null = null;
+    let forwardedProto: string | null = null;
+    try {
+      const headerList = await headers();
+      hostHeader = headerList.get("host");
+      forwardedProto = headerList.get("x-forwarded-proto");
+    } catch {
+      // Safe fallback when executed outside HTTP request scope
+    }
     const isLocalhost = !hostHeader || hostHeader.includes("localhost") || hostHeader.includes("127.0.0.1");
     const proto = forwardedProto || (isLocalhost ? "http" : "https");
 
