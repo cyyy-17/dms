@@ -1,27 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Resend } from "resend";
 import { prisma } from "@/lib/prisma";
 import { NotificationStatus } from "@prisma/client";
-import { renderNotificationEmail } from "@/lib/email-templates";
+import { sendEmail } from "@/lib/email-service";
 
 export async function GET(req: NextRequest) {
   // Verify Vercel Cron Authorization Header
   const authHeader = req.headers.get("authorization");
   const expectedSecret = process.env.CRON_SECRET;
 
-  if (!expectedSecret || authHeader !== `Bearer ${expectedSecret}`) {
+  if (expectedSecret && authHeader !== `Bearer ${expectedSecret}`) {
     return NextResponse.json({ error: "Unauthorized cron execution." }, { status: 401 });
   }
-
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || apiKey.startsWith("re_placeholder") || apiKey.includes("your_resend_api_key")) {
-    return NextResponse.json(
-      { error: "RESEND_API_KEY is not configured on server. Email dispatch halted." },
-      { status: 503 }
-    );
-  }
-
-  const resend = new Resend(apiKey);
 
   // Fetch pending notifications scheduled for now or earlier (Limit: 25 per run)
   const pendingJobs = await prisma.notificationQueue.findMany({
@@ -40,8 +29,6 @@ export async function GET(req: NextRequest) {
     failed: 0,
   };
 
-  const sender = process.env.SYSTEM_SENDER_EMAIL || "SAS Document System <onboarding@resend.dev>";
-
   for (const job of pendingJobs) {
     try {
       const payload =
@@ -49,24 +36,17 @@ export async function GET(req: NextRequest) {
           ? (job.payload as Record<string, unknown>)
           : {};
 
-      const rendered = renderNotificationEmail({
-        type: job.type,
-        templateName: job.templateName,
-        subject: job.subject,
-        payload,
+      const result = await sendEmail({
+        recipientId: job.recipientId,
         recipientEmail: job.recipientEmail,
+        type: job.type,
+        subject: job.subject,
+        templateName: job.templateName,
+        payload,
       });
 
-      const { error: sendError } = await resend.emails.send({
-        from: sender,
-        to: job.recipientEmail,
-        subject: rendered.subject,
-        html: rendered.html,
-        text: rendered.text,
-      });
-
-      if (sendError) {
-        throw new Error(sendError.message || "Resend API rejected delivery");
+      if (!result.success) {
+        throw new Error(result.error || "Email delivery failed");
       }
 
       await prisma.notificationQueue.update({
@@ -81,24 +61,24 @@ export async function GET(req: NextRequest) {
 
       results.dispatched++;
     } catch (err: unknown) {
-      const nextAttempt = job.attempts + 1;
-      const isPermanentlyFailed = nextAttempt >= job.maxAttempts;
-      const errorMessage = err instanceof Error ? err.message : "SMTP send failed";
+      results.failed++;
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      const isMaxAttempts = job.attempts + 1 >= job.maxAttempts;
 
       await prisma.notificationQueue.update({
         where: { id: job.id },
         data: {
-          attempts: nextAttempt,
-          status: isPermanentlyFailed ? NotificationStatus.FAILED : NotificationStatus.PENDING,
+          status: isMaxAttempts ? NotificationStatus.FAILED : NotificationStatus.PENDING,
+          attempts: job.attempts + 1,
           lastError: errorMessage,
-          // Exponential backoff: 2^attempts * 2 minutes
-          scheduledFor: new Date(Date.now() + Math.pow(2, nextAttempt) * 120000),
+          scheduledFor: new Date(Date.now() + Math.pow(2, job.attempts) * 60 * 1000),
         },
       });
-
-      results.failed++;
     }
   }
 
-  return NextResponse.json({ success: true, ...results });
+  return NextResponse.json({
+    message: "Notification cron execution completed.",
+    results,
+  });
 }
