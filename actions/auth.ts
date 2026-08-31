@@ -623,3 +623,219 @@ export async function updateUserPasswordAction(input: {
     return { success: false, error: err instanceof Error ? err.message : "Failed to update password." };
   }
 }
+
+/**
+ * Request Password Reset Action (Self-Service Forgot Password)
+ * Dispatches an institutional recovery email with anti-enumeration protection.
+ */
+export async function requestPasswordResetAction(email: string): Promise<{
+  success: boolean;
+  message?: string;
+  error?: string;
+  previewLink?: string;
+}> {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // 1. Strict Institutional Domain Guard
+  if (!normalizedEmail.endsWith(INSTITUTION_EMAIL_DOMAIN)) {
+    return {
+      success: false,
+      error: `Password reset is restricted exclusively to official institutional accounts ending in ${INSTITUTION_EMAIL_DOMAIN}.`,
+    };
+  }
+
+  // 2. Rate Limiting Guard
+  try {
+    const headerList = await headers();
+    const clientIp =
+      headerList.get("x-forwarded-for")?.split(",")[0].trim() ||
+      headerList.get("x-real-ip") ||
+      "127.0.0.1";
+    const rl = checkRateLimit(
+      `pwd-reset:${clientIp}:${normalizedEmail}`,
+      RATE_LIMIT_PRESETS.AUTH_ATTEMPT.limit,
+      RATE_LIMIT_PRESETS.AUTH_ATTEMPT.windowMs
+    );
+    if (!rl.success) {
+      return {
+        success: false,
+        error: "Too many password reset requests. Please wait a few minutes before trying again.",
+      };
+    }
+  } catch {
+    // Non-blocking fallback
+  }
+
+  const genericSuccessMessage =
+    "If an active account exists for this institutional email, a password reset link has been dispatched to your inbox.";
+
+  if (!isDatabaseConfigured) {
+    return {
+      success: true,
+      message: genericSuccessMessage,
+      previewLink: "/reset-password?preview=true",
+    };
+  }
+
+  try {
+    // 3. User verification in Prisma database
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
+    // Anti-enumeration: If user does not exist or is not active, return generic success
+    if (!user || user.status !== "ACTIVE") {
+      return {
+        success: true,
+        message: genericSuccessMessage,
+      };
+    }
+
+    // 4. Generate recovery link using Supabase Admin Auth
+    const hostHeader = (await headers()).get("host");
+    const proto = (await headers()).get("x-forwarded-proto") || "http";
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (hostHeader ? `${proto}://${hostHeader}` : "http://localhost:3000");
+
+    let actionLink = `${baseUrl}/reset-password`;
+
+    try {
+      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
+        type: "recovery",
+        email: normalizedEmail,
+        options: {
+          redirectTo: `${baseUrl}/auth/callback?next=/reset-password`,
+        },
+      });
+
+      if (!linkError && linkData?.properties?.action_link) {
+        actionLink = linkData.properties.action_link;
+      }
+    } catch (e) {
+      console.warn("[SUPABASE_GENERATE_LINK_WARNING]", e);
+    }
+
+    // 5. Enqueue branded email notification
+    await queueNotification({
+      recipientId: user.id,
+      recipientEmail: user.email,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      type: "REGISTRATION_REQUEST_ADMIN" as any,
+      subject: "SASDMS: Institutional Password Reset Request",
+      templateName: "password-reset-request",
+      payload: {
+        recipientName: `${user.firstName} ${user.lastName}`,
+        resetUrl: actionLink,
+        expirationMinutes: 15,
+      },
+    });
+
+    // 6. Log security audit event
+    await logAuditEvent({
+      actorId: user.id,
+      unitId: user.unitId,
+      action: "USER_ROLE_CHANGE",
+      targetType: "USER",
+      targetId: user.id,
+      details: {
+        actionType: "PASSWORD_RESET_REQUESTED",
+        email: user.email,
+      },
+    });
+
+    return {
+      success: true,
+      message: genericSuccessMessage,
+      previewLink: process.env.NODE_ENV === "development" ? actionLink : undefined,
+    };
+  } catch (err: unknown) {
+    console.error("[REQUEST_PASSWORD_RESET_ERROR]", err);
+    return {
+      success: false,
+      error: "An unexpected error occurred while processing your request. Please try again.",
+    };
+  }
+}
+
+/**
+ * Confirm and Apply New Password
+ * Works for users recovering via recovery session or authenticated token.
+ */
+export async function resetPasswordConfirmAction(input: {
+  newPassword: string;
+  confirmPassword: string;
+}): Promise<{
+  success: boolean;
+  error?: string;
+}> {
+  const { newPassword, confirmPassword } = input;
+
+  if (!newPassword || newPassword.length < 8) {
+    return {
+      success: false,
+      error: "New password must contain at least 8 characters.",
+    };
+  }
+
+  if (newPassword !== confirmPassword) {
+    return {
+      success: false,
+      error: "New password and confirmation do not match.",
+    };
+  }
+
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return {
+        success: false,
+        error: "Your password reset session has expired or is invalid. Please request a new reset link.",
+      };
+    }
+
+    // Update password on Supabase
+    const { error: updateError } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (updateError) {
+      console.error("[PASSWORD_RESET_UPDATE_ERROR]", updateError);
+      return {
+        success: false,
+        error: updateError.message || "Failed to update password.",
+      };
+    }
+
+    if (isDatabaseConfigured) {
+      const profile = await prisma.user.findUnique({ where: { id: user.id } });
+      await logAuditEvent({
+        actorId: user.id,
+        unitId: profile?.unitId || null,
+        action: "USER_ROLE_CHANGE",
+        targetType: "USER",
+        targetId: user.id,
+        details: { actionType: "PASSWORD_RESET_COMPLETED_SELF", email: user.email },
+      });
+    }
+
+    // Invalidate / sign out recovery session so user signs in cleanly
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Non-blocking
+    }
+
+    revalidatePath("/", "layout");
+    return { success: true };
+  } catch (err: unknown) {
+    console.error("[RESET_PASSWORD_CONFIRM_ERROR]", err);
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : "Failed to reset password.",
+    };
+  }
+}

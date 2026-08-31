@@ -36,7 +36,7 @@ function escapeHtml(str: unknown): string {
  * Institutional HTML & Plaintext Email Renderer for SASDMS
  */
 export function renderNotificationEmail(params: EmailRenderParams): RenderedEmail {
-  const { templateName, subject, payload } = params;
+  const { templateName, subject, payload, recipientEmail } = params;
   const baseUrl = getBaseUrl();
   const currentYear = new Date().getFullYear();
 
@@ -412,6 +412,39 @@ export function renderNotificationEmail(params: EmailRenderParams): RenderedEmai
       `;
 
       plainDetails = `Dear ${userName},\nYour registration could not be approved. Reason: ${reason}`;
+      break;
+    }
+
+    case "password-reset-request": {
+      const resetUrl = payload.resetUrl ? String(payload.resetUrl) : `${baseUrl}/reset-password`;
+      const recipientName = payload.recipientName ? String(payload.recipientName) : "Employee";
+      const expirationMinutes = payload.expirationMinutes ? Number(payload.expirationMinutes) : 15;
+
+      badgeText = "Security Alert • Password Reset";
+      badgeBg = "#0F2962";
+      badgeColor = "#FFFFFF";
+
+      headline = "Institutional Password Reset Request";
+      leadText = `Hello ${escapeHtml(recipientName)}, a password reset was requested for your official @firstasia.edu.ph institutional account.`;
+
+      calloutHtml = `
+        <div style="margin: 20px 0; padding: 16px 20px; background-color: #FEF3C7; border-left: 4px solid #F59E0B; border-radius: 6px;">
+          <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #92400E;">Security Advisory</p>
+          <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #78350F;">
+            This password recovery link is strictly confidential and will expire in <strong>${expirationMinutes} minutes</strong>. If you did not initiate this request, no action is needed; your password remains secure.
+          </p>
+        </div>
+      `;
+
+      bodyHtml = `
+        <p style="font-size: 13px; line-height: 1.6; color: #64748B; margin: 15px 0;">
+          Click the button below to securely set a new password for your SASDMS account:
+        </p>
+      `;
+
+      ctaText = "Reset Institutional Password";
+      ctaUrl = resetUrl;
+      plainDetails = `A password reset request was initiated for ${recipientEmail}.\nReset Link (valid for ${expirationMinutes} mins): ${resetUrl}\nIf you did not request this, please disregard this email.`;
       break;
     }
 

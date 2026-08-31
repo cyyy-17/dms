@@ -67,10 +67,10 @@ export default function LoginForm() {
 
   return (
     <div className="rounded-2xl sm:rounded-3xl py-5 px-5 sm:py-6 sm:px-8 shadow-2xl bg-slate-900/85 border border-slate-800/90 backdrop-blur-2xl transition-all duration-300">
-      {reason === "password_changed" && (
+      {(reason === "password_changed" || reason === "password_updated") && (
         <div className="mb-3.5 p-3 rounded-xl bg-emerald-950/60 border border-emerald-500/40 flex items-start gap-2.5 text-emerald-300 text-xs font-semibold shadow-xs animate-in fade-in slide-in-from-top-2 duration-200">
           <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-          <span className="leading-tight">Password changed successfully. Please sign in with your new credentials.</span>
+          <span className="leading-tight">Password reset successfully. Please sign in with your new credentials.</span>
         </div>
       )}
 
@@ -124,6 +124,12 @@ export default function LoginForm() {
             <label className="block text-[11px] font-black text-slate-300 uppercase tracking-wider">
               Password
             </label>
+            <Link
+              href="/forgot-password"
+              className="text-[11px] font-bold text-amber-400 hover:text-amber-300 hover:underline transition focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:outline-none rounded"
+            >
+              Forgot password?
+            </Link>
           </div>
           <div className="relative rounded-xl shadow-xs">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
