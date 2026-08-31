@@ -5,6 +5,7 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/audit";
 import { queueNotification } from "@/lib/notifications";
+import { NotificationType } from "@prisma/client";
 import { INSTITUTION_EMAIL_DOMAIN, isValidInstitutionalEmail } from "@/lib/constants";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
@@ -693,8 +694,25 @@ export async function requestPasswordResetAction(email: string): Promise<{
 
     // 4. Generate recovery link using Supabase Admin Auth
     const hostHeader = (await headers()).get("host");
-    const proto = (await headers()).get("x-forwarded-proto") || "http";
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (hostHeader ? `${proto}://${hostHeader}` : "http://localhost:3000");
+    const forwardedProto = (await headers()).get("x-forwarded-proto");
+    const isLocalhost = !hostHeader || hostHeader.includes("localhost") || hostHeader.includes("127.0.0.1");
+    const proto = forwardedProto || (isLocalhost ? "http" : "https");
+
+    let baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+    if (!baseUrl || baseUrl === "http://localhost:3000") {
+      if (hostHeader && !isLocalhost) {
+        baseUrl = `${proto}://${hostHeader}`;
+      } else if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+        baseUrl = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+      } else if (process.env.VERCEL_URL) {
+        baseUrl = `https://${process.env.VERCEL_URL}`;
+      } else if (hostHeader) {
+        baseUrl = `${proto}://${hostHeader}`;
+      } else {
+        baseUrl = "http://localhost:3000";
+      }
+    }
+    baseUrl = baseUrl.replace(/\/$/, "");
 
     let actionLink = `${baseUrl}/reset-password`;
 
@@ -709,6 +727,10 @@ export async function requestPasswordResetAction(email: string): Promise<{
 
       if (!linkError && linkData?.properties?.action_link) {
         actionLink = linkData.properties.action_link;
+        // If Supabase generated a link with localhost, replace it with the deployed baseUrl
+        if (baseUrl !== "http://localhost:3000" && !baseUrl.includes("127.0.0.1")) {
+          actionLink = actionLink.replace(/http:\/\/(localhost|127\.0\.0\.1):3000/g, baseUrl);
+        }
       }
     } catch (e) {
       console.warn("[SUPABASE_GENERATE_LINK_WARNING]", e);
@@ -718,8 +740,7 @@ export async function requestPasswordResetAction(email: string): Promise<{
     await queueNotification({
       recipientId: user.id,
       recipientEmail: user.email,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      type: "REGISTRATION_REQUEST_ADMIN" as any,
+      type: NotificationType.REGISTRATION_REQUEST_ADMIN,
       subject: "SASDMS: Institutional Password Reset Request",
       templateName: "password-reset-request",
       payload: {
