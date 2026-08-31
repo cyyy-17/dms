@@ -49,6 +49,7 @@ const RECENT_SEARCHES_KEY = "sasdms_recent_searches";
 
 export default function QuickSearchModal({ isOpen, onClose, userRole, units = [] }: QuickSearchModalProps) {
   const router = useRouter();
+  const [isClosing, setIsClosing] = useState(false);
   const [query, setQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [liveDocs, setLiveDocs] = useState<LiveDocumentResult[]>([]);
@@ -66,6 +67,15 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
   });
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   const saveRecentSearch = (term: string) => {
     const trimmed = term.trim();
     if (!trimmed || trimmed.length < 2) return;
@@ -79,21 +89,16 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
   };
 
   const handleClose = useCallback(() => {
-    setQuery("");
-    setLiveDocs([]);
-    setLiveUnits([]);
-    setIsSearching(false);
-    onClose();
+    setIsClosing(true);
+    setTimeout(() => {
+      setQuery("");
+      setLiveDocs([]);
+      setLiveUnits([]);
+      setIsSearching(false);
+      setIsClosing(false);
+      onClose();
+    }, 180);
   }, [onClose]);
-
-  useEffect(() => {
-    if (isOpen) {
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -254,9 +259,21 @@ export default function QuickSearchModal({ isOpen, onClose, userRole, units = []
   const hasLiveResults = liveDocs.length > 0 || displayedUnits.length > 0;
   const isQueryActive = query.trim().length >= 2;
 
+  if (!isOpen && !isClosing) return null;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-10 sm:pt-20 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-150">
-      <div className="glass-panel rounded-3xl max-w-2xl w-full bg-white shadow-2xl border border-white/90 overflow-hidden space-y-0 flex flex-col max-h-[85vh]">
+    <div
+      onClick={handleClose}
+      className={`fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-4 pt-10 sm:pt-20 bg-slate-950/75 backdrop-blur-md transition-opacity duration-200 ${
+        isClosing ? "opacity-0" : "opacity-100"
+      }`}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className={`glass-panel rounded-3xl max-w-2xl w-full bg-white shadow-2xl border border-white/90 overflow-hidden space-y-0 flex flex-col max-h-[85vh] ${
+          isClosing ? "animate-modal-out" : "animate-modal-in"
+        }`}
+      >
         {/* Search Input Bar */}
         <form onSubmit={handleSearchSubmit} className="p-3.5 sm:p-5 border-b border-slate-200/80 flex items-center gap-2.5 sm:gap-3 shrink-0 bg-white/95">
           {isSearching ? (

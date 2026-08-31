@@ -55,6 +55,9 @@ function getNotificationIcon(type: string) {
 
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isRendered, setIsRendered] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
+  const [isRinging, setIsRinging] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(() => {
     if (typeof window === "undefined") return new Set();
@@ -83,6 +86,28 @@ export default function NotificationBell() {
     }
   }, []);
 
+  const closePopover = useCallback(() => {
+    setIsClosing(true);
+    setTimeout(() => {
+      setIsRendered(false);
+      setIsClosing(false);
+      setIsOpen(false);
+    }, 160);
+  }, []);
+
+  const togglePopover = useCallback(() => {
+    if (isOpen) {
+      closePopover();
+    } else {
+      setIsOpen(true);
+      setIsRendered(true);
+      setIsClosing(false);
+      setIsRinging(true);
+      setTimeout(() => setIsRinging(false), 600);
+      fetchNotifications();
+    }
+  }, [isOpen, closePopover, fetchNotifications]);
+
   useEffect(() => {
     let ignore = false;
     async function load() {
@@ -102,14 +127,16 @@ export default function NotificationBell() {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        setIsOpen(false);
+        if (isOpen && !isClosing) {
+          closePopover();
+        }
       }
     };
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
+  }, [isOpen, isClosing, closePopover]);
 
   const markAllAsRead = () => {
     const allIds = new Set(notifications.map((n) => n.id));
@@ -140,15 +167,12 @@ export default function NotificationBell() {
     <div className="relative" ref={popoverRef}>
       <button
         type="button"
-        onClick={() => {
-          setIsOpen(!isOpen);
-          if (!isOpen) fetchNotifications();
-        }}
-        className="relative p-2.5 sm:px-3.5 sm:py-2.5 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962]"
+        onClick={togglePopover}
+        className="relative p-2.5 sm:px-3.5 sm:py-2.5 rounded-xl border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 text-xs font-bold transition-all duration-200 flex items-center gap-1.5 shadow-xs cursor-pointer focus-visible:ring-2 focus-visible:ring-[#0F2962] active:scale-95"
         title="Notifications"
         aria-label="View notifications"
       >
-        <Bell className="w-3.5 h-3.5 text-[#0F2962]" />
+        <Bell className={`w-3.5 h-3.5 text-[#0F2962] ${isRinging || (unreadCount > 0 && !isOpen) ? "animate-bell-wobble" : ""}`} />
         <span className="hidden sm:inline">Alerts</span>
 
         {unreadCount > 0 && (
@@ -158,15 +182,21 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {isOpen && (
+      {isRendered && (
         <>
           {/* Mobile backdrop to easily dismiss on tap outside */}
           <div
-            className="fixed inset-0 z-40 sm:hidden bg-slate-950/20 backdrop-blur-2xs"
-            onClick={() => setIsOpen(false)}
+            className={`fixed inset-0 z-40 sm:hidden bg-slate-950/20 backdrop-blur-2xs transition-opacity duration-150 ${
+              isClosing ? "opacity-0" : "opacity-100"
+            }`}
+            onClick={closePopover}
           />
 
-          <div className="fixed inset-x-3.5 top-17 sm:top-auto sm:inset-x-auto sm:right-0 sm:mt-2 sm:absolute w-auto sm:w-96 rounded-2xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+          <div
+            className={`fixed inset-x-3.5 top-17 sm:top-auto sm:inset-x-auto sm:right-0 sm:mt-2 sm:absolute w-auto sm:w-96 rounded-2xl bg-white border border-slate-200 shadow-2xl z-50 overflow-hidden ${
+              isClosing ? "animate-popover-out" : "animate-popover-in"
+            }`}
+          >
             {/* Header */}
             <div className="p-3.5 sm:p-4 bg-slate-50 border-b border-slate-200/80 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -192,7 +222,7 @@ export default function NotificationBell() {
               )}
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
+                onClick={closePopover}
                 className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-white transition cursor-pointer"
                 aria-label="Close notifications"
               >
