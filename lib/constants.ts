@@ -16,7 +16,28 @@ export function isValidInstitutionalEmail(email: string): boolean {
   );
 }
 
-
+/**
+ * Resolves the application base URL dynamically across local development and Vercel environments.
+ */
+export function getAppBaseUrl(hostHeader?: string | null, isSsl?: boolean): string {
+  if (hostHeader && !hostHeader.includes("localhost") && !hostHeader.includes("127.0.0.1")) {
+    const proto = isSsl !== false ? "https" : "http";
+    return `${proto}://${hostHeader}`.replace(/\/$/, "");
+  }
+  if (process.env.NEXT_PUBLIC_APP_URL && process.env.NEXT_PUBLIC_APP_URL !== "http://localhost:3000") {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`.replace(/\/$/, "");
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`.replace(/\/$/, "");
+  }
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  }
+  return "http://localhost:3000";
+}
 
 /**
  * Generate standardized human-readable tracking number

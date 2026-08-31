@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logAuditEvent } from "@/lib/audit";
 import { queueNotification, dispatchImmediateNotification } from "@/lib/notifications";
 import { NotificationType } from "@prisma/client";
-import { INSTITUTION_EMAIL_DOMAIN, isValidInstitutionalEmail } from "@/lib/constants";
+import { INSTITUTION_EMAIL_DOMAIN, isValidInstitutionalEmail, getAppBaseUrl } from "@/lib/constants";
 import { getAuthenticatedUser } from "@/lib/auth/session";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -702,25 +702,8 @@ export async function requestPasswordResetAction(email: string): Promise<{
     } catch {
       // Safe fallback when executed outside HTTP request scope
     }
-    const isLocalhost = !hostHeader || hostHeader.includes("localhost") || hostHeader.includes("127.0.0.1");
-    const proto = forwardedProto || (isLocalhost ? "http" : "https");
 
-    let baseUrl = process.env.NEXT_PUBLIC_APP_URL;
-    if (!baseUrl || baseUrl === "http://localhost:3000") {
-      if (hostHeader && !isLocalhost) {
-        baseUrl = `${proto}://${hostHeader}`;
-      } else if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
-        baseUrl = `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-      } else if (process.env.VERCEL_URL) {
-        baseUrl = `https://${process.env.VERCEL_URL}`;
-      } else if (hostHeader) {
-        baseUrl = `${proto}://${hostHeader}`;
-      } else {
-        baseUrl = "http://localhost:3000";
-      }
-    }
-    baseUrl = baseUrl.replace(/\/$/, "");
-
+    const baseUrl = getAppBaseUrl(hostHeader, forwardedProto === "https");
     let actionLink = `${baseUrl}/reset-password`;
 
     try {
