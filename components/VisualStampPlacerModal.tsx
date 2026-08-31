@@ -79,6 +79,8 @@ export default function VisualStampPlacerModal({
   );
 
   const [viewportWidth, setViewportWidth] = useState<number>(620);
+  const [stampAnimationKey, setStampAnimationKey] = useState<number>(0);
+  const [showShockwave, setShowShockwave] = useState<boolean>(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -158,16 +160,15 @@ export default function VisualStampPlacerModal({
     };
   }, [isOpen, documentId, storagePath, initialCoordinates, currentUser.signaturePath]);
 
-  // High-Precision Pixel-Perfect PDF Canvas Rendering via pdfjs-dist
+  // Render the PDF onto the canvas at 1:1 crisp vector scale
   useEffect(() => {
     if (!isOpen || !pdfUrl || !canvasRef.current) return;
 
     let isCancelled = false;
+    setIsRenderingCanvas(true);
 
     const renderPage = async () => {
       try {
-        setIsRenderingCanvas(true);
-
         const pdfjs = await import("pdfjs-dist");
         if (typeof window !== "undefined") {
           pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
@@ -252,6 +253,9 @@ export default function VisualStampPlacerModal({
       y: pdfY,
       isCustom: true,
     });
+    setStampAnimationKey((k) => k + 1);
+    setShowShockwave(true);
+    setTimeout(() => setShowShockwave(false), 650);
   };
 
   // Convert PDF points (0-612, 0-792) to percentage in container for CSS positioning
@@ -455,14 +459,20 @@ export default function VisualStampPlacerModal({
             {/* Live Interactive Pure Electronic Signature Overlay */}
             {currentPage === coords.page && (
               <div
+                key={`stamp-${stampAnimationKey}`}
                 style={{
                   left: `${leftPercent}%`,
                   top: `${topPercent}%`,
                   width: `${widthPercent}%`,
                   height: `${heightPercent}%`,
                 }}
-                className="absolute z-20 flex items-center justify-center cursor-move group select-none transition-all"
+                className="absolute z-20 flex items-center justify-center cursor-move group select-none transition-all animate-stamp-press"
               >
+                {/* Expanding Golden Ink Shockwave upon Placement */}
+                {showShockwave && (
+                  <div className="absolute inset-0 rounded-full border border-amber-400/80 bg-amber-400/20 animate-shockwave pointer-events-none" />
+                )}
+
                 {/* Transparent bounding container with clear blue border and guidelines */}
                 <div className="absolute inset-0 rounded-md border-2 border-dashed border-blue-600 bg-blue-500/5 pointer-events-none ring-2 ring-blue-500/20" />
 

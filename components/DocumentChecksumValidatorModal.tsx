@@ -7,10 +7,10 @@ import {
   UploadCloud,
   FileCheck2,
   X,
-  Loader2,
   Copy,
   Check,
 } from "lucide-react";
+import CryptographicLaserScanner from "@/components/CryptographicLaserScanner";
 
 export default function DocumentChecksumValidatorModal({
   isOpen,
@@ -135,24 +135,36 @@ export default function DocumentChecksumValidatorModal({
           </label>
         </div>
 
-        {/* Comparison Result */}
-        {isHashing ? (
-          <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs flex items-center justify-center gap-2 font-medium">
-            <Loader2 className="w-4 h-4 animate-spin text-[#0F2962]" />
-            <span>Calculating SHA-256 cryptographic digest...</span>
-          </div>
-        ) : isMatch ? (
-          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-950 text-xs space-y-1.5 animate-in fade-in">
-            <div className="flex items-center gap-2 font-black text-emerald-800">
-              <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
-              <span>Cryptographic Integrity Confirmed: Unaltered Original</span>
+        {/* Cryptographic Laser Scanner & Comparison Result */}
+        {isHashing && (
+          <CryptographicLaserScanner
+            isScanning={true}
+            statusText="Traversing binary buffer & computing SHA-256 digest..."
+          />
+        )}
+
+        {!isHashing && isMatch && (
+          <div className="space-y-3 animate-in fade-in zoom-in-95 duration-200">
+            <CryptographicLaserScanner
+              isScanning={false}
+              isComplete={true}
+              checksum={localHash}
+            />
+            <div className="relative overflow-hidden p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-950 text-xs space-y-1.5 shadow-sm">
+              <div className="absolute -right-4 -bottom-4 w-20 h-20 rounded-full bg-emerald-400/20 animate-shockwave pointer-events-none" />
+              <div className="flex items-center gap-2 font-black text-emerald-800 relative z-10">
+                <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+                <span>Cryptographic Integrity Confirmed: Unaltered Original</span>
+              </div>
+              <p className="text-[11px] text-emerald-700 leading-tight relative z-10">
+                The local file SHA-256 hash perfectly matches the immutable on-record checksum registered during institutional ingestion.
+              </p>
             </div>
-            <p className="text-[11px] text-emerald-700 leading-tight">
-              The local file hash perfectly matches the immutable on-record checksum registered during institutional ingestion.
-            </p>
           </div>
-        ) : isMismatch ? (
-          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-950 text-xs space-y-1.5 animate-in fade-in">
+        )}
+
+        {!isHashing && isMismatch && (
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-300 text-rose-950 text-xs space-y-2 animate-in fade-in">
             <div className="flex items-center gap-2 font-black text-rose-800">
               <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0" />
               <span>Integrity Warning: File Checksum Mismatch</span>
@@ -164,7 +176,7 @@ export default function DocumentChecksumValidatorModal({
               Calculated: {localHash}
             </div>
           </div>
-        ) : null}
+        )}
 
         {/* Footer */}
         <div className="flex justify-end pt-2">

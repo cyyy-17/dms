@@ -9,6 +9,7 @@ import DataTableWrapper from "@/components/DataTableWrapper";
 import { useStarredDocuments } from "@/hooks/useStarredDocuments";
 import ExpiryCalendarView from "@/components/ExpiryCalendarView";
 import DocumentQuickPreviewModal, { QuickPreviewDoc } from "@/components/DocumentQuickPreviewModal";
+import AnimatedCounter from "@/components/AnimatedCounter";
 import {
   FileText,
   Search,
@@ -908,40 +909,44 @@ export default function DocumentRepositoryConsole({
         })}
       </div>
     )}
-      {/* Floating Batch Selection Command Deck */}
+      {/* Floating Dynamic Island Batch Selection Command Deck */}
       {selectedDocIds.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 text-white px-4 py-2.5 sm:px-5 sm:py-3 rounded-2xl shadow-2xl border border-slate-700/80 backdrop-blur-xl flex flex-wrap sm:flex-nowrap items-center justify-center gap-2 sm:gap-3.5 text-xs max-w-[calc(100vw-2rem)] animate-in slide-in-from-bottom-4 duration-200">
-          <div className="flex items-center gap-2">
-            <span className="w-5 h-5 rounded-full bg-[#0F2962] text-amber-400 font-black flex items-center justify-center text-[10px]">
-              {selectedDocIds.size}
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-950/90 text-white px-5 py-3 rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.4)] border border-blue-500/30 backdrop-blur-2xl flex flex-wrap sm:flex-nowrap items-center justify-center gap-3 text-xs max-w-[calc(100vw-2rem)] animate-in slide-in-from-bottom-5 duration-300 ring-1 ring-white/10">
+          <div className="flex items-center gap-2 pl-1">
+            <span className="w-6 h-6 rounded-full bg-linear-to-r from-blue-600 to-indigo-600 text-amber-300 font-black flex items-center justify-center text-xs shadow-inner">
+              <AnimatedCounter value={selectedDocIds.size} />
             </span>
-            <span className="font-bold">Selected</span>
+            <span className="font-bold text-slate-200">Selected</span>
           </div>
 
-          <div className="hidden sm:block h-4 w-px bg-slate-700" />
+          <div className="hidden sm:block h-4 w-px bg-slate-800" />
 
-          <button
-            type="button"
-            onClick={handleExportSelectedCsv}
-            className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition flex items-center gap-1.5 cursor-pointer text-[11px] sm:text-xs"
-          >
-            <Download className="w-3.5 h-3.5 text-blue-400" />
-            <span>Export CSV</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleExportSelectedCsv}
+              className="px-3.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-blue-600 text-white font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer text-xs border border-slate-700/60 hover:border-blue-500 shadow-xs hover:-translate-y-0.5 active:scale-95"
+            >
+              <Download className="w-3.5 h-3.5 text-blue-400 group-hover:text-white" />
+              <span>Export CSV</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={handleCopySelectedTrackingNumbers}
-            className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold transition flex items-center gap-1.5 cursor-pointer text-[11px] sm:text-xs"
-          >
-            {copiedBatch ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-400" />}
-            <span>{copiedBatch ? "Copied!" : "Copy IDs"}</span>
-          </button>
+            <button
+              type="button"
+              onClick={handleCopySelectedTrackingNumbers}
+              className="px-3.5 py-1.5 rounded-full bg-slate-900/90 hover:bg-amber-500 hover:text-slate-950 text-white font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer text-xs border border-slate-700/60 hover:border-amber-400 shadow-xs hover:-translate-y-0.5 active:scale-95"
+            >
+              {copiedBatch ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-amber-400" />}
+              <span>{copiedBatch ? "Copied!" : "Copy Tracking #"}</span>
+            </button>
+          </div>
+
+          <div className="hidden sm:block h-4 w-px bg-slate-800" />
 
           <button
             type="button"
             onClick={() => setSelectedDocIds(new Set())}
-            className="p-1 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition cursor-pointer ml-0.5 sm:ml-1"
+            className="p-1.5 hover:bg-slate-800 rounded-full text-slate-400 hover:text-white transition cursor-pointer"
             title="Clear Selection"
           >
             <X className="w-3.5 h-3.5" />

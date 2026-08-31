@@ -14,6 +14,7 @@ import {
   getApprovalVelocityAction,
   ApprovalVelocityReport,
 } from "@/actions/velocity";
+import AnimatedCounter from "@/components/AnimatedCounter";
 
 export default function ApprovalVelocityWidget() {
   const [report, setReport] = useState<ApprovalVelocityReport | null>(null);
@@ -94,10 +95,10 @@ export default function ApprovalVelocityWidget() {
             <span>Overall Turnaround</span>
           </span>
           <p className="text-xl font-black text-slate-900 font-mono">
-            {report.overallAvgHours} Hours
+            <AnimatedCounter value={report.overallAvgHours} decimals={1} suffix=" Hours" />
           </p>
           <span className="text-[10px] text-slate-500 font-medium block">
-            Across {report.totalApprovedDocs} sealed documents
+            Across <AnimatedCounter value={report.totalApprovedDocs} suffix=" sealed documents" />
           </span>
         </div>
 

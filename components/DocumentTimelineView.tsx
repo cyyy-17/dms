@@ -59,14 +59,37 @@ export default function DocumentTimelineView({
         </span>
       </div>
 
-      <div className="relative pl-6 space-y-5 sm:space-y-6 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200">
+      <div className="relative pl-7 space-y-6 sm:space-y-7">
+        {/* Animated SVG Energy Spine */}
+        <div className="absolute left-2.5 top-3 bottom-4 w-0.5 pointer-events-none">
+          <svg className="w-full h-full" preserveAspectRatio="none">
+            <line
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="100%"
+              stroke="#cbd5e1"
+              strokeWidth="2"
+            />
+            <line
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="100%"
+              stroke="#3b82f6"
+              strokeWidth="2"
+              className="animate-ribbon-flow opacity-70"
+            />
+          </svg>
+        </div>
+
         {/* Milestone 1: Initial Ingestion */}
         <div className="relative group">
-          <div className="absolute -left-6 top-0.5 w-5 h-5 rounded-full bg-[#0F2962] border-2 border-white text-white flex items-center justify-center shadow-xs">
+          <div className="absolute -left-7 top-0.5 w-5 h-5 rounded-full bg-[#0F2962] border-2 border-white text-white flex items-center justify-center shadow-md z-10">
             <FileUp className="w-2.5 h-2.5" />
           </div>
 
-          <div className="space-y-1">
+          <div className="p-3 rounded-2xl bg-white/70 border border-slate-200/70 hover:border-blue-300 transition-all duration-200 hover:shadow-xs space-y-1">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
                 <span>Document Ingested & Prepared</span>
@@ -94,12 +117,12 @@ export default function DocumentTimelineView({
           return (
             <div key={action.id} className="relative group">
               <div
-                className={`absolute -left-6 top-0.5 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center shadow-xs ${
+                className={`absolute -left-7 top-0.5 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center shadow-md z-10 ${
                   isApproved
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-emerald-600 text-white shadow-emerald-500/30"
                     : isRejected
-                    ? "bg-rose-600 text-white"
-                    : "bg-blue-600 text-white"
+                    ? "bg-rose-600 text-white shadow-rose-500/30"
+                    : "bg-blue-600 text-white shadow-blue-500/30"
                 }`}
               >
                 {isApproved ? (
@@ -111,7 +134,7 @@ export default function DocumentTimelineView({
                 )}
               </div>
 
-              <div className="space-y-1.5">
+              <div className="p-3 rounded-2xl bg-white/70 border border-slate-200/70 hover:border-blue-300 transition-all duration-200 hover:shadow-xs space-y-1.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-bold text-slate-900">
@@ -144,27 +167,39 @@ export default function DocumentTimelineView({
 
         {/* Current State Milestone */}
         <div className="relative group">
-          <div
-            className={`absolute -left-6 top-0.5 w-5 h-5 rounded-full border-2 border-white flex items-center justify-center shadow-xs ${
-              status === DocumentStatus.APPROVED
-                ? "bg-emerald-600 text-white"
-                : status === DocumentStatus.ARCHIVED
-                ? "bg-slate-600 text-white"
-                : status === DocumentStatus.REJECTED_RETURNED || status === DocumentStatus.REJECTED_CLOSED
-                ? "bg-rose-600 text-white"
-                : "bg-amber-500 text-white animate-pulse"
-            }`}
-          >
-            {status === DocumentStatus.APPROVED ? (
-              <ShieldCheck className="w-2.5 h-2.5" />
-            ) : status === DocumentStatus.REJECTED_RETURNED ? (
-              <RotateCcw className="w-2.5 h-2.5" />
-            ) : (
-              <Clock className="w-2.5 h-2.5" />
+          {/* Radar Ripple on Active State */}
+          <div className="absolute -left-7 top-0.5 w-5 h-5 flex items-center justify-center">
+            {status !== DocumentStatus.APPROVED && status !== DocumentStatus.ARCHIVED && (
+              <div className="absolute w-5 h-5 rounded-full bg-amber-400/40 animate-radar-ripple pointer-events-none" />
             )}
+            <div
+              className={`w-5 h-5 rounded-full border-2 border-white flex items-center justify-center shadow-md relative z-10 ${
+                status === DocumentStatus.APPROVED
+                  ? "bg-emerald-600 text-white shadow-emerald-500/30"
+                  : status === DocumentStatus.ARCHIVED
+                  ? "bg-slate-600 text-white shadow-slate-500/30"
+                  : status === DocumentStatus.REJECTED_RETURNED || status === DocumentStatus.REJECTED_CLOSED
+                  ? "bg-rose-600 text-white shadow-rose-500/30"
+                  : "bg-amber-500 text-white shadow-amber-500/40"
+              }`}
+            >
+              {status === DocumentStatus.APPROVED ? (
+                <ShieldCheck className="w-2.5 h-2.5" />
+              ) : status === DocumentStatus.REJECTED_RETURNED ? (
+                <RotateCcw className="w-2.5 h-2.5" />
+              ) : (
+                <Clock className="w-2.5 h-2.5" />
+              )}
+            </div>
           </div>
 
-          <div className="space-y-1">
+          <div className={`p-3 rounded-2xl border transition-all duration-200 space-y-1 ${
+            status === DocumentStatus.APPROVED
+              ? "bg-emerald-50/50 border-emerald-200"
+              : status === DocumentStatus.REJECTED_RETURNED || status === DocumentStatus.REJECTED_CLOSED
+              ? "bg-rose-50/50 border-rose-200"
+              : "bg-amber-50/60 border-amber-200"
+          }`}>
             <span className="text-xs font-black text-slate-900 block">
               {status === DocumentStatus.APPROVED
                 ? "Fully Approved & Sealed"

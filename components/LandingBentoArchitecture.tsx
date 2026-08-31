@@ -8,6 +8,7 @@ import {
   Database,
   Award,
 } from "lucide-react";
+import SpotlightCard from "@/components/SpotlightCard";
 
 export default function LandingBentoArchitecture() {
   return (
@@ -32,7 +33,7 @@ export default function LandingBentoArchitecture() {
       {/* Bento Grid (6 Varied Cards) */}
       <div className="grid md:grid-cols-12 gap-6">
         {/* Bento 1: Zero-Overwrite Version Trees (Span 8) */}
-        <div className="md:col-span-8 p-7 sm:p-8 rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between relative overflow-hidden group">
+        <SpotlightCard variant="blue" className="md:col-span-8 p-7 sm:p-8 rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between relative overflow-hidden group">
           <div className="space-y-4 relative z-10">
             <div className="flex items-center justify-between">
               <div className="w-12 h-12 rounded-2xl bg-blue-950/90 border border-blue-500/40 text-blue-400 flex items-center justify-center shadow-md">
@@ -85,11 +86,11 @@ export default function LandingBentoArchitecture() {
               </div>
             </div>
           </div>
-        </div>
+        </SpotlightCard>
 
         {/* Bento 2: Unit-Scoped RBAC Tenancy (Span 4) */}
-        <div className="md:col-span-4 p-7 rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between group">
-          <div className="space-y-3.5">
+        <SpotlightCard variant="gold" className="md:col-span-4 p-7 rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between group">
+          <div className="space-y-3.5 relative z-10">
             <div className="w-12 h-12 rounded-2xl bg-blue-950/90 border border-blue-500/40 text-blue-400 flex items-center justify-center shadow-md">
               <Lock className="w-6 h-6" />
             </div>
@@ -100,14 +101,14 @@ export default function LandingBentoArchitecture() {
               Staff and Coordinators are strictly partitioned within their own Department Unit (CAREER, ALUMNI, GUIDANCE, etc.), preventing cross-unit visibility leaks while granting the Director unified oversight.
             </p>
           </div>
-          <span className="text-[11px] font-mono font-bold text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 px-3 py-1 rounded-full w-fit mt-4">
+          <span className="text-[11px] font-mono font-bold text-cyan-400 bg-cyan-950/40 border border-cyan-500/30 px-3 py-1 rounded-full w-fit mt-4 relative z-10">
             Zero-Trust Isolation
           </span>
-        </div>
+        </SpotlightCard>
 
         {/* Bento 3: RA 10173 Audit Stamping (Span 4) */}
-        <div className="md:col-span-4 p-7 rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between group">
-          <div className="space-y-3.5">
+        <SpotlightCard variant="emerald" className="md:col-span-4 p-7 rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between group">
+          <div className="space-y-3.5 relative z-10">
             <div className="w-12 h-12 rounded-2xl bg-blue-950/90 border border-blue-500/40 text-emerald-400 flex items-center justify-center shadow-md">
               <ShieldCheck className="w-6 h-6" />
             </div>
@@ -118,14 +119,14 @@ export default function LandingBentoArchitecture() {
               Full Philippine Data Privacy Act compliance with real-time tamper-evident audit logging of every document creation, reviewer endorsement, return, and binary download event.
             </p>
           </div>
-          <span className="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full w-fit mt-4">
+          <span className="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full w-fit mt-4 relative z-10">
             National Compliance
           </span>
-        </div>
+        </SpotlightCard>
 
         {/* Bento 4: Automated Expiry & Retention Cron (Span 4) */}
-        <div className="md:col-span-4 p-7 rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between group">
-          <div className="space-y-3.5">
+        <SpotlightCard variant="gold" className="md:col-span-4 p-7 rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between group">
+          <div className="space-y-3.5 relative z-10">
             <div className="w-12 h-12 rounded-2xl bg-blue-950/90 border border-blue-500/40 text-amber-400 flex items-center justify-center shadow-md">
               <Clock className="w-6 h-6" />
             </div>
@@ -136,14 +137,14 @@ export default function LandingBentoArchitecture() {
               Automated cron workers audit institutional covenants, dispatching proactive 30-day notifications prior to expiration and enforcing document lifecycle retention protocols.
             </p>
           </div>
-          <span className="text-[11px] font-mono font-bold text-amber-400 bg-amber-950/40 border border-amber-500/30 px-3 py-1 rounded-full w-fit mt-4">
+          <span className="text-[11px] font-mono font-bold text-amber-400 bg-amber-950/40 border border-amber-500/30 px-3 py-1 rounded-full w-fit mt-4 relative z-10">
             Automated Cron
           </span>
-        </div>
+        </SpotlightCard>
 
         {/* Bento 5: Supabase Private Encrypted Vault (Span 4) */}
-        <div className="md:col-span-4 p-7 rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between group">
-          <div className="space-y-3.5">
+        <SpotlightCard variant="blue" className="md:col-span-4 p-7 rounded-3xl bg-slate-900/70 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between group">
+          <div className="space-y-3.5 relative z-10">
             <div className="w-12 h-12 rounded-2xl bg-blue-950/90 border border-blue-500/40 text-purple-400 flex items-center justify-center shadow-md">
               <Database className="w-6 h-6" />
             </div>
@@ -154,10 +155,10 @@ export default function LandingBentoArchitecture() {
               Document binaries are secured in private object storage vaults with time-limited signed access tokens, preventing public URL leaks and unauthorized file scraping.
             </p>
           </div>
-          <span className="text-[11px] font-mono font-bold text-purple-400 bg-purple-950/40 border border-purple-500/30 px-3 py-1 rounded-full w-fit mt-4">
+          <span className="text-[11px] font-mono font-bold text-purple-400 bg-purple-950/40 border border-purple-500/30 px-3 py-1 rounded-full w-fit mt-4 relative z-10">
             AES-256 Vault
           </span>
-        </div>
+        </SpotlightCard>
       </div>
     </section>
   );

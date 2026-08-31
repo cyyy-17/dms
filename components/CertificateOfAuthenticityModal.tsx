@@ -17,6 +17,7 @@ import {
   Lock,
 } from "lucide-react";
 import { formatHumanDateTime, getStatusLabel } from "@/lib/status-labels";
+import MilestoneConfetti from "@/components/MilestoneConfetti";
 
 const emptySubscribe = () => () => {};
 
@@ -87,6 +88,7 @@ export default function CertificateOfAuthenticityModal({
       id="certificate-portal-root"
       className="fixed inset-0 z-100 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 animate-in fade-in duration-200 print:p-0 print:bg-white print:static"
     >
+      <MilestoneConfetti trigger={isOpen} particleCount={45} />
       <div
         className="glass-panel rounded-2xl sm:rounded-3xl max-w-3xl w-full max-h-[92vh] border border-white/90 bg-white shadow-2xl overflow-hidden flex flex-col print:shadow-none print:border-none print:m-0 print:max-w-none print:w-full print:max-h-none"
         onClick={(e) => e.stopPropagation()}

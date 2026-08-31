@@ -270,6 +270,157 @@
   animation: gradient-shift 5s ease infinite;
 }
 
+@keyframes scan-laser {
+  0% {
+    top: 0%;
+    opacity: 0.85;
+  }
+  50% {
+    top: 96%;
+    opacity: 1;
+  }
+  100% {
+    top: 0%;
+    opacity: 0.85;
+  }
+}
+
+.animate-laser-scan {
+  animation: scan-laser 2.2s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+}
+
+@keyframes stamp-press-in {
+  0% {
+    transform: scale(1.15) rotate(-3deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(0.95) rotate(0.5deg);
+    opacity: 1;
+  }
+  85% {
+    transform: scale(1.03) rotate(-0.2deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.animate-stamp-press {
+  animation: stamp-press-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes shockwave-expand {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.animate-shockwave {
+  animation: shockwave-expand 0.65s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes ribbon-flow {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-ribbon-flow {
+  stroke-dasharray: 6 6;
+  animation: ribbon-flow 1.2s linear infinite;
+}
+
+@keyframes radar-ripple {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.animate-radar-ripple {
+  animation: radar-ripple 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+@keyframes hex-cascade {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+    color: #38bdf8;
+  }
+}
+
+.animate-hex-flux {
+  animation: hex-cascade 1.8s ease-in-out infinite;
+}
+
+/* Spotlight Card Ambient Dynamic Border Effect */
+.spotlight-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: radial-gradient(
+    450px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(59, 130, 246, 0.15),
+    transparent 40%
+  );
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+.spotlight-card-gold::before {
+  background: radial-gradient(
+    450px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(245, 158, 11, 0.18),
+    transparent 40%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-laser-scan,
+  .animate-stamp-press,
+  .animate-shockwave,
+  .animate-ribbon-flow,
+  .animate-radar-ripple,
+  .animate-hex-flux,
+  .animate-float,
+  .animate-float-slow,
+  .animate-beacon,
+  .animate-beam,
+  .animate-gradient-text,
+  .skeleton-shimmer {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 /* ==========================================================================
    AWARD-WINNING VISUAL ENHANCEMENTS & GRADIENTS
    ========================================================================== */

@@ -15,11 +15,13 @@ import {
   Plus,
   ArrowRight,
   Building2,
-  PenLine,
   TrendingUp,
+  PenLine,
   Sparkles,
 } from "lucide-react";
 import { DocumentStatus } from "@prisma/client";
+import AnimatedCounter from "@/components/AnimatedCounter";
+import SpotlightCard from "@/components/SpotlightCard";
 
 export const dynamic = "force-dynamic";
 
@@ -238,17 +240,17 @@ export default async function DashboardPage() {
         {/* Real-time Institutional Health Trust Ribbon */}
         <div className="mt-6 pt-5 border-t border-slate-200/70 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+            <div className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 animate-pulse" />
             <div>
               <span className="text-[10px] text-slate-400 uppercase font-black block">Review SLA</span>
-              <span className="font-bold text-slate-900">{slaOnTimeRate}% On-Time</span>
+              <AnimatedCounter value={slaOnTimeRate} suffix="% On-Time" className="font-bold text-slate-900" />
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+            <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0 animate-pulse" />
             <div>
               <span className="text-[10px] text-slate-400 uppercase font-black block">Integrity</span>
-              <span className="font-bold text-slate-900">{sha256Rate}% SHA-256</span>
+              <AnimatedCounter value={sha256Rate} suffix="% SHA-256" className="font-bold text-slate-900" />
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -263,7 +265,7 @@ export default async function DashboardPage() {
             <div>
               <span className="text-[10px] text-slate-400 uppercase font-black block">Department Units</span>
               <span className="font-bold text-slate-900">
-                {activeUnitCount} Active {activeUnitCount === 1 ? "Tenancy" : "Tenancies"}
+                <AnimatedCounter value={activeUnitCount} suffix={activeUnitCount === 1 ? " Active Tenancy" : " Active Tenancies"} />
               </span>
             </div>
           </div>
@@ -272,7 +274,7 @@ export default async function DashboardPage() {
 
       {/* Priority Action Callout: My Assigned Reviews */}
       {myActionItems.length > 0 && (
-        <div className="glass-panel-gold glow-amber rounded-3xl p-6 sm:p-7 border border-amber-300 shadow-lg animate-in fade-in slide-in-from-top-2 duration-300">
+        <SpotlightCard variant="gold" className="glass-panel-gold glow-amber rounded-3xl p-6 sm:p-7 border border-amber-300 shadow-lg animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3.5">
               <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-amber-500 to-amber-600 text-white flex items-center justify-center shadow-md shrink-0">
@@ -280,7 +282,7 @@ export default async function DashboardPage() {
               </div>
               <div>
                 <span className="font-black text-sm sm:text-base text-amber-950 block">
-                  {myActionItems.length} Document{myActionItems.length > 1 ? "s" : ""} Requiring Your Electronic Signature
+                  <AnimatedCounter value={myActionItems.length} suffix={myActionItems.length > 1 ? " Documents" : " Document"} /> Requiring Your Electronic Signature
                 </span>
                 <span className="text-xs text-amber-900/90 font-medium block mt-0.5">
                   It is currently your designated turn in the sequential pipeline to review and apply cryptographic sign-off.
@@ -295,7 +297,7 @@ export default async function DashboardPage() {
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-        </div>
+        </SpotlightCard>
       )}
 
       {/* Miller's Law: 3-Cluster Cognitive Metrics Architecture */}
@@ -305,12 +307,15 @@ export default async function DashboardPage() {
             <TrendingUp className="w-4 h-4 text-[#0F2962]" />
             <span>Operational &amp; Governance Metrics</span>
           </h2>
-          <span className="text-[11px] font-mono text-slate-400">Real-time Telemetry</span>
+          <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Real-time Telemetry
+          </span>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {/* KPI 1: Total Ingested */}
-          <div className="glass-panel stat-kpi-card glow-blue rounded-3xl p-5 sm:p-6 border border-white/90 bg-white/85 shadow-sm">
+          <SpotlightCard variant="blue" className="glass-panel stat-kpi-card glow-blue rounded-3xl p-5 sm:p-6 border border-white/90 bg-white/85 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
                 Total Ingested
@@ -320,17 +325,19 @@ export default async function DashboardPage() {
               </div>
             </div>
             <div className="mt-3.5 flex items-baseline justify-between">
-              <span className="text-3xl font-black text-slate-900 tracking-tight">{stats.total}</span>
+              <span className="text-3xl font-black text-slate-900 tracking-tight">
+                <AnimatedCounter value={stats.total} />
+              </span>
               <span className="text-xs font-extrabold text-emerald-700 flex items-center gap-1 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                 <TrendingUp className="w-3 h-3" />
-                {approvalRate}% Sealed
+                <AnimatedCounter value={approvalRate} suffix="% Sealed" className="font-extrabold" />
               </span>
             </div>
             <p className="mt-2 text-[11px] text-slate-400 font-medium">Immutable cryptographed records</p>
-          </div>
+          </SpotlightCard>
 
           {/* KPI 2: In Sequential Review */}
-          <div className="glass-panel stat-kpi-card glow-amber rounded-3xl p-5 sm:p-6 border border-amber-200/80 bg-amber-50/40 shadow-sm">
+          <SpotlightCard variant="gold" className="glass-panel stat-kpi-card glow-amber rounded-3xl p-5 sm:p-6 border border-amber-200/80 bg-amber-50/40 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black uppercase tracking-wider text-amber-900">
                 In Sequential Review
@@ -340,16 +347,18 @@ export default async function DashboardPage() {
               </div>
             </div>
             <div className="mt-3.5 flex items-baseline justify-between">
-              <span className="text-3xl font-black text-amber-950 tracking-tight">{stats.pendingCoordinator + stats.pendingDirector}</span>
+              <span className="text-3xl font-black text-amber-950 tracking-tight">
+                <AnimatedCounter value={stats.pendingCoordinator + stats.pendingDirector} />
+              </span>
               <span className="text-[10px] font-extrabold text-amber-800 bg-amber-200/70 px-2.5 py-0.5 rounded-full">
                 In Pipeline
               </span>
             </div>
             <p className="mt-2 text-[11px] text-amber-800/80 font-medium">Assigned signatory flow active</p>
-          </div>
+          </SpotlightCard>
 
           {/* KPI 3: Awaiting My Turn */}
-          <div className="glass-panel stat-kpi-card glow-purple rounded-3xl p-5 sm:p-6 border border-purple-200/80 bg-purple-50/40 shadow-sm">
+          <SpotlightCard variant="blue" className="glass-panel stat-kpi-card glow-purple rounded-3xl p-5 sm:p-6 border border-purple-200/80 bg-purple-50/40 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black uppercase tracking-wider text-purple-900">
                 Awaiting My Turn
@@ -359,16 +368,18 @@ export default async function DashboardPage() {
               </div>
             </div>
             <div className="mt-3.5 flex items-baseline justify-between">
-              <span className="text-3xl font-black text-purple-950 tracking-tight">{stats.awaitingMySignature}</span>
+              <span className="text-3xl font-black text-purple-950 tracking-tight">
+                <AnimatedCounter value={stats.awaitingMySignature} />
+              </span>
               <span className="text-[10px] font-extrabold text-purple-800 bg-purple-200/70 px-2.5 py-0.5 rounded-full">
                 My Action
               </span>
             </div>
             <p className="mt-2 text-[11px] text-purple-800/80 font-medium">Ready for your e-signature</p>
-          </div>
+          </SpotlightCard>
 
           {/* KPI 4: Approved & Stamped */}
-          <div className="glass-panel stat-kpi-card glow-emerald rounded-3xl p-5 sm:p-6 border border-emerald-200/80 bg-emerald-50/40 shadow-sm">
+          <SpotlightCard variant="emerald" className="glass-panel stat-kpi-card glow-emerald rounded-3xl p-5 sm:p-6 border border-emerald-200/80 bg-emerald-50/40 shadow-sm">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black uppercase tracking-wider text-emerald-900">
                 Approved & Stamped
@@ -378,13 +389,15 @@ export default async function DashboardPage() {
               </div>
             </div>
             <div className="mt-3.5 flex items-baseline justify-between">
-              <span className="text-3xl font-black text-emerald-950 tracking-tight">{stats.approved}</span>
+              <span className="text-3xl font-black text-emerald-950 tracking-tight">
+                <AnimatedCounter value={stats.approved} />
+              </span>
               <span className="text-[10px] font-extrabold text-emerald-800 bg-emerald-200/70 px-2.5 py-0.5 rounded-full">
                 Cryptosealed
               </span>
             </div>
             <p className="mt-2 text-[11px] text-emerald-800/80 font-medium">With Smart Anchor E-Signature</p>
-          </div>
+          </SpotlightCard>
         </div>
       </div>
 
