@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { Resend } from "resend";
+import { NotificationType } from "@prisma/client";
 import { renderNotificationEmail } from "../lib/email-templates";
 
 async function testPersonalEmail() {
@@ -15,7 +16,7 @@ async function testPersonalEmail() {
 
   console.log(`Rendering password reset notification email for ${recipientEmail}...`);
   const rendered = renderNotificationEmail({
-    type: "REGISTRATION_REQUEST_ADMIN" as any,
+    type: NotificationType.REGISTRATION_REQUEST_ADMIN,
     templateName: "password-reset-request",
     subject: "SASDMS: Test Password Reset Notification",
     recipientEmail,
